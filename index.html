@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, user-scalable=yes">
+<title>ReWrite — Handwriting Rehabilitation</title>
+<meta name="description" content="Guided handwriting exercises for stroke survivors and anyone rebuilding writing skills. Trace letters, words and sentences with built-in progress tracking.">
+<meta name="theme-color" content="#3a7a5a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ReWrite">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%233a7a5a'/><path d='M256 96 L384 320 L256 384 L128 320Z' fill='none' stroke='white' stroke-width='24' stroke-linejoin='round'/><path d='M256 192V384' stroke='white' stroke-width='24' stroke-linecap='round'/><circle cx='256' cy='96' r='28' fill='white'/><line x1='100' y1='432' x2='412' y2='432' stroke='white' stroke-width='16' stroke-linecap='round' stroke-opacity='.5'/></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%233a7a5a'/><path d='M256 96 L384 320 L256 384 L128 320Z' fill='none' stroke='white' stroke-width='24' stroke-linejoin='round'/><path d='M256 192V384' stroke='white' stroke-width='24' stroke-linecap='round'/><circle cx='256' cy='96' r='28' fill='white'/></svg>">
+<style>
+/* ── Reset & Base ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#faf7f2;--bg2:#f3ede4;--card:#fff;--text:#2c3e2d;--text2:#5a6b5c;--text3:#8a9a8c;
+  --accent:#3a7a5a;--accent-light:#e8f5ec;--accent-dark:#2d6147;
+  --success:#3a8a5a;--warning:#c48a2a;--danger:#c45a4a;
+  --border:#e4ddd4;--shadow:0 2px 12px rgba(0,0,0,.06);
+  --radius:16px;--radius-sm:10px;
+  --font:'Segoe UI','SF Pro Display',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+  --min-touch:48px;
+}
+html{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;scroll-behavior:smooth;font-size:16px}
+body{min-height:100dvh;display:flex;flex-direction:column;overflow-x:hidden}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit;-webkit-tap-highlight-color:transparent}
+input,select,textarea{font:inherit}
+canvas{display:block;touch-action:none}
+
+/* ── App Shell ── */
+.app-header{
+  position:sticky;top:0;z-index:50;
+  background:var(--accent);color:#fff;
+  padding:0 16px;height:56px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+}
+.app-header h1{font-size:18px;font-weight:700;letter-spacing:-.3px;display:flex;align-items:center;gap:8px}
+.app-header .subtitle{font-size:11px;font-weight:400;opacity:.8;display:block}
+.header-right{display:flex;align-items:center;gap:8px}
+.header-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;transition:background .15s}
+.header-btn:hover{background:rgba(255,255,255,.15)}
+
+/* ── Tab Bar ── */
+.tab-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:50;
+  background:var(--card);border-top:1px solid var(--border);
+  display:flex;height:64px;
+  padding-bottom:env(safe-area-inset-bottom);
+  box-shadow:0 -2px 12px rgba(0,0,0,.04);
+}
+.tab-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;font-size:10px;font-weight:600;color:var(--text3);
+  transition:color .15s;min-height:var(--min-touch);
+}
+.tab-btn.active{color:var(--accent)}
+.tab-btn svg{width:22px;height:22px;transition:transform .15s}
+.tab-btn.active svg{transform:scale(1.08)}
+
+/* ── Panels ── */
+.panel{display:none;padding:16px 16px 80px;max-width:600px;margin:0 auto;width:100%}
+.panel.active{display:block}
+
+/* ── Cards ── */
+.card{background:var(--card);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.card-title{font-size:15px;font-weight:700;margin-bottom:8px;color:var(--text)}
+.card-subtitle{font-size:12px;color:var(--text3);margin-bottom:12px}
+
+/* ── Exercise Buttons ── */
+.exercise-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:16px}
+.exercise-card{
+  background:var(--card);border-radius:var(--radius);padding:18px 16px;
+  border:2px solid var(--border);box-shadow:var(--shadow);
+  display:flex;align-items:center;gap:14px;
+  transition:border-color .15s,transform .1s;
+  min-height:var(--min-touch);text-align:left;width:100%;
+}
+.exercise-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.exercise-card:active{transform:scale(.98)}
+.exercise-icon{
+  width:48px;height:48px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.exercise-card h3{font-size:15px;font-weight:700;margin-bottom:2px}
+.exercise-card p{font-size:12px;color:var(--text2);line-height:1.4}
+
+/* ── Level Selector ── */
+.level-selector{display:flex;gap:8px;margin-bottom:16px}
+.level-btn{
+  flex:1;padding:10px 8px;border-radius:var(--radius-sm);
+  font-size:13px;font-weight:600;text-align:center;
+  background:var(--bg2);color:var(--text2);border:2px solid transparent;
+  transition:all .15s;min-height:var(--min-touch);
+}
+.level-btn.active{background:var(--accent-light);color:var(--accent);border-color:var(--accent)}
+
+/* ── Canvas ── */
+.canvas-container{
+  position:relative;border-radius:var(--radius);overflow:hidden;
+  background:var(--card);border:2px solid var(--border);
+  margin-bottom:14px;
+}
+.canvas-container canvas{width:100%;height:auto;cursor:crosshair}
+.canvas-hint{
+  position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+  font-size:12px;color:var(--text3);background:rgba(255,255,255,.85);
+  padding:4px 14px;border-radius:20px;pointer-events:none;
+  transition:opacity .3s;
+}
+
+/* ── Action Buttons ── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:14px 24px;border-radius:var(--radius-sm);font-size:15px;font-weight:600;
+  transition:all .15s;min-height:var(--min-touch);
+}
+.btn-primary{background:var(--accent);color:#fff;width:100%}
+.btn-primary:hover{background:var(--accent-dark)}
+.btn-primary:active{transform:scale(.97)}
+.btn-outline{background:var(--bg2);color:var(--text);border:1px solid var(--border);width:100%}
+.btn-outline:hover{background:var(--border)}
+.btn-row{display:flex;gap:10px;margin-top:14px}
+.btn-row .btn{flex:1}
+.btn-sm{padding:10px 16px;font-size:13px;min-height:40px}
+
+/* ── Score Feedback ── */
+.score-display{text-align:center;padding:24px 16px;animation:fadeIn .3s ease}
+.score-ring-container{margin:0 auto 16px;width:120px;height:120px;position:relative}
+.score-ring-container svg{width:100%;height:100%}
+.score-value{font-size:28px;font-weight:800;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+.score-label{font-size:16px;font-weight:700;margin-bottom:4px}
+.score-message{font-size:13px;color:var(--text2);max-width:300px;margin:0 auto 16px;line-height:1.5}
+
+/* ── Benchmark Bands ── */
+.benchmark{display:flex;gap:6px;align-items:center;font-size:12px;margin-top:6px}
+.benchmark-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.bench-green{background:var(--success)}
+.bench-amber{background:var(--warning)}
+.bench-grey{background:var(--text3)}
+
+/* ── Progress Stats ── */
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.stat-card{background:var(--card);border-radius:var(--radius-sm);padding:14px;text-align:center;border:1px solid var(--border)}
+.stat-value{font-size:22px;font-weight:800;color:var(--accent)}
+.stat-label{font-size:11px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+
+/* ── Session Log ── */
+.session-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 0;border-bottom:1px solid var(--border);font-size:13px;
+}
+.session-row:last-child{border-bottom:none}
+.session-meta{color:var(--text2);font-size:11px;margin-top:2px}
+.session-score{font-weight:700;font-size:15px}
+
+/* ── Per-exercise breakdown ── */
+.exercise-stat-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.exercise-stat-row:last-child{border-bottom:none}
+.exercise-stat-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.exercise-stat-info{flex:1;min-width:0}
+.exercise-stat-name{font-size:13px;font-weight:600}
+.exercise-stat-detail{font-size:11px;color:var(--text3)}
+.bar-container{height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-top:4px}
+.bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+
+/* ── About ── */
+.about-section{margin-bottom:20px}
+.about-section h3{font-size:15px;font-weight:700;margin-bottom:6px;color:var(--accent)}
+.about-section p,.about-section li{font-size:13px;color:var(--text2);line-height:1.6}
+.about-section ul{padding-left:18px;margin-top:4px}
+.disclaimer{background:#fef3cd;border:1px solid #f0d78a;border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;font-size:12px;line-height:1.5;color:#7a6520}
+
+/* ── Settings ── */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)}
+.setting-row:last-child{border-bottom:none}
+.setting-label{font-size:14px;font-weight:600}
+.setting-desc{font-size:11px;color:var(--text3);margin-top:2px}
+.toggle{position:relative;width:48px;height:28px;border-radius:14px;background:var(--border);transition:background .2s;flex-shrink:0;cursor:pointer}
+.toggle.on{background:var(--accent)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.toggle.on::after{transform:translateX(20px)}
+select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);font-size:13px;min-height:var(--min-touch)}
+
+/* ── Language Picker (first launch) ── */
+.lang-overlay{
+  position:fixed;inset:0;z-index:100;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;gap:16px;
+}
+.lang-overlay.hidden{display:none}
+.lang-overlay h2{font-size:20px;font-weight:700;color:var(--accent);text-align:center}
+.lang-overlay p{font-size:13px;color:var(--text2);text-align:center;margin-bottom:8px}
+.lang-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;max-width:340px}
+.lang-btn{
+  padding:16px 12px;border-radius:var(--radius-sm);border:2px solid var(--border);
+  background:var(--card);text-align:center;transition:all .15s;min-height:var(--min-touch);
+}
+.lang-btn:hover{border-color:var(--accent);background:var(--accent-light)}
+.lang-btn .native{font-size:16px;font-weight:700;display:block}
+.lang-btn .english{font-size:11px;color:var(--text3);display:block;margin-top:2px}
+
+/* ── Exercise Active Screen ── */
+.exercise-screen{display:none;padding:16px 16px 100px;max-width:600px;margin:0 auto;width:100%}
+.exercise-screen.active{display:block}
+.exercise-progress{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;font-size:13px;color:var(--text2)}
+.progress-bar{height:4px;background:var(--bg2);border-radius:2px;overflow:hidden;margin-bottom:16px}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
+.target-display{text-align:center;margin-bottom:12px}
+.target-char{
+  display:inline-block;padding:10px 24px;border-radius:var(--radius-sm);
+  background:var(--accent-light);border:2px solid var(--accent);
+  font-weight:800;color:var(--text);line-height:1.2;
+}
+.target-hint{font-size:12px;color:var(--text3);margin-top:8px}
+
+/* ── Difficulty Toggle ── */
+.exercise-card-group{margin-bottom:0}
+.difficulty-toggle{display:flex;gap:6px;padding:4px 0 12px 60px}
+.diff-btn{padding:4px 12px;border-radius:14px;font-size:11px;font-weight:600;border:1.5px solid var(--border);background:var(--bg);color:var(--text2);cursor:pointer;transition:all .15s;min-height:28px}
+.diff-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.diff-btn:hover:not(.active){border-color:var(--accent);color:var(--accent)}
+
+/* ── Trend Chart ── */
+.trend-chart-container{position:relative;width:100%;height:180px;margin:8px 0}
+.trend-chart-container canvas{display:block}
+
+/* ── Animations ── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.fade-in{animation:fadeIn .3s ease}
+
+/* ── Accessibility ── */
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+/* ── Print ── */
+@media print{
+  .app-header,.tab-bar,.btn,.canvas-container,.exercise-screen{display:none!important}
+  .panel{display:block!important;padding:0!important;max-width:100%!important}
+  .card{break-inside:avoid;box-shadow:none;border:1px solid #ccc}
+  body{background:#fff;color:#000}
+  .print-header{display:block!important;text-align:center;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #333}
+  .print-header h2{font-size:20px;font-weight:700}
+  .print-header p{font-size:12px;color:#666}
+}
+.print-header{display:none}
+
+/* ── RTL (Arabic) ── */
+[dir="rtl"] .exercise-card{flex-direction:row-reverse;text-align:right}
+[dir="rtl"] .difficulty-toggle{padding:4px 60px 12px 0}
+[dir="rtl"] .tab-bar{direction:ltr}
+[dir="rtl"] .header-right{direction:ltr}
+[dir="rtl"] .btn-row{direction:ltr}
+[dir="rtl"] .exercise-progress{direction:ltr}
+[dir="rtl"] .session-row{direction:ltr}
+[dir="rtl"] .stat-grid{direction:ltr}
+[dir="rtl"] .about-section ul{padding-left:0;padding-right:18px}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ Language Picker ══════════════ -->
+<div class="lang-overlay" id="langOverlay">
+  <svg width="64" height="64" viewBox="0 0 512 512" fill="none"><rect width="512" height="512" rx="96" fill="#3a7a5a"/><path d="M256 96 L384 320 L256 384 L128 320Z" fill="none" stroke="white" stroke-width="24" stroke-linejoin="round"/><path d="M256 192V384" stroke="white" stroke-width="24" stroke-linecap="round"/><circle cx="256" cy="96" r="28" fill="white"/><line x1="100" y1="432" x2="412" y2="432" stroke="white" stroke-width="16" stroke-linecap="round" stroke-opacity=".5"/></svg>
+  <h2>ReWrite</h2>
+  <p>Handwriting Rehabilitation</p>
+  <p style="font-size:12px;color:var(--text3)">Choose your language</p>
+  <div class="lang-grid" style="grid-template-columns:repeat(3,1fr);max-width:480px;max-height:60vh;overflow-y:auto;padding:4px">
+    <button class="lang-btn" onclick="setLanguage('en')"><span class="native">English</span></button>
+    <button class="lang-btn" onclick="setLanguage('es')"><span class="native">Español</span><span class="english">Spanish</span></button>
+    <button class="lang-btn" onclick="setLanguage('fr')"><span class="native">Français</span><span class="english">French</span></button>
+    <button class="lang-btn" onclick="setLanguage('de')"><span class="native">Deutsch</span><span class="english">German</span></button>
+    <button class="lang-btn" onclick="setLanguage('it')"><span class="native">Italiano</span><span class="english">Italian</span></button>
+    <button class="lang-btn" onclick="setLanguage('pt')"><span class="native">Português</span><span class="english">Portuguese</span></button>
+    <button class="lang-btn" onclick="setLanguage('cy')"><span class="native">Cymraeg</span><span class="english">Welsh</span></button>
+    <button class="lang-btn" onclick="setLanguage('ja')"><span class="native">日本語</span><span class="english">Japanese</span></button>
+    <button class="lang-btn" onclick="setLanguage('ko')"><span class="native">한국어</span><span class="english">Korean</span></button>
+    <button class="lang-btn" onclick="setLanguage('hi')"><span class="native">हिन्दी</span><span class="english">Hindi</span></button>
+    <button class="lang-btn" onclick="setLanguage('ar')" dir="rtl"><span class="native">العربية</span><span class="english">Arabic</span></button>
+    <button class="lang-btn" onclick="setLanguage('zh')"><span class="native">中文</span><span class="english">Chinese</span></button>
+    <button class="lang-btn" onclick="setLanguage('pl')"><span class="native">Polski</span><span class="english">Polish</span></button>
+  </div>
+</div>
+
+<!-- ══════════════ Header ══════════════ -->
+<header class="app-header">
+  <h1>
+    <svg width="28" height="28" viewBox="0 0 512 512" fill="none"><rect width="512" height="512" rx="96" fill="rgba(255,255,255,.2)"/><path d="M256 96 L384 320 L256 384 L128 320Z" fill="none" stroke="white" stroke-width="24" stroke-linejoin="round"/><path d="M256 192V384" stroke="white" stroke-width="24" stroke-linecap="round"/><circle cx="256" cy="96" r="28" fill="white"/></svg>
+    <span>ReWrite<span class="subtitle" id="headerSubtitle">Handwriting Rehab</span></span>
+  </h1>
+  <div class="header-right">
+    <select id="langSelect" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:4px 8px;font-size:12px;cursor:pointer" aria-label="Language">
+      <option value="en">EN</option><option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option><option value="it">IT</option><option value="pt">PT</option><option value="cy">CY</option><option value="ja">JA</option><option value="ko">KO</option><option value="hi">HI</option><option value="ar">AR</option><option value="zh">ZH</option><option value="pl">PL</option>
+    </select>
+  </div>
+</header>
+
+<!-- ══════════════ Tab Panels ══════════════ -->
+
+<!-- ── Exercises Tab ── -->
+<div class="panel active" id="panelExercises">
+  <div style="margin-bottom:16px">
+    <h2 style="font-size:20px;font-weight:800;margin-bottom:4px" id="exercisesTitle">Practice Handwriting</h2>
+    <p style="font-size:13px;color:var(--text2)" id="exercisesSubtitle">Choose an exercise type to begin</p>
+  </div>
+
+  <div class="disclaimer" id="disclaimer">
+    <strong>Wellness tool only.</strong> ReWrite supports handwriting rehabilitation but is not a medical device. Always follow guidance from your occupational therapist or care team.
+  </div>
+
+  <div class="exercise-grid">
+    <div class="exercise-card-group">
+      <button class="exercise-card" onclick="startExerciseType('letters')">
+        <div class="exercise-icon" style="background:#e8f5ec;color:#3a7a5a">Aa</div>
+        <div>
+          <h3 id="exLettersTitle">Individual Letters</h3>
+          <p id="exLettersDesc">Trace uppercase and lowercase letters. Focus on form, size and proportion.</p>
+        </div>
+      </button>
+      <div class="difficulty-toggle" data-type="letters">
+        <button class="diff-btn active" data-diff="easy" onclick="setDifficulty('letters','easy',this)" id="diffLettersEasy">a–z</button>
+        <button class="diff-btn" data-diff="medium" onclick="setDifficulty('letters','medium',this)" id="diffLettersMed">A–Z</button>
+      </div>
+    </div>
+    <div class="exercise-card-group">
+      <button class="exercise-card" onclick="startExerciseType('numbers')">
+        <div class="exercise-icon" style="background:#e8f0fa;color:#3a5a9a">12</div>
+        <div>
+          <h3 id="exNumbersTitle">Numbers</h3>
+          <p id="exNumbersDesc">Practice writing digits 0–9. Important for forms, dates and addresses.</p>
+        </div>
+      </button>
+    </div>
+    <div class="exercise-card-group">
+      <button class="exercise-card" onclick="startExerciseType('words')">
+        <div class="exercise-icon" style="background:#faf0e8;color:#8a6a3a">cat</div>
+        <div>
+          <h3 id="exWordsTitle">Common Words</h3>
+          <p id="exWordsDesc">Trace short everyday words. Connect letters smoothly.</p>
+        </div>
+      </button>
+      <div class="difficulty-toggle" data-type="words">
+        <button class="diff-btn active" data-diff="easy" onclick="setDifficulty('words','easy',this)" id="diffWordsEasy">Short</button>
+        <button class="diff-btn" data-diff="medium" onclick="setDifficulty('words','medium',this)" id="diffWordsMed">Longer</button>
+      </div>
+    </div>
+    <div class="exercise-card-group">
+      <button class="exercise-card" onclick="startExerciseType('sentences')">
+        <div class="exercise-icon" style="background:#f5e8f5;color:#7a3a7a">...</div>
+        <div>
+          <h3 id="exSentencesTitle">Sentences</h3>
+          <p id="exSentencesDesc">Write full sentences. Builds endurance and flow.</p>
+        </div>
+      </button>
+      <div class="difficulty-toggle" data-type="sentences">
+        <button class="diff-btn active" data-diff="easy" onclick="setDifficulty('sentences','easy',this)" id="diffSentEasy">Simple</button>
+        <button class="diff-btn" data-diff="medium" onclick="setDifficulty('sentences','medium',this)" id="diffSentMed">Complex</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="text-align:center;padding:14px">
+    <p style="font-size:12px;color:var(--text3)" id="tipText">Tip: Short daily sessions (10–15 minutes) are more effective than long infrequent ones.</p>
+  </div>
+</div>
+
+<!-- ── Exercise Active Screen ── -->
+<div class="exercise-screen" id="exerciseActive">
+  <div class="exercise-progress">
+    <span id="exerciseCounter">Exercise 1 of 8</span>
+    <span id="exerciseType" style="font-weight:600;color:var(--accent)">Letters</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+  <div class="target-display">
+    <p style="font-size:12px;color:var(--text3);margin-bottom:8px" id="tracePrompt">Trace this carefully:</p>
+    <div class="target-char" id="targetChar" style="font-size:48px">A</div>
+    <p class="target-hint" id="targetHint">Focus on form — size, shape and proportions</p>
+  </div>
+
+  <div class="canvas-container" id="canvasContainer">
+    <canvas id="guideCanvas"></canvas>
+    <canvas id="drawCanvas" style="position:absolute;top:0;left:0"></canvas>
+    <div class="canvas-hint" id="canvasHint">Draw with your finger or mouse</div>
+  </div>
+
+  <div id="drawingControls">
+    <div class="btn-row">
+      <button class="btn btn-outline btn-sm" onclick="clearCanvas()" id="clearBtn">↻ Clear</button>
+      <button class="btn btn-primary btn-sm" onclick="submitAttempt()" id="submitBtn" disabled>✓ Submit</button>
+    </div>
+  </div>
+
+  <div id="scoreFeedback" style="display:none">
+    <div class="score-display fade-in">
+      <div class="score-ring-container">
+        <svg viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="var(--bg2)" stroke-width="10"/>
+          <circle id="scoreRing" cx="60" cy="60" r="50" fill="none" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" stroke-dasharray="314.16" stroke-dashoffset="314.16" transform="rotate(-90 60 60)" style="transition:stroke-dashoffset .8s cubic-bezier(.16,1,.3,1)"/>
+        </svg>
+        <div class="score-value" id="scoreValue">0%</div>
+      </div>
+      <div class="score-label" id="scoreLabel">Good effort</div>
+      <p class="score-message" id="scoreMessage">Keep practising — every attempt builds new neural pathways.</p>
+      <div id="benchmarkDisplay"></div>
+      <div class="btn-row" style="margin-top:16px">
+        <button class="btn btn-primary" onclick="nextExercise()" id="nextBtn">Next Exercise →</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-outline btn-sm" style="margin-top:12px" onclick="exitExercise()" id="exitBtn">← Back to exercises</button>
+</div>
+
+<!-- ── Session Summary (shown after completing all exercises) ── -->
+<div class="exercise-screen" id="sessionSummary" style="display:none">
+  <div class="score-display fade-in">
+    <div style="font-size:40px;margin-bottom:8px">🏆</div>
+    <h2 style="font-size:20px;font-weight:800;margin-bottom:4px" id="summaryTitle">Session Complete</h2>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:20px" id="summarySubtitle">Great work — here's how you did</p>
+
+    <div class="score-ring-container" style="margin-bottom:16px">
+      <svg viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="50" fill="none" stroke="var(--bg2)" stroke-width="10"/>
+        <circle id="summaryRing" cx="60" cy="60" r="50" fill="none" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" stroke-dasharray="314.16" stroke-dashoffset="314.16" transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 1s cubic-bezier(.16,1,.3,1)"/>
+      </svg>
+      <div class="score-value" id="summaryScore">0%</div>
+    </div>
+
+    <div class="stat-grid" style="margin-bottom:16px">
+      <div class="stat-card"><div class="stat-value" id="sumExCount">0</div><div class="stat-label" id="sumExLabel">Exercises</div></div>
+      <div class="stat-card"><div class="stat-value" id="sumBest">0%</div><div class="stat-label" id="sumBestLabel">Best Score</div></div>
+    </div>
+
+    <div id="summaryBreakdown" class="card" style="text-align:left"></div>
+
+    <p style="font-size:13px;color:var(--text2);margin:16px 0;line-height:1.5" id="summaryEncouragement"></p>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="exitExercise()" id="sumBackBtn">← Exercises</button>
+      <button class="btn btn-primary" onclick="exitExercise()" id="sumNewBtn">New Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Progress Tab ── -->
+<div class="panel" id="panelProgress">
+  <div class="print-header"><h2>ReWrite — Handwriting Rehabilitation</h2><p>Progress Report</p></div>
+  <h2 style="font-size:20px;font-weight:800;margin-bottom:14px" id="progressTitle">Your Progress</h2>
+
+  <div class="stat-grid" id="statsGrid">
+    <div class="stat-card"><div class="stat-value" id="statSessions">0</div><div class="stat-label">Sessions</div></div>
+    <div class="stat-card"><div class="stat-value" id="statExercises">0</div><div class="stat-label">Exercises</div></div>
+    <div class="stat-card"><div class="stat-value" id="statAvgScore">0%</div><div class="stat-label">Avg Score</div></div>
+    <div class="stat-card"><div class="stat-value" id="statBestScore">0%</div><div class="stat-label">Best Score</div></div>
+  </div>
+
+  <div class="card" id="trendChartCard">
+    <div class="card-title" id="trendChartTitle">Your Progress Over Time</div>
+    <div class="trend-chart-container"><canvas id="trendChart"></canvas></div>
+    <p style="font-size:11px;color:var(--text3);text-align:center;margin-top:4px" id="trendChartHelp">Average score per session over time</p>
+  </div>
+
+  <div class="card" id="perExerciseCard">
+    <div class="card-title" id="perExTitle">Per-Exercise Breakdown</div>
+    <div id="perExerciseBreakdown"></div>
+  </div>
+
+  <div class="card" id="sessionLogCard">
+    <div class="card-title" id="sessionLogTitle">Session History</div>
+    <div id="sessionLog"></div>
+  </div>
+
+  <button class="btn btn-outline" style="margin-top:10px" onclick="exportForTherapist()" id="exportBtn">📋 Export for Therapist</button>
+</div>
+
+<!-- ── About Tab ── -->
+<div class="panel" id="panelAbout">
+  <h2 style="font-size:20px;font-weight:800;margin-bottom:14px" id="aboutTitle">About ReWrite</h2>
+
+  <div class="disclaimer" id="aboutDisclaimer">
+    <strong>Important:</strong> ReWrite is a wellness support tool, not a medical device. It is designed to supplement — not replace — occupational therapy. Always follow the guidance of your therapist or care team.
+  </div>
+
+  <div class="about-section">
+    <h3 id="whatIsTitle">What is ReWrite?</h3>
+    <p id="whatIsText">ReWrite helps you rebuild handwriting skills through guided tracing exercises. Designed for people recovering from stroke, brain injury, or other conditions that affect hand control and writing ability. It provides practice exercises with progress tracking and colour-coded score bands. No ads, no subscriptions — no additional costs after purchase.</p>
+  </div>
+
+  <div class="about-section">
+    <h3 id="howItWorksTitle">How it works</h3>
+    <ul>
+      <li id="howIt1">Choose an exercise type: individual letters, numbers, words, or sentences</li>
+      <li id="howIt2">A faint guide character appears on the writing area</li>
+      <li id="howIt3">Trace over the guide with your finger (touchscreen) or mouse</li>
+      <li id="howIt4">The app scores your accuracy based on how closely you traced the guide</li>
+      <li id="howIt5">Your progress is saved automatically on this device</li>
+    </ul>
+  </div>
+
+  <div class="about-section">
+    <h3 id="benchmarksTitle">Understanding benchmarks</h3>
+    <p id="benchmarksText">Scores are compared against typical performance bands. These are guides only — visual, motor, cognitive and fatigue factors all affect scores. What matters most is your personal improvement over time.</p>
+    <div style="margin-top:10px">
+      <div class="benchmark"><div class="benchmark-dot bench-green"></div> <span id="benchGreen">Strong performance (≥80%) — close match to the guide</span></div>
+      <div class="benchmark" style="margin-top:4px"><div class="benchmark-dot bench-amber"></div> <span id="benchAmber">Developing (50–79%) — improving, keep practising</span></div>
+      <div class="benchmark" style="margin-top:4px"><div class="benchmark-dot bench-grey"></div> <span id="benchGrey">Early stage (&lt;50%) — every attempt builds new pathways</span></div>
+    </div>
+  </div>
+
+  <div class="about-section">
+    <h3 id="tipsTitle">Tips for best results</h3>
+    <ul>
+      <li id="tip1">Practice 10–15 minutes daily — short frequent sessions beat long infrequent ones</li>
+      <li id="tip2">Start with individual letters before progressing to words and sentences</li>
+      <li id="tip3">Focus on accuracy, not speed — you are retraining motor pathways</li>
+      <li id="tip4">Use the Export button on the Progress tab to share results with your therapist</li>
+      <li id="tip5">Sit comfortably with your device on a stable surface at a good angle</li>
+    </ul>
+  </div>
+
+  <div class="about-section">
+    <h3 id="privacyTitle">Privacy</h3>
+    <p id="privacyText">All data is stored locally on your device only. Nothing is sent to any server. No account is needed. Your progress stays private.</p>
+  </div>
+
+  <div style="text-align:center;margin-top:20px;padding:16px;border-top:1px solid var(--border)">
+    <p style="font-size:11px;color:var(--text3)">ReWrite — Handwriting Rehabilitation</p>
+    <p style="font-size:11px;color:var(--text3)">A wellness support tool — no subscription required</p>
+  </div>
+</div>
+
+<!-- ── Settings Tab ── -->
+<div class="panel" id="panelSettings">
+  <h2 style="font-size:20px;font-weight:800;margin-bottom:14px" id="settingsTitle">Settings</h2>
+
+  <div class="card">
+    <div class="setting-row">
+      <div>
+        <div class="setting-label" id="setExPerSession">Exercises per session</div>
+        <div class="setting-desc" id="setExPerSessionDesc">How many exercises in each session</div>
+      </div>
+      <select class="setting-select" id="settingSessionLength" onchange="saveSetting('sessionLength',this.value)">
+        <option value="5">5</option><option value="8" selected>8</option><option value="10">10</option><option value="12">12</option>
+      </select>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label" id="setPenWidth">Pen thickness</div>
+        <div class="setting-desc" id="setPenWidthDesc">Adjusts the drawing line width</div>
+      </div>
+      <select class="setting-select" id="settingPenWidth" onchange="saveSetting('penWidth',this.value)">
+        <option value="3">Thin</option><option value="5" selected>Medium</option><option value="8">Thick</option>
+      </select>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label" id="setSounds">Sound effects</div>
+        <div class="setting-desc" id="setSoundsDesc">Play sounds for feedback</div>
+      </div>
+      <button class="toggle" id="settingSounds" onclick="toggleSounds()" aria-label="Toggle sounds"></button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" id="setDataTitle">Data</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:12px" id="setDataDesc">All progress data is stored locally on this device.</p>
+    <button class="btn btn-outline btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="confirmReset()" id="resetBtn">Reset All Progress</button>
+  </div>
+</div>
+
+<!-- ══════════════ Tab Bar ══════════════ -->
+<nav class="tab-bar" id="tabBar">
+  <button class="tab-btn active" data-tab="panelExercises" onclick="switchTab(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+    <span id="tabExercises">Exercises</span>
+  </button>
+  <button class="tab-btn" data-tab="panelProgress" onclick="switchTab(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="m18 9-5 5-4-4-3 3"/></svg>
+    <span id="tabProgress">Progress</span>
+  </button>
+  <button class="tab-btn" data-tab="panelAbout" onclick="switchTab(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+    <span id="tabAbout">About</span>
+  </button>
+  <button class="tab-btn" data-tab="panelSettings" onclick="switchTab(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+    <span id="tabSettings">Settings</span>
+  </button>
+</nav>
+
+<script>
+// ══════════════ EXERCISE DATA ══════════════
+const EXERCISES_BASE = {
+  letters: {
+    easy: 'a b c d e f g h i j k l m n o p q r s t u v w x y z'.split(' '),
+    medium: 'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split(' ')
+  },
+  numbers: {
+    easy: '0 1 2 3 4 5 6 7 8 9'.split(' '),
+    medium: '0 1 2 3 4 5 6 7 8 9'.split(' ')
+  },
+  words: {
+    easy: ['cat','dog','the','and','for','you','can','run','sun','big','day','get','new','old','see','put','say'],
+    medium: ['water','house','light','write','could','about','their','where','think','learn','dream','heart','smile','thank','today','under','voice','green','place','stand']
+  },
+  sentences: {
+    easy: ['The cat sat.','I can do this.','One step at a time.','I am getting stronger.','Keep going.','Every day I improve.','Practice makes progress.'],
+    medium: ['The quick brown fox jumped.','Writing helps my recovery.','I will practice every day.','Each letter is a small victory.','Slow and steady wins the race.']
+  }
+};
+
+// Language-specific exercise content
+const EXERCISES_LANG = {
+  cy: {
+    words: {
+      easy: ['ci','cath','dŵr','tŷ','da','lle','un','dau','tri','nos','haul','glaw','bore','eira','gwynt','llun','hir'],
+      medium: ['cartref','ysgol','cymraeg','croeso','diolch','amser','blodyn','mynydd','afon','gwyrdd','cariad','llyfr','geiriau','teulu','ffrind','heddiw','golau','bywyd','cerdded','yfory']
+    },
+    sentences: {
+      easy: ['Y gath fach.','Un cam ar y tro.','Dal ati.','Dw i\u2019n gwella.','Ymarfer bob dydd.','Pob lwc.','Rwy\u2019n trio.'],
+      medium: ['Mae\u2019r haul yn disgleirio heddiw.','Ymarfer sy\u2019n gwneud cynnydd.','Pob llythyren yn fuddugoliaeth.','Rwy\u2019n ysgrifennu bob dydd.','Araf a phwyllog piau hi.']
+    }
+  },
+  ja: {
+    letters: {
+      easy: 'あ い う え お か き く け こ さ し す せ そ た ち つ て と な に ぬ ね の は ひ ふ へ ほ ま み む め も や ゆ よ ら り る れ ろ わ を ん'.split(' '),
+      medium: 'ア イ ウ エ オ カ キ ク ケ コ サ シ ス セ ソ タ チ ツ テ ト ナ ニ ヌ ネ ノ ハ ヒ フ ヘ ホ マ ミ ム メ モ ヤ ユ ヨ ラ リ ル レ ロ ワ ヲ ン'.split(' ')
+    },
+    words: {
+      easy: ['ねこ','いぬ','みず','やま','はな','そら','ひと','もり','うみ','くも','あめ','かぜ','ほし','つき','にわ','まち','いえ'],
+      medium: ['ありがとう','おはよう','げんき','がんばる','しあわせ','ともだち','さくら','たいよう','こころ','せかい','ひかり','れんしゅう','じかん','きぼう','えがお','みらい','けんこう','しぜん','ことば','にほん']
+    },
+    sentences: {
+      easy: ['ねこが いる。','がんばろう。','いち にち ずつ。','すこし ずつ。','きょうも れんしゅう。','できる。','よく やった。'],
+      medium: ['まいにち すこしずつ じょうずに なる。','れんしゅうは ちからに なる。','あきらめない こころが たいせつ。','ひとつ ひとつが しょうり。','ゆっくり でも すすんで いる。']
+    }
+  },
+  ko: {
+    letters: {
+      easy: 'ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ ㅅ ㅇ ㅈ ㅊ ㅋ ㅌ ㅍ ㅎ ㅏ ㅑ ㅓ ㅕ ㅗ ㅛ ㅜ ㅠ ㅡ ㅣ'.split(' '),
+      medium: '가 나 다 라 마 바 사 아 자 차 카 타 파 하 거 너 더 러 머 버 서 어 저 처 커 터 퍼 허'.split(' ')
+    },
+    words: {
+      easy: ['고양이','강아지','물','산','꽃','하늘','사람','숲','바다','구름','비','바람','별','달','집','마을','길'],
+      medium: ['감사합니다','안녕하세요','건강','노력','행복','친구','사랑','태양','마음','세계','빛','연습','시간','희망','미소','미래','자연','용기','생활','한국']
+    },
+    sentences: {
+      easy: ['고양이가 있다.','힘내자.','하루 하루.','조금씩.','오늘도 연습.','할 수 있다.','잘했다.'],
+      medium: ['매일 조금씩 나아지고 있다.','연습은 힘이 된다.','포기하지 않는 마음이 중요하다.','하나하나가 작은 승리이다.','천천히 하지만 앞으로 나아간다.']
+    }
+  },
+  hi: {
+    letters: {
+      easy: 'अ आ इ ई उ ऊ ए ऐ ओ औ क ख ग घ च छ ज झ ट ठ ड ढ ण त थ द ध न प फ ब भ म य र ल व श ष स ह'.split(' '),
+      medium: 'क्ष त्र ज्ञ श्र कि की कु कू के कै को कौ कं कः'.split(' ')
+    },
+    words: {
+      easy: ['नमस्ते','पानी','घर','माँ','पापा','दिन','रात','हाथ','पैर','आँख','कान','मुँह','नाक','सर','दिल','फूल','पेड़'],
+      medium: ['अभ्यास','स्वास्थ्य','सुधार','परिवार','दोस्त','खुशी','ताकत','हिम्मत','धैर्य','कोशिश','सफलता','विश्वास','प्रगति','इलाज','उम्मीद','जीवन','शांति','सूरज','चाँद','तारा']
+    },
+    sentences: {
+      easy: ['मैं कर सकता हूँ।','एक कदम।','हर दिन बेहतर।','कोशिश करो।','मैं मजबूत हूँ।','अभ्यास करो।','शाबाश।'],
+      medium: ['हर दिन थोड़ा-थोड़ा सुधार होता है।','अभ्यास से प्रगति होती है।','हर अक्षर एक छोटी जीत है।','धीरे लेकिन आगे बढ़ रहा हूँ।','हिम्मत मत हारो।']
+    }
+  },
+  ar: {
+    letters: {
+      easy: 'ا ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي'.split(' '),
+      medium: 'بـ تـ ثـ جـ حـ خـ سـ شـ صـ ضـ طـ ظـ عـ غـ فـ قـ كـ لـ مـ نـ هـ يـ'.split(' ')
+    },
+    words: {
+      easy: ['بيت','ماء','يد','عين','قلب','شمس','قمر','نجم','زهرة','كتاب','باب','نور','سلام','حب','أمل','يوم','ليل'],
+      medium: ['تمرين','صحة','تحسن','عائلة','صديق','سعادة','قوة','شجاعة','صبر','محاولة','نجاح','ثقة','تقدم','علاج','أمان','حياة','سكينة','شروق','غروب','حرية']
+    },
+    sentences: {
+      easy: ['أنا أستطيع.','خطوة بخطوة.','كل يوم أفضل.','حاول مرة أخرى.','أنا قوي.','تمرّن يومياً.','أحسنت.'],
+      medium: ['كل يوم تتحسن قليلاً.','التمرين يصنع التقدم.','كل حرف انتصار صغير.','ببطء ولكن إلى الأمام.','لا تفقد الأمل أبداً.']
+    }
+  },
+  zh: {
+    letters: {
+      easy: '一 二 三 四 五 六 七 八 九 十 人 大 小 上 下 中 山 水 火 木 日 月 天 地 口 目 手 足 心 田'.split(' '),
+      medium: '学 写 字 读 书 画 花 草 风 云 雨 雪 春 夏 秋 冬 东 南 西 北 好 美 新 老 高 长'.split(' ')
+    },
+    words: {
+      easy: ['你好','谢谢','家','水','花','天空','太阳','月亮','星星','朋友','妈妈','爸爸','手','心','眼睛','耳朵','鼻子'],
+      medium: ['练习','健康','进步','家人','快乐','力量','勇气','耐心','努力','成功','信心','希望','治疗','平安','生活','自然','阳光','微笑','坚持','未来']
+    },
+    sentences: {
+      easy: ['我能做到。','一步一步。','每天进步。','继续努力。','我很坚强。','坚持练习。','做得好。'],
+      medium: ['每天都在一点点进步。','练习带来力量。','每个字都是小小的胜利。','慢慢来但在前进。','永远不要放弃希望。']
+    }
+  },
+  pl: {
+    words: {
+      easy: ['dom','woda','ręka','oko','serce','dzień','noc','kot','pies','mama','tata','kwiat','drzewo','słońce','niebo','droga','pokój'],
+      medium: ['ćwiczenie','zdrowie','poprawa','rodzina','przyjaciel','szczęście','siła','odwaga','cierpliwość','próba','sukces','zaufanie','postęp','leczenie','nadzieja','życie','spokój','uśmiech','wiosna','wolność']
+    },
+    sentences: {
+      easy: ['Ja to mogę.','Krok po kroku.','Każdy dzień lepszy.','Spróbuj jeszcze raz.','Jestem silny.','Ćwicz codziennie.','Brawo.'],
+      medium: ['Każdego dnia jest trochę lepiej.','Ćwiczenie daje postęp.','Każda litera to małe zwycięstwo.','Powoli ale do przodu.','Nigdy nie trać nadziei.']
+    }
+  }
+};
+
+// Merge function to get exercises for current language
+function getExercises() {
+  const langData = EXERCISES_LANG[currentLang];
+  if (!langData) return EXERCISES_BASE;
+  return {
+    letters: langData.letters || EXERCISES_BASE.letters,
+    numbers: EXERCISES_BASE.numbers, // numbers are universal
+    words: langData.words || EXERCISES_BASE.words,
+    sentences: langData.sentences || EXERCISES_BASE.sentences
+  };
+}
+const EXERCISES = EXERCISES_BASE; // fallback reference
+
+const HINTS_BASE = {
+  letters: 'Focus on form — size, shape and proportions',
+  numbers: 'Take it slowly — form each number carefully',
+  words: 'Connect each letter smoothly',
+  sentences: 'Take your time — accuracy matters more than speed'
+};
+const HINTS_LANG = {
+  ja: { letters: '線の形やバランスに注意しましょう', words: '一文字ずつ丁寧に', sentences: 'ゆっくり、正確さが大切です' },
+  ko: { letters: '획의 모양과 균형에 주의하세요', words: '한 글자씩 정성껏', sentences: '천천히, 정확도가 중요합니다' },
+  cy: { letters: 'Canolbwyntiwch ar ffurf a maint', words: 'Cysylltwch bob llythyren yn esmwyth', sentences: 'Cymerwch eich amser — cywirdeb sy\'n bwysig' },
+  hi: { letters: 'आकार और अनुपात पर ध्यान दें', words: 'हर अक्षर को जोड़कर लिखें', sentences: 'धीरे-धीरे — सटीकता ज़रूरी है' },
+  ar: { letters: 'ركّز على شكل وحجم الحروف', words: 'اربط كل حرف بسلاسة', sentences: 'خذ وقتك — الدقة أهم من السرعة' },
+  zh: { letters: '注意笔画的形状和平衡', words: '一笔一画认真写', sentences: '慢慢来——准确性最重要' },
+  pl: { letters: 'Skup się na kształcie i proporcjach', words: 'Łącz litery płynnie', sentences: 'Nie spiesz się — liczy się dokładność' }
+};
+function getHints() {
+  const lh = HINTS_LANG[currentLang];
+  if (!lh) return HINTS_BASE;
+  return { ...HINTS_BASE, ...lh };
+}
+
+// ══════════════ BENCHMARK BANDS ══════════════
+const SCORE_BANDS = {
+  green: 80,   // ≥80% strong
+  amber: 50    // 50–79% developing
+                // <50% early stage
+};
+
+// ══════════════ STATE ══════════════
+let currentLang = 'en';
+let currentType = '';
+let currentDifficulty = 'easy';
+const difficultyPerType = { letters: 'easy', numbers: 'easy', words: 'easy', sentences: 'easy' };
+let sessionExercises = [];
+let currentIndex = 0;
+let scores = [];
+let isDrawing = false;
+let hasStrokes = false;
+let strokes = [];
+let currentStroke = [];
+let startTime = 0;
+let drawCtx = null;
+let guideCtx = null;
+let settings = { sessionLength: 8, penWidth: 5, sounds: false };
+
+// ══════════════ IndexedDB with fallback ══════════════
+let db;
+let usingFallback = false;
+
+// In-memory fallback store for when IndexedDB is blocked
+const memStore = { sessions: [], settings: {} };
+
+function openDB() {
+  return new Promise((resolve) => {
+    try {
+      const req = indexedDB.open('ReWriteDB', 2);
+      req.onupgradeneeded = e => {
+        const d = e.target.result;
+        if (!d.objectStoreNames.contains('sessions')) d.createObjectStore('sessions', { keyPath: 'id', autoIncrement: true });
+        if (!d.objectStoreNames.contains('settings')) d.createObjectStore('settings', { keyPath: 'key' });
+      };
+      req.onsuccess = e => { db = e.target.result; resolve(db); };
+      req.onerror = () => { usingFallback = true; showStorageWarning(); resolve(null); };
+      // Some browsers fire neither callback — timeout fallback
+      setTimeout(() => { if (!db && !usingFallback) { usingFallback = true; showStorageWarning(); resolve(null); } }, 2000);
+    } catch (e) {
+      usingFallback = true;
+      showStorageWarning();
+      resolve(null);
+    }
+  });
+}
+
+function showStorageWarning() {
+  const banner = document.createElement('div');
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#b45309;color:#fff;padding:10px 16px;font-size:13px;text-align:center';
+  banner.textContent = 'Storage unavailable (private browsing?). Progress will not be saved between sessions.';
+  document.body.appendChild(banner);
+  setTimeout(() => banner.remove(), 8000);
+}
+
+function saveSession(sessionData) {
+  if (usingFallback) { memStore.sessions.push({ ...sessionData, id: Date.now() }); return Promise.resolve(); }
+  return new Promise((resolve) => {
+    const tx = db.transaction('sessions', 'readwrite');
+    tx.objectStore('sessions').add(sessionData);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => resolve();
+  });
+}
+
+function getAllSessions() {
+  if (usingFallback) return Promise.resolve([...memStore.sessions]);
+  return new Promise((resolve) => {
+    const tx = db.transaction('sessions', 'readonly');
+    const req = tx.objectStore('sessions').getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => resolve([]);
+  });
+}
+
+function clearAllSessions() {
+  if (usingFallback) { memStore.sessions = []; return Promise.resolve(); }
+  return new Promise((resolve) => {
+    const tx = db.transaction('sessions', 'readwrite');
+    tx.objectStore('sessions').clear();
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => resolve();
+  });
+}
+
+function saveSetting(key, value) {
+  settings[key] = (typeof value === 'object' || typeof value === 'boolean') ? value : (isNaN(Number(value)) ? value : Number(value));
+  if (usingFallback) { memStore.settings[key] = settings[key]; return; }
+  try {
+    const tx = db.transaction('settings', 'readwrite');
+    tx.objectStore('settings').put({ key, value: settings[key] });
+  } catch(e) { /* silent */ }
+}
+
+function loadSettings() {
+  if (usingFallback) {
+    Object.entries(memStore.settings).forEach(([k, v]) => { settings[k] = v; });
+    applySettings();
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => {
+    const tx = db.transaction('settings', 'readonly');
+    const req = tx.objectStore('settings').getAll();
+    req.onsuccess = () => {
+      (req.result || []).forEach(s => { settings[s.key] = s.value; });
+      applySettings();
+      resolve();
+    };
+    req.onerror = () => { applySettings(); resolve(); };
+  });
+}
+
+function applySettings() {
+  document.getElementById('settingSessionLength').value = settings.sessionLength || 8;
+  document.getElementById('settingPenWidth').value = settings.penWidth || 5;
+  const soundsEl = document.getElementById('settingSounds');
+  if (settings.sounds) soundsEl.classList.add('on');
+  else soundsEl.classList.remove('on');
+
+  // Restore difficulty preferences
+  if (settings.difficultyPerType && typeof settings.difficultyPerType === 'object') {
+    Object.assign(difficultyPerType, settings.difficultyPerType);
+    // Update toggle UI to reflect saved state
+    document.querySelectorAll('.diff-btn').forEach(btn => {
+      const type = btn.getAttribute('onclick')?.match(/setDifficulty\('(\w+)'/)?.[1];
+      const diff = btn.getAttribute('data-diff');
+      if (type && diff) {
+        if (difficultyPerType[type] === diff) btn.classList.add('active');
+        else btn.classList.remove('active');
+      }
+    });
+  }
+}
+
+function toggleSounds() {
+  settings.sounds = !settings.sounds;
+  saveSetting('sounds', settings.sounds);
+  applySettings();
+}
+
+// ══════════════ LANGUAGE ══════════════
+const STRINGS = {
+  en: {
+    headerSubtitle: 'Handwriting Rehab',
+    exercisesTitle: 'Practice Handwriting', exercisesSubtitle: 'Choose an exercise type to begin',
+    disclaimer: '<strong>Wellness tool only.</strong> ReWrite supports handwriting rehabilitation but is not a medical device. Always follow guidance from your occupational therapist or care team.',
+    exLettersTitle: 'Individual Letters', exLettersDesc: 'Trace uppercase and lowercase letters. Focus on form, size and proportion.',
+    exNumbersTitle: 'Numbers', exNumbersDesc: 'Practice writing digits 0–9. Important for forms, dates and addresses.',
+    exWordsTitle: 'Common Words', exWordsDesc: 'Trace short everyday words. Connect letters smoothly.',
+    exSentencesTitle: 'Sentences', exSentencesDesc: 'Write full sentences. Builds endurance and flow.',
+    tipText: 'Tip: Short daily sessions (10–15 minutes) are more effective than long infrequent ones.',
+    tracePrompt: 'Trace this carefully:', clearBtn: '↻ Clear', submitBtn: '✓ Submit',
+    nextBtn: 'Next Exercise →', finishBtn: 'Finish Session ✓',
+    exitBtn: '← Back to exercises',
+    summaryTitle: 'Session Complete', summarySubtitle: 'Great work — here\'s how you did',
+    progressTitle: 'Your Progress', exportBtn: '📋 Export for Therapist',
+    aboutTitle: 'About ReWrite',
+    settingsTitle: 'Settings',
+    tabExercises: 'Exercises', tabProgress: 'Progress', tabAbout: 'About', tabSettings: 'Settings',
+    // Score bands
+    excellent: 'Excellent!', excellentMsg: 'Beautiful tracing — keep it up.',
+    good: 'Good effort', goodMsg: 'Good form — try to stay closer to the guide.',
+    improving: 'Keep practising', improvingMsg: 'You\'re making progress — every attempt counts.',
+    early: 'Well done for trying', earlyMsg: 'Rehab takes time and patience — you\'re doing great just by trying.',
+    // Summary
+    sumEncHigh: 'Outstanding work today. Your handwriting is really coming along.',
+    sumEncMid: 'Solid session. Consistent practice will keep the improvement going.',
+    sumEncLow: 'Every session matters. You\'re building important neural pathways.',
+    sumEncEarly: 'Just showing up and trying is the most important step in recovery.',
+  },
+  es: {
+    headerSubtitle: 'Rehabilitación de escritura',
+    exercisesTitle: 'Practicar escritura', exercisesSubtitle: 'Elige un tipo de ejercicio para comenzar',
+    disclaimer: '<strong>Solo herramienta de bienestar.</strong> ReWrite apoya la rehabilitación de la escritura pero no es un dispositivo médico. Sigue siempre las indicaciones de tu terapeuta ocupacional.',
+    exLettersTitle: 'Letras individuales', exLettersDesc: 'Traza letras mayúsculas y minúsculas. Céntrate en la forma y el tamaño.',
+    exNumbersTitle: 'Números', exNumbersDesc: 'Practica escribir los dígitos 0–9.',
+    exWordsTitle: 'Palabras comunes', exWordsDesc: 'Traza palabras cortas del día a día.',
+    exSentencesTitle: 'Frases', exSentencesDesc: 'Escribe frases completas para ganar resistencia.',
+    tipText: 'Consejo: Las sesiones cortas diarias (10–15 min) son más efectivas.',
+    tracePrompt: 'Traza esto con cuidado:', clearBtn: '↻ Borrar', submitBtn: '✓ Enviar',
+    nextBtn: 'Siguiente →', finishBtn: 'Finalizar ✓', exitBtn: '← Volver',
+    summaryTitle: 'Sesión completada', summarySubtitle: 'Buen trabajo — así te fue',
+    progressTitle: 'Tu progreso', exportBtn: '📋 Exportar para terapeuta',
+    aboutTitle: 'Acerca de ReWrite', settingsTitle: 'Ajustes',
+    tabExercises: 'Ejercicios', tabProgress: 'Progreso', tabAbout: 'Info', tabSettings: 'Ajustes',
+    excellent:'¡Excelente!',excellentMsg:'Trazado precioso — sigue así.',good:'Buen esfuerzo',goodMsg:'Buena forma — intenta acercarte más a la guía.',improving:'Sigue practicando',improvingMsg:'Estás progresando — cada intento cuenta.',early:'Bien hecho por intentarlo',earlyMsg:'La rehabilitación lleva tiempo y paciencia.',
+    sumEncHigh:'Trabajo excelente hoy.',sumEncMid:'Sesión sólida.',sumEncLow:'Cada sesión importa.',sumEncEarly:'Solo intentarlo es el paso más importante.',
+  },
+  fr: {
+    headerSubtitle: 'Rééducation de l\'écriture',
+    exercisesTitle: 'Pratiquer l\'écriture', exercisesSubtitle: 'Choisissez un type d\'exercice',
+    disclaimer: '<strong>Outil de bien-être uniquement.</strong> ReWrite soutient la rééducation de l\'écriture mais n\'est pas un dispositif médical.',
+    exLettersTitle: 'Lettres individuelles', exLettersDesc: 'Tracez les lettres. Concentrez-vous sur la forme et la taille.',
+    exNumbersTitle: 'Chiffres', exNumbersDesc: 'Pratiquez l\'écriture des chiffres 0–9.',
+    exWordsTitle: 'Mots courants', exWordsDesc: 'Tracez des mots courts du quotidien.',
+    exSentencesTitle: 'Phrases', exSentencesDesc: 'Écrivez des phrases complètes.',
+    tipText: 'Conseil : Des sessions courtes quotidiennes (10–15 min) sont plus efficaces.',
+    tracePrompt: 'Tracez soigneusement :', clearBtn: '↻ Effacer', submitBtn: '✓ Soumettre',
+    nextBtn: 'Suivant →', finishBtn: 'Terminer ✓', exitBtn: '← Retour',
+    summaryTitle: 'Session terminée', summarySubtitle: 'Bon travail — voici vos résultats',
+    progressTitle: 'Votre progression', exportBtn: '📋 Exporter pour le thérapeute',
+    aboutTitle: 'À propos', settingsTitle: 'Paramètres',
+    tabExercises: 'Exercices', tabProgress: 'Progrès', tabAbout: 'Info', tabSettings: 'Réglages',
+    excellent:'Excellent !',excellentMsg:'Beau tracé — continuez.',good:'Bon effort',goodMsg:'Bonne forme — essayez de rester plus proche du guide.',improving:'Continuez',improvingMsg:'Vous progressez — chaque tentative compte.',early:'Bravo d\'avoir essayé',earlyMsg:'La rééducation demande du temps et de la patience.',
+    sumEncHigh:'Travail exceptionnel.',sumEncMid:'Bonne session.',sumEncLow:'Chaque session compte.',sumEncEarly:'Le plus important est de continuer à essayer.',
+  },
+  de: {
+    headerSubtitle: 'Schreib-Rehabilitation',
+    exercisesTitle: 'Schreiben üben', exercisesSubtitle: 'Wählen Sie eine Übungsart',
+    disclaimer: '<strong>Nur Wellness-Tool.</strong> ReWrite unterstützt die Schreibrehabilitation, ist aber kein Medizinprodukt.',
+    exLettersTitle: 'Einzelne Buchstaben', exLettersDesc: 'Buchstaben nachzeichnen. Fokus auf Form und Größe.',
+    exNumbersTitle: 'Zahlen', exNumbersDesc: 'Ziffern 0–9 üben.',
+    exWordsTitle: 'Häufige Wörter', exWordsDesc: 'Kurze Alltagswörter nachzeichnen.',
+    exSentencesTitle: 'Sätze', exSentencesDesc: 'Ganze Sätze schreiben.',
+    tipText: 'Tipp: Kurze tägliche Übungen (10–15 Min.) sind effektiver.',
+    tracePrompt: 'Sorgfältig nachzeichnen:', clearBtn: '↻ Löschen', submitBtn: '✓ Absenden',
+    nextBtn: 'Weiter →', finishBtn: 'Beenden ✓', exitBtn: '← Zurück',
+    summaryTitle: 'Sitzung abgeschlossen', summarySubtitle: 'Gut gemacht — so haben Sie abgeschnitten',
+    progressTitle: 'Ihr Fortschritt', exportBtn: '📋 Für Therapeuten exportieren',
+    aboutTitle: 'Über ReWrite', settingsTitle: 'Einstellungen',
+    tabExercises: 'Übungen', tabProgress: 'Fortschritt', tabAbout: 'Info', tabSettings: 'Einstellungen',
+    excellent:'Ausgezeichnet!',excellentMsg:'Schönes Nachzeichnen.',good:'Guter Versuch',goodMsg:'Gute Form — versuchen Sie näher an der Vorlage zu bleiben.',improving:'Weiter üben',improvingMsg:'Sie machen Fortschritte.',early:'Gut gemacht',earlyMsg:'Rehabilitation braucht Zeit und Geduld.',
+    sumEncHigh:'Hervorragende Arbeit heute.',sumEncMid:'Solide Sitzung.',sumEncLow:'Jede Sitzung zählt.',sumEncEarly:'Der wichtigste Schritt ist, es zu versuchen.',
+  },
+  it: {
+    headerSubtitle: 'Riabilitazione della scrittura',
+    exercisesTitle: 'Pratica di scrittura', exercisesSubtitle: 'Scegli un tipo di esercizio',
+    disclaimer: '<strong>Solo strumento di benessere.</strong> ReWrite supporta la riabilitazione della scrittura ma non è un dispositivo medico.',
+    exLettersTitle: 'Lettere singole', exLettersDesc: 'Traccia le lettere. Concentrati su forma e dimensione.',
+    exNumbersTitle: 'Numeri', exNumbersDesc: 'Pratica la scrittura delle cifre 0–9.',
+    exWordsTitle: 'Parole comuni', exWordsDesc: 'Traccia brevi parole quotidiane.',
+    exSentencesTitle: 'Frasi', exSentencesDesc: 'Scrivi frasi complete.',
+    tipText: 'Consiglio: sessioni brevi quotidiane (10–15 min) sono più efficaci.',
+    tracePrompt: 'Traccia con attenzione:', clearBtn: '↻ Cancella', submitBtn: '✓ Invia',
+    nextBtn: 'Avanti →', finishBtn: 'Termina ✓', exitBtn: '← Indietro',
+    summaryTitle: 'Sessione completata', summarySubtitle: 'Ottimo lavoro — ecco come è andata',
+    progressTitle: 'I tuoi progressi', exportBtn: '📋 Esporta per il terapista',
+    aboutTitle: 'Informazioni', settingsTitle: 'Impostazioni',
+    tabExercises: 'Esercizi', tabProgress: 'Progressi', tabAbout: 'Info', tabSettings: 'Impost.',
+    excellent:'Eccellente!',excellentMsg:'Bel tracciato.',good:'Buono sforzo',goodMsg:'Buona forma — cerca di restare più vicino alla guida.',improving:'Continua',improvingMsg:'Stai progredendo.',early:'Bravo per aver provato',earlyMsg:'La riabilitazione richiede tempo e pazienza.',
+    sumEncHigh:'Lavoro eccezionale oggi.',sumEncMid:'Buona sessione.',sumEncLow:'Ogni sessione conta.',sumEncEarly:'Il passo più importante è continuare a provare.',
+  },
+  pt: {
+    headerSubtitle: 'Reabilitação da escrita',
+    exercisesTitle: 'Praticar escrita', exercisesSubtitle: 'Escolha um tipo de exercício',
+    disclaimer: '<strong>Apenas ferramenta de bem-estar.</strong> O ReWrite apoia a reabilitação da escrita mas não é um dispositivo médico.',
+    exLettersTitle: 'Letras individuais', exLettersDesc: 'Trace letras. Foque na forma e no tamanho.',
+    exNumbersTitle: 'Números', exNumbersDesc: 'Pratique escrever os dígitos 0–9.',
+    exWordsTitle: 'Palavras comuns', exWordsDesc: 'Trace palavras curtas do dia a dia.',
+    exSentencesTitle: 'Frases', exSentencesDesc: 'Escreva frases completas.',
+    tipText: 'Dica: Sessões curtas diárias (10–15 min) são mais eficazes.',
+    tracePrompt: 'Trace com cuidado:', clearBtn: '↻ Limpar', submitBtn: '✓ Enviar',
+    nextBtn: 'Próximo →', finishBtn: 'Finalizar ✓', exitBtn: '← Voltar',
+    summaryTitle: 'Sessão concluída', summarySubtitle: 'Bom trabalho — veja como foi',
+    progressTitle: 'Seu progresso', exportBtn: '📋 Exportar para terapeuta',
+    aboutTitle: 'Sobre o ReWrite', settingsTitle: 'Configurações',
+    tabExercises: 'Exercícios', tabProgress: 'Progresso', tabAbout: 'Info', tabSettings: 'Config.',
+    excellent:'Excelente!',excellentMsg:'Belo traçado.',good:'Bom esforço',goodMsg:'Boa forma — tente ficar mais perto do guia.',improving:'Continue',improvingMsg:'Você está progredindo.',early:'Parabéns por tentar',earlyMsg:'A reabilitação leva tempo e paciência.',
+    sumEncHigh:'Trabalho excepcional hoje.',sumEncMid:'Boa sessão.',sumEncLow:'Cada sessão importa.',sumEncEarly:'O passo mais importante é continuar tentando.',
+  },
+  cy: {
+    headerSubtitle: 'Ailhyfforddi Ysgrifennu',
+    exercisesTitle: 'Ymarfer Ysgrifennu', exercisesSubtitle: 'Dewiswch fath o ymarfer i ddechrau',
+    disclaimer: '<strong>Offeryn lles yn unig.</strong> Mae ReWrite yn cefnogi ailhyfforddi ysgrifennu ond nid yw\'n ddyfais feddygol. Dilynwch arweiniad eich therapydd bob amser.',
+    exLettersTitle: 'Llythrennau Unigol', exLettersDesc: 'Olrheiniwch lythrennau. Canolbwyntiwch ar ffurf a maint.',
+    exNumbersTitle: 'Rhifau', exNumbersDesc: 'Ymarferwch ysgrifennu rhifau 0–9.',
+    exWordsTitle: 'Geiriau Cyffredin', exWordsDesc: 'Olrheiniwch eiriau byr o ddydd i ddydd.',
+    exSentencesTitle: 'Brawddegau', exSentencesDesc: 'Ysgrifennwch frawddegau llawn.',
+    tipText: 'Awgrym: Mae sesiynau byr dyddiol (10–15 mun) yn fwy effeithiol.',
+    tracePrompt: 'Olrheiniwch yn ofalus:', clearBtn: '↻ Clirio', submitBtn: '✓ Cyflwyno',
+    nextBtn: 'Nesaf →', finishBtn: 'Gorffen ✓', exitBtn: '← Yn ôl',
+    summaryTitle: 'Sesiwn wedi\'i chwblhau', summarySubtitle: 'Da iawn — dyma sut aethoch chi',
+    progressTitle: 'Eich Cynnydd', exportBtn: '📋 Allforio i\'r therapydd',
+    aboutTitle: 'Am ReWrite', settingsTitle: 'Gosodiadau',
+    tabExercises: 'Ymarferion', tabProgress: 'Cynnydd', tabAbout: 'Amdanom', tabSettings: 'Gosod.',
+    excellent:'Ardderchog!',excellentMsg:'Olrheiniad hyfryd — daliwch ati.',good:'Ymdrech dda',goodMsg:'Ffurf dda — ceisiwch aros yn agosach at y canllaw.',improving:'Daliwch ati',improvingMsg:'Rydych yn gwneud cynnydd — mae pob ymgais yn cyfrif.',early:'Da iawn am geisio',earlyMsg:'Mae ailhyfforddi yn cymryd amser ac amynedd.',
+    sumEncHigh:'Gwaith rhagorol heddiw.',sumEncMid:'Sesiwn solet.',sumEncLow:'Mae pob sesiwn yn bwysig.',sumEncEarly:'Y cam pwysicaf yw dal ati i geisio.',
+  },
+  ja: {
+    headerSubtitle: '書字リハビリ',
+    exercisesTitle: '練習しましょう', exercisesSubtitle: '練習の種類を選びましょう',
+    disclaimer: '<strong>健康支援ツールです。</strong>ReWriteは書字リハビリを支援しますが、医療機器ではありません。常に担当のセラピストの指導に従ってください。',
+    exLettersTitle: 'ひらがな / カタカナ', exLettersDesc: 'ひらがなとカタカナをなぞりましょう。',
+    exNumbersTitle: '数字', exNumbersDesc: '0〜9の数字を練習しましょう。',
+    exWordsTitle: 'よく使う言葉', exWordsDesc: '日常的な言葉をなぞりましょう。',
+    exSentencesTitle: '文章', exSentencesDesc: '文章を書いて持久力を高めましょう。',
+    tipText: 'ヒント：毎日短い練習（10〜15分）が効果的です。',
+    tracePrompt: '丁寧になぞりましょう：', clearBtn: '↻ 消去', submitBtn: '✓ 提出',
+    nextBtn: '次へ →', finishBtn: '終了 ✓', exitBtn: '← 戻る',
+    summaryTitle: 'セッション完了', summarySubtitle: 'お疲れさまでした — 結果を見ましょう',
+    progressTitle: 'あなたの進捗', exportBtn: '📋 セラピスト用に印刷',
+    aboutTitle: 'ReWriteについて', settingsTitle: '設定',
+    tabExercises: '練習', tabProgress: '進捗', tabAbout: '情報', tabSettings: '設定',
+    excellent:'素晴らしい！',excellentMsg:'見事ななぞりです — その調子で。',good:'良い調子',goodMsg:'良い形です — もう少し見本に近づけてみましょう。',improving:'続けましょう',improvingMsg:'進歩しています — 毎回の練習が大切です。',early:'挑戦してくれてありがとう',earlyMsg:'リハビリには時間と忍耐が必要です。',
+    sumEncHigh:'今日は素晴らしい練習でした。',sumEncMid:'良いセッションでした。',sumEncLow:'毎回のセッションが大切です。',sumEncEarly:'挑戦することが一番大切な一歩です。',
+  },
+  ko: {
+    headerSubtitle: '손글씨 재활',
+    exercisesTitle: '연습하기', exercisesSubtitle: '연습 유형을 선택하세요',
+    disclaimer: '<strong>건강 지원 도구입니다.</strong> ReWrite는 손글씨 재활을 지원하지만 의료기기가 아닙니다. 항상 담당 치료사의 지도를 따르세요.',
+    exLettersTitle: '자음 / 모음', exLettersDesc: '한글 자음과 모음을 따라 쓰세요.',
+    exNumbersTitle: '숫자', exNumbersDesc: '0–9 숫자 쓰기를 연습하세요.',
+    exWordsTitle: '일상 단어', exWordsDesc: '일상적인 단어를 따라 쓰세요.',
+    exSentencesTitle: '문장', exSentencesDesc: '완전한 문장을 써서 지구력을 키우세요.',
+    tipText: '팁: 매일 짧은 연습(10–15분)이 더 효과적입니다.',
+    tracePrompt: '정성껏 따라 쓰세요:', clearBtn: '↻ 지우기', submitBtn: '✓ 제출',
+    nextBtn: '다음 →', finishBtn: '종료 ✓', exitBtn: '← 돌아가기',
+    summaryTitle: '세션 완료', summarySubtitle: '수고하셨습니다 — 결과를 확인하세요',
+    progressTitle: '나의 진행 상황', exportBtn: '📋 치료사용 인쇄',
+    aboutTitle: 'ReWrite 정보', settingsTitle: '설정',
+    tabExercises: '연습', tabProgress: '진행', tabAbout: '정보', tabSettings: '설정',
+    excellent:'훌륭합니다!',excellentMsg:'멋진 글씨입니다 — 계속 힘내세요.',good:'좋은 노력',goodMsg:'좋은 형태입니다 — 가이드에 더 가까이 써보세요.',improving:'계속하세요',improvingMsg:'발전하고 있습니다 — 매번 연습이 중요합니다.',early:'시도해 주셔서 감사합니다',earlyMsg:'재활에는 시간과 인내가 필요합니다.',
+    sumEncHigh:'오늘 훌륭한 연습이었습니다.',sumEncMid:'좋은 세션이었습니다.',sumEncLow:'매 세션이 중요합니다.',sumEncEarly:'시도하는 것이 가장 중요한 한 걸음입니다.',
+  },
+  hi: {
+    headerSubtitle: 'लेखन पुनर्वास',
+    exercisesTitle: 'लेखन अभ्यास', exercisesSubtitle: 'शुरू करने के लिए एक अभ्यास प्रकार चुनें',
+    disclaimer: '<strong>केवल स्वास्थ्य सहायता उपकरण।</strong> ReWrite लेखन पुनर्वास का समर्थन करता है लेकिन यह चिकित्सा उपकरण नहीं है। हमेशा अपने चिकित्सक के मार्गदर्शन का पालन करें।',
+    exLettersTitle: 'देवनागरी अक्षर', exLettersDesc: 'स्वर और व्यंजन का अभ्यास करें। आकार और अनुपात पर ध्यान दें।',
+    exNumbersTitle: 'संख्याएँ', exNumbersDesc: '0-9 अंक लिखने का अभ्यास करें।',
+    exWordsTitle: 'सामान्य शब्द', exWordsDesc: 'रोज़मर्रा के छोटे शब्दों को लिखें।',
+    exSentencesTitle: 'वाक्य', exSentencesDesc: 'पूरे वाक्य लिखें। सहनशक्ति बनाएँ।',
+    tipText: 'सुझाव: छोटे दैनिक सत्र (10-15 मिनट) लंबे अनियमित सत्रों से अधिक प्रभावी हैं।',
+    tracePrompt: 'ध्यान से लिखें:', clearBtn: '↻ मिटाएँ', submitBtn: '✓ जमा करें',
+    nextBtn: 'अगला →', finishBtn: 'समाप्त ✓', exitBtn: '← वापस',
+    summaryTitle: 'सत्र पूरा', summarySubtitle: 'बहुत अच्छा — यह रहा आपका प्रदर्शन',
+    progressTitle: 'आपकी प्रगति', exportBtn: '📋 चिकित्सक के लिए निर्यात',
+    aboutTitle: 'ReWrite के बारे में', settingsTitle: 'सेटिंग्स',
+    tabExercises: 'अभ्यास', tabProgress: 'प्रगति', tabAbout: 'जानकारी', tabSettings: 'सेटिंग',
+    excellent:'उत्कृष्ट!',excellentMsg:'सुंदर लेखन — ऐसे ही जारी रखें।',good:'अच्छा प्रयास',goodMsg:'अच्छा आकार — गाइड के और करीब लिखने का प्रयास करें।',improving:'अभ्यास जारी रखें',improvingMsg:'आप प्रगति कर रहे हैं — हर प्रयास मायने रखता है।',early:'कोशिश के लिए शाबाश',earlyMsg:'पुनर्वास में समय और धैर्य लगता है।',
+    sumEncHigh:'आज का अभ्यास शानदार रहा।',sumEncMid:'अच्छा सत्र।',sumEncLow:'हर सत्र महत्वपूर्ण है।',sumEncEarly:'प्रयास करना ही सबसे महत्वपूर्ण कदम है।',
+  },
+  ar: {
+    headerSubtitle: 'تأهيل الكتابة',
+    exercisesTitle: 'تمرين الكتابة', exercisesSubtitle: 'اختر نوع التمرين للبدء',
+    disclaimer: '<strong>أداة صحية فقط.</strong> يدعم ReWrite تأهيل الكتابة اليدوية ولكنه ليس جهازاً طبياً. اتبع دائماً إرشادات معالجك.',
+    exLettersTitle: 'الحروف العربية', exLettersDesc: 'تدرّب على الحروف الأساسية. ركّز على الشكل والحجم.',
+    exNumbersTitle: 'الأرقام', exNumbersDesc: 'تدرّب على كتابة الأرقام 0-9.',
+    exWordsTitle: 'كلمات شائعة', exWordsDesc: 'اكتب كلمات يومية قصيرة.',
+    exSentencesTitle: 'جمل', exSentencesDesc: 'اكتب جملاً كاملة لبناء القدرة على التحمل.',
+    tipText: 'نصيحة: الجلسات اليومية القصيرة (10-15 دقيقة) أكثر فعالية.',
+    tracePrompt: 'اكتب بعناية:', clearBtn: '↻ مسح', submitBtn: '✓ إرسال',
+    nextBtn: 'التالي →', finishBtn: 'إنهاء ✓', exitBtn: '← رجوع',
+    summaryTitle: 'اكتملت الجلسة', summarySubtitle: 'عمل رائع — إليك نتائجك',
+    progressTitle: 'تقدمك', exportBtn: '📋 تصدير للمعالج',
+    aboutTitle: 'حول ReWrite', settingsTitle: 'الإعدادات',
+    tabExercises: 'تمارين', tabProgress: 'التقدم', tabAbout: 'حول', tabSettings: 'إعدادات',
+    excellent:'ممتاز!',excellentMsg:'كتابة رائعة — استمر.',good:'جهد جيد',goodMsg:'شكل جيد — حاول الاقتراب أكثر من الدليل.',improving:'واصل التمرين',improvingMsg:'أنت تتقدم — كل محاولة مهمة.',early:'أحسنت المحاولة',earlyMsg:'التأهيل يحتاج وقتاً وصبراً.',
+    sumEncHigh:'عمل ممتاز اليوم.',sumEncMid:'جلسة جيدة.',sumEncLow:'كل جلسة مهمة.',sumEncEarly:'المحاولة هي الخطوة الأهم.',
+  },
+  zh: {
+    headerSubtitle: '书写康复',
+    exercisesTitle: '练习书写', exercisesSubtitle: '选择练习类型开始',
+    disclaimer: '<strong>仅为健康辅助工具。</strong>ReWrite支持书写康复训练，但不是医疗器械。请始终遵循治疗师的指导。',
+    exLettersTitle: '汉字练习', exLettersDesc: '练习基础汉字。注意笔画和结构。',
+    exNumbersTitle: '数字', exNumbersDesc: '练习书写数字0-9。',
+    exWordsTitle: '常用词语', exWordsDesc: '书写日常短词。',
+    exSentencesTitle: '句子', exSentencesDesc: '书写完整句子，锻炼耐力。',
+    tipText: '提示：每天短时练习（10-15分钟）比长时间偶尔练习更有效。',
+    tracePrompt: '请仔细临摹：', clearBtn: '↻ 清除', submitBtn: '✓ 提交',
+    nextBtn: '下一个 →', finishBtn: '完成 ✓', exitBtn: '← 返回',
+    summaryTitle: '练习完成', summarySubtitle: '做得好——以下是您的成绩',
+    progressTitle: '您的进度', exportBtn: '📋 导出给治疗师',
+    aboutTitle: '关于ReWrite', settingsTitle: '设置',
+    tabExercises: '练习', tabProgress: '进度', tabAbout: '关于', tabSettings: '设置',
+    excellent:'优秀！',excellentMsg:'书写漂亮——继续保持。',good:'不错',goodMsg:'形态良好——试着更贴近参考线。',improving:'继续练习',improvingMsg:'你在进步——每次练习都很重要。',early:'勇于尝试',earlyMsg:'康复需要时间和耐心。',
+    sumEncHigh:'今天表现出色。',sumEncMid:'不错的练习。',sumEncLow:'每次练习都很重要。',sumEncEarly:'坚持尝试就是最重要的一步。',
+  },
+  pl: {
+    headerSubtitle: 'Rehabilitacja pisma',
+    exercisesTitle: 'Ćwicz pisanie', exercisesSubtitle: 'Wybierz rodzaj ćwiczenia, aby rozpocząć',
+    disclaimer: '<strong>Tylko narzędzie wsparcia zdrowia.</strong> ReWrite wspiera rehabilitację pisma, ale nie jest urządzeniem medycznym. Zawsze stosuj się do zaleceń terapeuty.',
+    exLettersTitle: 'Pojedyncze litery', exLettersDesc: 'Ćwicz litery. Skup się na kształcie i proporcjach.',
+    exNumbersTitle: 'Cyfry', exNumbersDesc: 'Ćwicz pisanie cyfr 0-9.',
+    exWordsTitle: 'Popularne słowa', exWordsDesc: 'Pisz krótkie codzienne słowa.',
+    exSentencesTitle: 'Zdania', exSentencesDesc: 'Pisz pełne zdania dla wytrzymałości.',
+    tipText: 'Wskazówka: Krótkie codzienne sesje (10-15 min) są bardziej skuteczne.',
+    tracePrompt: 'Odwzoruj starannie:', clearBtn: '↻ Wyczyść', submitBtn: '✓ Zatwierdź',
+    nextBtn: 'Dalej →', finishBtn: 'Zakończ ✓', exitBtn: '← Powrót',
+    summaryTitle: 'Sesja zakończona', summarySubtitle: 'Świetna robota — oto Twoje wyniki',
+    progressTitle: 'Twoje postępy', exportBtn: '📋 Eksport dla terapeuty',
+    aboutTitle: 'O aplikacji ReWrite', settingsTitle: 'Ustawienia',
+    tabExercises: 'Ćwiczenia', tabProgress: 'Postępy', tabAbout: 'Info', tabSettings: 'Ustaw.',
+    excellent:'Doskonale!',excellentMsg:'Piękne pismo — tak trzymaj.',good:'Dobra próba',goodMsg:'Dobra forma — spróbuj trzymać się bliżej wzoru.',improving:'Ćwicz dalej',improvingMsg:'Robisz postępy — każda próba się liczy.',early:'Brawo za próbę',earlyMsg:'Rehabilitacja wymaga czasu i cierpliwości.',
+    sumEncHigh:'Doskonała praca dzisiaj.',sumEncMid:'Dobra sesja.',sumEncLow:'Każda sesja ma znaczenie.',sumEncEarly:'Samo próbowanie to najważniejszy krok.',
+  },
+};
+
+function setLanguage(lang) {
+  currentLang = lang;
+  document.getElementById('langSelect').value = lang;
+  document.getElementById('langOverlay').classList.add('hidden');
+  saveSetting('language', lang);
+  applyLanguage();
+}
+
+function applyLanguage() {
+  // RTL support for Arabic
+  document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+  const s = STRINGS[currentLang] || STRINGS.en;
+  const ids = ['headerSubtitle','exercisesTitle','exercisesSubtitle','exLettersTitle','exLettersDesc',
+    'exNumbersTitle','exNumbersDesc','exWordsTitle','exWordsDesc','exSentencesTitle','exSentencesDesc',
+    'tipText','tracePrompt','clearBtn','submitBtn','exitBtn','progressTitle','exportBtn',
+    'aboutTitle','settingsTitle','tabExercises','tabProgress','tabAbout','tabSettings'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && s[id]) el.textContent = s[id];
+  });
+  const disc = document.getElementById('disclaimer');
+  if (disc && s.disclaimer) disc.innerHTML = s.disclaimer;
+  const aboutDisc = document.getElementById('aboutDisclaimer');
+  if (aboutDisc) aboutDisc.innerHTML = s.disclaimer || STRINGS.en.disclaimer;
+}
+
+// ══════════════ TAB NAVIGATION ══════════════
+function switchTab(btn) {
+  // Hide exercise screen if showing
+  document.getElementById('exerciseActive').style.display = 'none';
+  document.getElementById('sessionSummary').style.display = 'none';
+
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const target = btn.dataset.tab;
+  document.getElementById(target).classList.add('active');
+  btn.classList.add('active');
+  if (target === 'panelProgress') refreshProgress();
+}
+
+// ══════════════ EXERCISE ENGINE ══════════════
+function setDifficulty(type, diff, btn) {
+  difficultyPerType[type] = diff;
+  saveSetting('difficultyPerType', JSON.parse(JSON.stringify(difficultyPerType)));
+  const group = btn.closest('.difficulty-toggle');
+  group.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function startExerciseType(type) {
+  currentType = type;
+  currentDifficulty = difficultyPerType[type] || 'easy';
+  const ex = getExercises();
+  const pool = ex[type][currentDifficulty] || ex[type].easy;
+  const len = settings.sessionLength || 8;
+  sessionExercises = shuffle([...pool]).slice(0, Math.min(len, pool.length));
+  currentIndex = 0;
+  scores = [];
+  showExerciseScreen();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+  return arr;
+}
+
+function showExerciseScreen() {
+  // Hide panels, show exercise
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('sessionSummary').style.display = 'none';
+  const screen = document.getElementById('exerciseActive');
+  screen.style.display = 'block';
+  screen.classList.add('active');
+
+  loadExercise();
+}
+
+function loadExercise() {
+  const s = STRINGS[currentLang] || STRINGS.en;
+  const exercise = sessionExercises[currentIndex];
+  const total = sessionExercises.length;
+
+  document.getElementById('exerciseCounter').textContent = `${currentIndex + 1} / ${total}`;
+  document.getElementById('exerciseType').textContent = currentType.charAt(0).toUpperCase() + currentType.slice(1);
+  document.getElementById('progressFill').style.width = `${(currentIndex / total) * 100}%`;
+
+  // Target display
+  const targetEl = document.getElementById('targetChar');
+  targetEl.textContent = exercise;
+  const isCJKLang = currentLang === 'ja' || currentLang === 'ko' || currentLang === 'zh';
+  const isSentence = currentType === 'sentences';
+  const isWord = currentType === 'words';
+  // CJK characters need slightly larger display in the target preview
+  targetEl.style.fontSize = isSentence ? (isCJKLang ? '16px' : '18px') : isWord ? (isCJKLang ? '28px' : '32px') : (isCJKLang ? '44px' : '48px');
+
+  document.getElementById('targetHint').textContent = getHints()[currentType] || '';
+  document.getElementById('tracePrompt').textContent = s.tracePrompt || 'Trace this carefully:';
+
+  // Reset canvas
+  setupCanvas(exercise);
+  document.getElementById('scoreFeedback').style.display = 'none';
+  document.getElementById('drawingControls').style.display = 'block';
+  document.getElementById('submitBtn').disabled = true;
+  const hint = document.getElementById('canvasHint');
+  hint.style.opacity = '1';
+  // Auto-hide hint after 3 seconds so it doesn't interfere with drawing
+  clearTimeout(hint._hideTimer);
+  hint._hideTimer = setTimeout(() => { hint.style.opacity = '0'; }, 3000);
+  hasStrokes = false;
+  strokes = [];
+  startTime = Date.now();
+}
+
+// Offscreen canvas for character-only scoring (no ruled lines)
+let charCanvas = null;
+let charCtx = null;
+
+function setupCanvas(text) {
+  const container = document.getElementById('canvasContainer');
+  const guideC = document.getElementById('guideCanvas');
+  const drawC = document.getElementById('drawCanvas');
+
+  // Match canvas to container size × devicePixelRatio for crisp rendering
+  const dpr = window.devicePixelRatio || 1;
+  const rect = container.getBoundingClientRect();
+  const cssW = rect.width || 360;
+  const cssH = Math.round(cssW * 0.4); // 2.5:1 aspect ratio
+  const w = Math.round(cssW * dpr);
+  const h = Math.round(cssH * dpr);
+
+  guideC.width = w; guideC.height = h;
+  drawC.width = w; drawC.height = h;
+  guideC.style.width = cssW + 'px'; guideC.style.height = cssH + 'px';
+  drawC.style.width = cssW + 'px'; drawC.style.height = cssH + 'px';
+
+  // Guide canvas (visual: ruled lines + character)
+  guideCtx = guideC.getContext('2d');
+  guideCtx.clearRect(0, 0, w, h);
+  guideCtx.scale(dpr, dpr); // scale so we draw in CSS pixels
+
+  // All drawing below uses CSS pixel coordinates (dpr scaling handled above)
+  // Ruled lines (visual only — not used for scoring)
+  guideCtx.strokeStyle = 'rgba(58, 122, 90, 0.15)';
+  guideCtx.lineWidth = 1;
+  [0, cssH * 0.33, cssH * 0.66, cssH - 1].forEach(y => {
+    guideCtx.beginPath(); guideCtx.moveTo(0, y); guideCtx.lineTo(cssW, y); guideCtx.stroke();
+  });
+  guideCtx.strokeStyle = 'rgba(58, 122, 90, 0.35)';
+  guideCtx.lineWidth = 2;
+  guideCtx.beginPath(); guideCtx.moveTo(0, cssH * 0.75); guideCtx.lineTo(cssW, cssH * 0.75); guideCtx.stroke();
+
+  // Guide text — CJK-aware font and sizing
+  const isCJK = currentLang === 'ja' || currentLang === 'ko' || currentLang === 'zh';
+  const isSentence = currentType === 'sentences';
+  const isWord = currentType === 'words';
+  const charWidthFactor = isCJK ? (isSentence ? 0.85 : isWord ? 0.95 : 1.0) : (isSentence ? 0.55 : isWord ? 0.65 : 1.0);
+  const maxHeightFactor = isCJK ? (isSentence ? 0.35 : isWord ? 0.5 : 0.6) : (isSentence ? 0.3 : isWord ? 0.45 : 0.55);
+  const fontSize = isSentence || isWord ? Math.min(cssH * maxHeightFactor, cssW / (text.length * charWidthFactor)) : cssH * maxHeightFactor;
+  const isArabic = currentLang === 'ar';
+  const isDevanagari = currentLang === 'hi';
+  const fontStack = isCJK
+    ? `${Math.round(fontSize)}px 'Hiragino Sans', 'Noto Sans CJK', 'Noto Sans JP', 'Noto Sans KR', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Malgun Gothic', 'Yu Gothic', 'Meiryo', sans-serif`
+    : isArabic
+    ? `${Math.round(fontSize)}px 'Geeza Pro', 'Noto Sans Arabic', 'Simplified Arabic', 'Tahoma', sans-serif`
+    : isDevanagari
+    ? `${Math.round(fontSize)}px 'Noto Sans Devanagari', 'Mangal', 'Nirmala UI', 'Devanagari Sangam MN', sans-serif`
+    : `${Math.round(fontSize)}px 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif`;
+  guideCtx.font = fontStack;
+  guideCtx.textAlign = 'center';
+  if (isArabic) guideCtx.direction = 'rtl';
+  else guideCtx.direction = 'ltr';
+  if (isCJK || isArabic || isDevanagari) {
+    guideCtx.textBaseline = 'middle';
+    guideCtx.fillStyle = 'rgba(58, 122, 90, 0.2)';
+    guideCtx.fillText(text, cssW / 2, cssH * 0.55);
+  } else {
+    guideCtx.textBaseline = 'alphabetic';
+    guideCtx.fillStyle = 'rgba(58, 122, 90, 0.2)';
+    guideCtx.fillText(text, cssW / 2, cssH * 0.75);
+  }
+
+  // Offscreen canvas: character ONLY (no ruled lines) for accurate scoring
+  charCanvas = document.createElement('canvas');
+  charCanvas.width = w; charCanvas.height = h;
+  charCtx = charCanvas.getContext('2d');
+  charCtx.scale(dpr, dpr);
+  charCtx.font = fontStack;
+  charCtx.textAlign = 'center';
+  if (isArabic) charCtx.direction = 'rtl';
+  else charCtx.direction = 'ltr';
+  charCtx.fillStyle = 'rgba(58, 122, 90, 0.8)'; // stronger alpha for scoring
+  if (isCJK || isArabic || isDevanagari) {
+    charCtx.textBaseline = 'middle';
+    charCtx.fillText(text, cssW / 2, cssH * 0.55);
+  } else {
+    charCtx.textBaseline = 'alphabetic';
+    charCtx.fillText(text, cssW / 2, cssH * 0.75);
+  }
+
+  // Draw canvas
+  drawCtx = drawC.getContext('2d');
+  drawCtx.clearRect(0, 0, w, h);
+  drawCtx.scale(dpr, dpr);
+  drawCtx.lineCap = 'round';
+  drawCtx.lineJoin = 'round';
+  drawCtx.lineWidth = settings.penWidth || 5;
+  drawCtx.strokeStyle = '#2a6a4a';
+
+  // Store dpr and cssW/cssH on canvas for coordinate transforms
+  drawC._dpr = dpr; drawC._cssW = cssW; drawC._cssH = cssH;
+
+  // Events
+  drawC.onmousedown = drawC.ontouchstart = startDraw;
+  drawC.onmousemove = drawC.ontouchmove = draw;
+  drawC.onmouseup = drawC.onmouseleave = drawC.ontouchend = endDraw;
+}
+
+function getPos(e, canvas) {
+  const rect = canvas.getBoundingClientRect();
+  // Return CSS pixel coordinates (context is already scaled by dpr)
+  if (e.touches) {
+    return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+  }
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+function startDraw(e) {
+  e.preventDefault();
+  const canvas = document.getElementById('drawCanvas');
+  const pos = getPos(e, canvas);
+  isDrawing = true;
+  hasStrokes = true;
+  currentStroke = [pos];
+  drawCtx.beginPath();
+  drawCtx.moveTo(pos.x, pos.y);
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('canvasHint').style.opacity = '0';
+}
+
+function draw(e) {
+  if (!isDrawing) return;
+  e.preventDefault();
+  const canvas = document.getElementById('drawCanvas');
+  const pos = getPos(e, canvas);
+  currentStroke.push(pos);
+  drawCtx.lineTo(pos.x, pos.y);
+  drawCtx.stroke();
+}
+
+function endDraw() {
+  if (!isDrawing) return;
+  isDrawing = false;
+  if (currentStroke.length > 1) strokes.push([...currentStroke]);
+  currentStroke = [];
+}
+
+function clearCanvas() {
+  const canvas = document.getElementById('drawCanvas');
+  const dpr = canvas._dpr || 1;
+  drawCtx.save();
+  drawCtx.setTransform(1, 0, 0, 1, 0, 0);
+  drawCtx.clearRect(0, 0, canvas.width, canvas.height);
+  drawCtx.restore();
+  strokes = [];
+  hasStrokes = false;
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('canvasHint').style.opacity = '1';
+}
+
+// ══════════════ SCORING ══════════════
+function submitAttempt() {
+  if (!hasStrokes) return;
+  const score = calculateScore();
+  const timeTaken = Math.round((Date.now() - startTime) / 1000);
+  scores.push({ score, time: timeTaken, exercise: sessionExercises[currentIndex], type: currentType });
+
+  // Show feedback
+  showScoreFeedback(score);
+}
+
+function calculateScore() {
+  const w = charCanvas.width;
+  const h = charCanvas.height;
+  const charData = charCtx.getImageData(0, 0, w, h).data;
+  drawCtx.save();
+  drawCtx.setTransform(1, 0, 0, 1, 0, 0);
+  const drawData = drawCtx.getImageData(0, 0, w, h).data;
+  drawCtx.restore();
+
+  // Build distance field — how far is each pixel from the nearest guide pixel?
+  // Uses two-pass approximation (left-right, then right-left) for speed
+  const RADIUS = 10;
+  const dist = new Float32Array(w * h).fill(RADIUS + 1);
+  // Mark guide pixels as distance 0
+  for (let i = 0; i < charData.length; i += 4) {
+    if (charData[i + 3] > 30) dist[i >> 2] = 0;
+  }
+  // Forward pass
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = y * w + x;
+      if (x > 0) dist[i] = Math.min(dist[i], dist[i - 1] + 1);
+      if (y > 0) dist[i] = Math.min(dist[i], dist[(y - 1) * w + x] + 1);
+    }
+  }
+  // Backward pass
+  for (let y = h - 1; y >= 0; y--) {
+    for (let x = w - 1; x >= 0; x--) {
+      const i = y * w + x;
+      if (x < w - 1) dist[i] = Math.min(dist[i], dist[i + 1] + 1);
+      if (y < h - 1) dist[i] = Math.min(dist[i], dist[(y + 1) * w + x] + 1);
+    }
+  }
+
+  // Score every drawn pixel based on distance to nearest guide pixel
+  // On-guide = full credit, within RADIUS = partial credit that fades with distance
+  let totalCredit = 0, drawnPx = 0;
+  for (let i = 0; i < w * h; i++) {
+    if (drawData[i * 4 + 3] > 15) {
+      drawnPx++;
+      const d = dist[i];
+      if (d <= 0) totalCredit += 1.0;
+      else if (d <= RADIUS) totalCredit += 1.0 - (d / RADIUS) * 0.7; // fades from 1.0 to 0.3
+      // else: too far from guide, no credit
+    }
+  }
+
+  // Also check guide coverage — what fraction of the guide was traced nearby?
+  let charPx = 0, coveredPx = 0;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = y * w + x;
+      if (charData[i * 4 + 3] > 30) {
+        charPx++;
+        // Check if any drawn pixel within RADIUS
+        let near = false;
+        for (let dy = -RADIUS; dy <= RADIUS && !near; dy++) {
+          for (let dx = -RADIUS; dx <= RADIUS && !near; dx++) {
+            const nx = x + dx, ny = y + dy;
+            if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+              if (drawData[(ny * w + nx) * 4 + 3] > 15 && Math.abs(dx) + Math.abs(dy) <= RADIUS) near = true;
+            }
+          }
+        }
+        if (near) coveredPx++;
+      }
+    }
+  }
+
+  const precision = drawnPx > 0 ? totalCredit / drawnPx : 0; // how close drawn pixels are to guide
+  const recall = charPx > 0 ? coveredPx / charPx : 0; // how much of the guide was covered
+  const coverage = Math.min((precision * 0.5 + recall * 0.5), 1);
+
+  // Smoothness — rewards controlled, steady strokes (pen direction consistency)
+  let totalVar = 0, pts = 0;
+  for (const s of strokes) {
+    for (let i = 1; i < s.length - 1; i++) {
+      const a1 = Math.atan2(s[i].y - s[i-1].y, s[i].x - s[i-1].x);
+      const a2 = Math.atan2(s[i+1].y - s[i].y, s[i+1].x - s[i].x);
+      totalVar += Math.min(Math.abs(a2 - a1), Math.PI);
+      pts++;
+    }
+  }
+  const smoothness = pts > 0 ? Math.max(0, 1 - (totalVar / pts) / (Math.PI * 0.5)) : 0.5;
+
+  // Weighted: 50% coverage (precision+recall), 50% smoothness
+  let score = (coverage * 0.5 + smoothness * 0.5) * 100;
+  // Floor: any genuine attempt scores at least 25%
+  if (hasStrokes && strokes.length > 0) score = Math.max(score, 25);
+  return Math.min(100, Math.round(score));
+}
+
+function showScoreFeedback(score) {
+  const s = STRINGS[currentLang] || STRINGS.en;
+  document.getElementById('drawingControls').style.display = 'none';
+  document.getElementById('scoreFeedback').style.display = 'block';
+
+  // Ring animation
+  const offset = 314.16 - (score / 100) * 314.16;
+  const ring = document.getElementById('scoreRing');
+  ring.style.stroke = score >= 80 ? 'var(--success)' : score >= 50 ? 'var(--warning)' : 'var(--text3)';
+  setTimeout(() => { ring.style.strokeDashoffset = offset; }, 50);
+
+  document.getElementById('scoreValue').textContent = score + '%';
+
+  // Label + message
+  let label, msg;
+  if (score >= 80) { label = s.excellent; msg = s.excellentMsg; }
+  else if (score >= 60) { label = s.good; msg = s.goodMsg; }
+  else if (score >= 40) { label = s.improving; msg = s.improvingMsg; }
+  else { label = s.early; msg = s.earlyMsg; }
+  document.getElementById('scoreLabel').textContent = label;
+  document.getElementById('scoreMessage').textContent = msg;
+
+  // Benchmark
+  const benchDiv = document.getElementById('benchmarkDisplay');
+  const band = score >= SCORE_BANDS.green ? 'green' : score >= SCORE_BANDS.amber ? 'amber' : 'grey';
+  const bandLabel = score >= SCORE_BANDS.green ? 'Strong' : score >= SCORE_BANDS.amber ? 'Developing' : 'Early stage';
+  benchDiv.innerHTML = `<div class="benchmark" style="justify-content:center"><div class="benchmark-dot bench-${band}"></div> ${bandLabel} (${score}%)</div>`;
+
+  // Next/Finish button
+  const isLast = currentIndex + 1 >= sessionExercises.length;
+  const nextBtnEl = document.getElementById('nextBtn');
+  nextBtnEl.textContent = isLast ? (s.finishBtn || 'Finish Session ✓') : (s.nextBtn || 'Next Exercise →');
+}
+
+function nextExercise() {
+  // Reset ring
+  document.getElementById('scoreRing').style.strokeDashoffset = '314.16';
+
+  if (currentIndex + 1 >= sessionExercises.length) {
+    endSession();
+  } else {
+    currentIndex++;
+    loadExercise();
+  }
+}
+
+async function endSession() {
+  const total = scores.length;
+  const avg = total > 0 ? Math.round(scores.reduce((a, b) => a + b.score, 0) / total) : 0;
+  const best = total > 0 ? Math.max(...scores.map(s => s.score)) : 0;
+
+  // Save to IndexedDB
+  await saveSession({
+    date: new Date().toISOString(),
+    type: currentType,
+    exercises: scores,
+    averageScore: avg,
+    bestScore: best,
+    count: total
+  });
+
+  showSessionSummary(avg, best, total);
+}
+
+function showSessionSummary(avg, best, total) {
+  const s = STRINGS[currentLang] || STRINGS.en;
+  document.getElementById('exerciseActive').style.display = 'none';
+  const summary = document.getElementById('sessionSummary');
+  summary.style.display = 'block';
+
+  document.getElementById('summaryTitle').textContent = s.summaryTitle || 'Session Complete';
+  document.getElementById('summarySubtitle').textContent = s.summarySubtitle || 'Great work';
+  document.getElementById('summaryScore').textContent = avg + '%';
+  document.getElementById('sumExCount').textContent = total;
+  document.getElementById('sumBest').textContent = best + '%';
+
+  // Ring
+  const offset = 314.16 - (avg / 100) * 314.16;
+  setTimeout(() => { document.getElementById('summaryRing').style.strokeDashoffset = offset; }, 100);
+
+  // Breakdown
+  const bd = document.getElementById('summaryBreakdown');
+  let html = '<p style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Exercise Breakdown</p>';
+  scores.forEach((s, i) => {
+    const color = s.score >= 80 ? 'var(--success)' : s.score >= 50 ? 'var(--warning)' : 'var(--text3)';
+    html += `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="width:22px;height:22px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text3);flex-shrink:0">${i+1}</span>
+      <span style="flex:1;font-size:13px;font-weight:500">${s.exercise}</span>
+      <span style="font-weight:700;font-size:14px;color:${color}">${s.score}%</span>
+    </div>`;
+  });
+  bd.innerHTML = html;
+
+  // Encouragement
+  const enc = avg >= 80 ? (STRINGS[currentLang]?.sumEncHigh || s.sumEncHigh) :
+              avg >= 60 ? (STRINGS[currentLang]?.sumEncMid || s.sumEncMid) :
+              avg >= 40 ? (STRINGS[currentLang]?.sumEncLow || s.sumEncLow) :
+              (STRINGS[currentLang]?.sumEncEarly || s.sumEncEarly);
+  document.getElementById('summaryEncouragement').textContent = enc;
+}
+
+function exitExercise() {
+  document.getElementById('exerciseActive').style.display = 'none';
+  document.getElementById('sessionSummary').style.display = 'none';
+  // Reset ring offsets
+  document.getElementById('scoreRing').style.strokeDashoffset = '314.16';
+  document.getElementById('summaryRing').style.strokeDashoffset = '314.16';
+  // Show exercises tab
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panelExercises').classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('[data-tab="panelExercises"]').classList.add('active');
+}
+
+// ══════════════ PROGRESS ══════════════
+async function refreshProgress() {
+  const sessions = await getAllSessions();
+
+  // Stats
+  const total = sessions.length;
+  const totalEx = sessions.reduce((a, s) => a + (s.count || 0), 0);
+  const allScores = sessions.map(s => s.averageScore || 0);
+  const avg = allScores.length > 0 ? Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length) : 0;
+  const best = allScores.length > 0 ? Math.max(...allScores) : 0;
+
+  document.getElementById('statSessions').textContent = total;
+  document.getElementById('statExercises').textContent = totalEx;
+  document.getElementById('statAvgScore').textContent = avg + '%';
+  document.getElementById('statBestScore').textContent = best + '%';
+
+  // Per-exercise breakdown
+  const byType = {};
+  sessions.forEach(s => {
+    const t = s.type || 'letters';
+    if (!byType[t]) byType[t] = { scores: [], count: 0 };
+    (s.exercises || []).forEach(ex => { byType[t].scores.push(ex.score); byType[t].count++; });
+  });
+
+  const peDiv = document.getElementById('perExerciseBreakdown');
+  const colours = { letters: '#3a7a5a', numbers: '#3a5a9a', words: '#8a6a3a', sentences: '#7a3a7a' };
+  const icons = { letters: 'Aa', numbers: '12', words: 'cat', sentences: '...' };
+  const bgColours = { letters: '#e8f5ec', numbers: '#e8f0fa', words: '#faf0e8', sentences: '#f5e8f5' };
+  let peHtml = '';
+  for (const [type, data] of Object.entries(byType)) {
+    const avgS = Math.round(data.scores.reduce((a, b) => a + b, 0) / data.scores.length);
+    const bestS = Math.max(...data.scores);
+    const band = avgS >= 80 ? 'var(--success)' : avgS >= 50 ? 'var(--warning)' : 'var(--text3)';
+    peHtml += `<div class="exercise-stat-row">
+      <div class="exercise-stat-icon" style="background:${bgColours[type]||'#eee'};color:${colours[type]||'#666'}">${icons[type]||'?'}</div>
+      <div class="exercise-stat-info">
+        <div class="exercise-stat-name">${type.charAt(0).toUpperCase()+type.slice(1)}</div>
+        <div class="exercise-stat-detail">${data.count} exercises · Avg ${avgS}% · Best ${bestS}%</div>
+        <div class="bar-container"><div class="bar-fill" style="width:${avgS}%;background:${band}"></div></div>
+      </div>
+    </div>`;
+  }
+  peDiv.innerHTML = peHtml || '<p style="font-size:12px;color:var(--text3);padding:8px 0">No exercises recorded yet.</p>';
+
+  // Trend chart
+  renderTrendChart(sessions);
+
+  // Session log
+  const logDiv = document.getElementById('sessionLog');
+  if (sessions.length === 0) {
+    logDiv.innerHTML = '<p style="font-size:12px;color:var(--text3);padding:8px 0">No sessions yet — start your first one from the Exercises tab.</p>';
+  } else {
+    let logHtml = '';
+    [...sessions].reverse().slice(0, 20).forEach(s => {
+      const d = new Date(s.date);
+      const dateStr = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+      const color = s.averageScore >= 80 ? 'var(--success)' : s.averageScore >= 50 ? 'var(--warning)' : 'var(--text3)';
+      logHtml += `<div class="session-row">
+        <div>
+          <div style="font-weight:600">${(s.type||'letters').charAt(0).toUpperCase()+(s.type||'letters').slice(1)}</div>
+          <div class="session-meta">${dateStr} · ${s.count||0} exercises</div>
+        </div>
+        <div class="session-score" style="color:${color}">${s.averageScore||0}%</div>
+      </div>`;
+    });
+    logDiv.innerHTML = logHtml;
+  }
+}
+
+function exportForTherapist() {
+  window.print();
+}
+
+function renderTrendChart(sessions) {
+  const canvas = document.getElementById('trendChart');
+  const container = canvas.parentElement;
+  const chartCard = document.getElementById('trendChartCard');
+  if (sessions.length < 2) {
+    chartCard.style.display = '';
+    const ctx2 = canvas.getContext('2d');
+    ctx2.clearRect(0, 0, canvas.width, canvas.height);
+    document.getElementById('trendChartHelp').textContent = (STRINGS[currentLang] || {}).trendEmpty || 'Complete at least two sessions to see your progress trend.';
+    return;
+  }
+  chartCard.style.display = '';
+  document.getElementById('trendChartHelp').textContent = (STRINGS[currentLang] || {}).trendHelp || 'Average score per session over time';
+
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = container.clientWidth;
+  const cssH = container.clientHeight || 180;
+  canvas.width = cssW * dpr;
+  canvas.height = cssH * dpr;
+  canvas.style.width = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const data = sessions.map(s => s.averageScore || 0);
+  const labels = sessions.map(s => {
+    const d = new Date(s.date);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  });
+  const maxPts = Math.min(data.length, 30);
+  const pts = data.slice(-maxPts);
+  const lbls = labels.slice(-maxPts);
+
+  const padL = 36, padR = 12, padT = 12, padB = 28;
+  const chartW = cssW - padL - padR;
+  const chartH = cssH - padT - padB;
+
+  ctx.clearRect(0, 0, cssW, cssH);
+
+  // Y-axis gridlines
+  ctx.strokeStyle = 'rgba(58,122,90,0.1)';
+  ctx.lineWidth = 1;
+  ctx.font = '10px sans-serif';
+  ctx.fillStyle = '#999';
+  ctx.textAlign = 'right';
+  [0, 25, 50, 75, 100].forEach(v => {
+    const y = padT + chartH - (v / 100) * chartH;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(cssW - padR, y); ctx.stroke();
+    ctx.fillText(v + '%', padL - 4, y + 3);
+  });
+
+  // Benchmark reference lines: 80% (Strong) and 50% (Developing)
+  ctx.setLineDash([4, 4]);
+  // 80% line — green
+  ctx.strokeStyle = 'rgba(58,122,90,0.45)';
+  ctx.lineWidth = 1.5;
+  const y80 = padT + chartH - (80 / 100) * chartH;
+  ctx.beginPath(); ctx.moveTo(padL, y80); ctx.lineTo(cssW - padR, y80); ctx.stroke();
+  ctx.font = '9px sans-serif'; ctx.fillStyle = 'rgba(58,122,90,0.6)'; ctx.textAlign = 'left';
+  ctx.fillText('Strong', cssW - padR - 32, y80 - 4);
+  // 50% line — amber
+  ctx.strokeStyle = 'rgba(180,83,9,0.4)';
+  const y50 = padT + chartH - (50 / 100) * chartH;
+  ctx.beginPath(); ctx.moveTo(padL, y50); ctx.lineTo(cssW - padR, y50); ctx.stroke();
+  ctx.fillStyle = 'rgba(180,83,9,0.55)';
+  ctx.fillText('Developing', cssW - padR - 54, y50 - 4);
+  ctx.setLineDash([]);
+
+  // Data line
+  if (pts.length > 1) {
+    const step = chartW / (pts.length - 1);
+    ctx.strokeStyle = '#3a7a5a';
+    ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    pts.forEach((v, i) => {
+      const x = padL + i * step;
+      const y = padT + chartH - (v / 100) * chartH;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Fill under line
+    ctx.lineTo(padL + (pts.length - 1) * step, padT + chartH);
+    ctx.lineTo(padL, padT + chartH);
+    ctx.closePath();
+    const grad = ctx.createLinearGradient(0, padT, 0, padT + chartH);
+    grad.addColorStop(0, 'rgba(58,122,90,0.15)');
+    grad.addColorStop(1, 'rgba(58,122,90,0.02)');
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Dots
+    pts.forEach((v, i) => {
+      const x = padL + i * step;
+      const y = padT + chartH - (v / 100) * chartH;
+      ctx.beginPath();
+      ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = v >= 80 ? '#3a7a5a' : v >= 50 ? '#b45309' : '#999';
+      ctx.fill();
+    });
+
+    // X labels (max ~8)
+    ctx.fillStyle = '#999';
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'center';
+    const labelStep = Math.max(1, Math.floor(pts.length / 8));
+    pts.forEach((_, i) => {
+      if (i % labelStep === 0 || i === pts.length - 1) {
+        ctx.fillText(lbls[i], padL + i * step, cssH - 4);
+      }
+    });
+  }
+}
+
+function confirmReset() {
+  if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+    clearAllSessions().then(() => refreshProgress());
+  }
+}
+
+// ══════════════ INIT ══════════════
+async function init() {
+  await openDB();
+  await loadSettings();
+
+  // Language
+  if (settings.language) {
+    currentLang = settings.language;
+    document.getElementById('langSelect').value = currentLang;
+    document.getElementById('langOverlay').classList.add('hidden');
+    applyLanguage();
+  }
+
+  // Lang select in header
+  document.getElementById('langSelect').onchange = function() {
+    setLanguage(this.value);
+  };
+
+  // Register service worker for offline caching
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+    // Listen for SW updates and auto-refresh
+    navigator.serviceWorker.addEventListener('message', e => {
+      if (e.data && e.data.type === 'SW_UPDATED') location.reload();
+    });
+  }
+}
+
+init();
+</script>
+</body>
+</html>
