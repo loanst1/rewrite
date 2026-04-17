@@ -283,6 +283,9 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
     <button class="lang-btn" onclick="setLanguage('ar')" dir="rtl"><span class="native">العربية</span><span class="english">Arabic</span></button>
     <button class="lang-btn" onclick="setLanguage('zh')"><span class="native">中文</span><span class="english">Chinese</span></button>
     <button class="lang-btn" onclick="setLanguage('pl')"><span class="native">Polski</span><span class="english">Polish</span></button>
+    <button class="lang-btn" onclick="setLanguage('es_mx')"><span class="native">Español (América)</span><span class="english">Latin American Spanish</span></button>
+    <button class="lang-btn" onclick="setLanguage('pt_br')"><span class="native">Português (Brasil)</span><span class="english">Brazilian Portuguese</span></button>
+    <button class="lang-btn" onclick="setLanguage('fr_ca')"><span class="native">Français (Canada)</span><span class="english">Canadian French</span></button>
   </div>
 </div>
 
@@ -294,7 +297,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   </h1>
   <div class="header-right">
     <select id="langSelect" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:4px 8px;font-size:12px;cursor:pointer" aria-label="Language">
-      <option value="en">EN</option><option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option><option value="it">IT</option><option value="pt">PT</option><option value="cy">CY</option><option value="ja">JA</option><option value="ko">KO</option><option value="hi">HI</option><option value="ar">AR</option><option value="zh">ZH</option><option value="pl">PL</option>
+      <option value="en">EN</option><option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option><option value="it">IT</option><option value="pt">PT</option><option value="cy">CY</option><option value="ja">JA</option><option value="ko">KO</option><option value="hi">HI</option><option value="ar">AR</option><option value="zh">ZH</option><option value="pl">PL</option><option value="es_mx">ES-MX</option><option value="pt_br">PT-BR</option><option value="fr_ca">FR-CA</option>
     </select>
   </div>
 </header>
@@ -705,6 +708,36 @@ const EXERCISES_LANG = {
       easy: ['Ja to mogę.','Krok po kroku.','Każdy dzień lepszy.','Spróbuj jeszcze raz.','Jestem silny.','Ćwicz codziennie.','Brawo.'],
       medium: ['Każdego dnia jest trochę lepiej.','Ćwiczenie daje postęp.','Każda litera to małe zwycięstwo.','Powoli ale do przodu.','Nigdy nie trać nadziei.']
     }
+  },
+  es_mx: {
+    words: {
+      easy: ['casa','agua','mano','ojo','sol','luna','gato','perro','niño','día','luz','flor','vida','pan','amor','bien','hoy'],
+      medium: ['hospital','ejercicio','familia','amigo','fuerza','trabajo','corazón','camino','esperanza','progreso','salud','valentía','paciencia','esfuerzo','victoria','confianza','futuro','alegría','montaña','escritura']
+    },
+    sentences: {
+      easy: ['Yo puedo.','Paso a paso.','Cada día mejor.','Inténtalo.','Soy fuerte.','Practica hoy.','¡Bien hecho!'],
+      medium: ['Cada día estoy un poco mejor.','La práctica hace el progreso.','Cada letra es una pequeña victoria.','Despacio pero hacia adelante.','Nunca pierdas la esperanza.']
+    }
+  },
+  pt_br: {
+    words: {
+      easy: ['casa','água','mão','olho','sol','lua','gato','cão','dia','luz','flor','vida','pão','amor','bem','céu','paz'],
+      medium: ['exercício','saúde','melhora','família','amigo','alegria','força','coragem','paciência','tentativa','sucesso','confiança','progresso','tratamento','esperança','vida','paz','sorriso','manhã','liberdade']
+    },
+    sentences: {
+      easy: ['Eu consigo.','Passo a passo.','Cada dia melhor.','Tente de novo.','Eu sou forte.','Pratique hoje.','Muito bem!'],
+      medium: ['Cada dia estou um pouco melhor.','A prática traz progresso.','Cada letra é uma pequena vitória.','Devagar, mas em frente.','Nunca perca a esperança.']
+    }
+  },
+  fr_ca: {
+    words: {
+      easy: ['chat','eau','main','jour','nuit','soleil','lune','fleur','coeur','arbre','ciel','pain','amour','paix','bien','vie','ami'],
+      medium: ['exercice','santé','progrès','famille','courage','patience','effort','réussite','confiance','espoir','bonheur','pratique','écriture','victoire','force','lumière','sourire','chemin','liberté','avenir']
+    },
+    sentences: {
+      easy: ['Je suis capable.','Un pas à la fois.','Chaque jour est meilleur.','Essaie encore.','Je suis fort.','Pratique chaque jour.','Bravo!'],
+      medium: ['Chaque jour, je m\'améliore un peu.','La pratique mène au progrès.','Chaque lettre est une petite victoire.','Doucement, mais sûrement.','N\'abandonne jamais l\'espoir.']
+    }
   }
 };
 
@@ -734,7 +767,10 @@ const HINTS_LANG = {
   hi: { letters: 'आकार और अनुपात पर ध्यान दें', words: 'हर अक्षर को जोड़कर लिखें', sentences: 'धीरे-धीरे — सटीकता ज़रूरी है' },
   ar: { letters: 'ركّز على شكل وحجم الحروف', words: 'اربط كل حرف بسلاسة', sentences: 'خذ وقتك — الدقة أهم من السرعة' },
   zh: { letters: '注意笔画的形状和平衡', words: '一笔一画认真写', sentences: '慢慢来——准确性最重要' },
-  pl: { letters: 'Skup się na kształcie i proporcjach', words: 'Łącz litery płynnie', sentences: 'Nie spiesz się — liczy się dokładność' }
+  pl: { letters: 'Skup się na kształcie i proporcjach', words: 'Łącz litery płynnie', sentences: 'Nie spiesz się — liczy się dokładność' },
+  es_mx: { letters: 'Concéntrate en la forma y las proporciones', words: 'Conecta cada letra con fluidez', sentences: 'Tómate tu tiempo — la precisión es lo que cuenta' },
+  pt_br: { letters: 'Foque na forma e nas proporções', words: 'Conecte cada letra com suavidade', sentences: 'Vá com calma — precisão importa mais que velocidade' },
+  fr_ca: { letters: 'Concentre-toi sur la forme et les proportions', words: 'Relie chaque lettre en douceur', sentences: 'Prends ton temps — la précision compte plus que la vitesse' }
 };
 function getHints() {
   const lh = HINTS_LANG[currentLang];
@@ -1132,6 +1168,60 @@ const STRINGS = {
     tabExercises: 'Ćwiczenia', tabProgress: 'Postępy', tabAbout: 'Info', tabSettings: 'Ustaw.',
     excellent:'Doskonale!',excellentMsg:'Piękne pismo — tak trzymaj.',good:'Dobra próba',goodMsg:'Dobra forma — spróbuj trzymać się bliżej wzoru.',improving:'Ćwicz dalej',improvingMsg:'Robisz postępy — każda próba się liczy.',early:'Brawo za próbę',earlyMsg:'Rehabilitacja wymaga czasu i cierpliwości.',
     sumEncHigh:'Doskonała praca dzisiaj.',sumEncMid:'Dobra sesja.',sumEncLow:'Każda sesja ma znaczenie.',sumEncEarly:'Samo próbowanie to najważniejszy krok.',
+  },
+  es_mx: {
+    headerSubtitle: 'Rehabilitación de escritura',
+    exercisesTitle: 'Practicar escritura', exercisesSubtitle: 'Elige un tipo de ejercicio para comenzar',
+    disclaimer: '<strong>Solo herramienta de bienestar.</strong> ReWrite apoya la rehabilitación de la escritura pero no es un dispositivo médico. Sigue siempre las indicaciones de tu terapeuta ocupacional.',
+    exLettersTitle: 'Letras individuales', exLettersDesc: 'Traza letras mayúsculas y minúsculas. Céntrate en la forma y el tamaño.',
+    exNumbersTitle: 'Números', exNumbersDesc: 'Practica escribir los dígitos 0–9.',
+    exWordsTitle: 'Palabras comunes', exWordsDesc: 'Traza palabras cortas del día a día.',
+    exSentencesTitle: 'Frases', exSentencesDesc: 'Escribe frases completas para ganar resistencia.',
+    tipText: 'Consejo: Las sesiones cortas diarias (10–15 min) son más efectivas.',
+    tracePrompt: 'Traza esto con cuidado:', clearBtn: '↻ Borrar', submitBtn: '✓ Enviar',
+    nextBtn: 'Siguiente →', finishBtn: 'Finalizar ✓', exitBtn: '← Volver',
+    summaryTitle: 'Sesión completada', summarySubtitle: 'Buen trabajo — así te fue',
+    progressTitle: 'Tu progreso', exportBtn: '📋 Exportar para terapeuta',
+    aboutTitle: 'Acerca de ReWrite', settingsTitle: 'Ajustes',
+    tabExercises: 'Ejercicios', tabProgress: 'Progreso', tabAbout: 'Info', tabSettings: 'Ajustes',
+    excellent:'¡Excelente!',excellentMsg:'Trazado precioso — sigue así.',good:'Buen esfuerzo',goodMsg:'Buena forma — inténtalo más cerca de la guía.',improving:'Sigue practicando',improvingMsg:'Estás progresando — cada intento cuenta.',early:'Bien hecho por intentarlo',earlyMsg:'La rehabilitación lleva tiempo y paciencia.',
+    sumEncHigh:'Trabajo excelente hoy.',sumEncMid:'Sesión sólida.',sumEncLow:'Cada sesión importa.',sumEncEarly:'Solo intentarlo es el paso más importante.',
+  },
+  pt_br: {
+    headerSubtitle: 'Reabilitação da escrita',
+    exercisesTitle: 'Praticar escrita', exercisesSubtitle: 'Escolha um tipo de exercício para começar',
+    disclaimer: '<strong>Apenas ferramenta de bem-estar.</strong> O ReWrite apoia a reabilitação da escrita mas não é um dispositivo médico. Siga sempre as orientações do seu terapeuta ocupacional.',
+    exLettersTitle: 'Letras individuais', exLettersDesc: 'Trace letras. Foque na forma e no tamanho.',
+    exNumbersTitle: 'Números', exNumbersDesc: 'Pratique escrever os dígitos 0–9.',
+    exWordsTitle: 'Palavras comuns', exWordsDesc: 'Trace palavras curtas do dia a dia.',
+    exSentencesTitle: 'Frases', exSentencesDesc: 'Escreva frases completas para ganhar resistência.',
+    tipText: 'Dica: Sessões curtas diárias (10–15 min) são mais eficazes.',
+    tracePrompt: 'Trace com cuidado:', clearBtn: '↻ Limpar', submitBtn: '✓ Enviar',
+    nextBtn: 'Próximo →', finishBtn: 'Finalizar ✓', exitBtn: '← Voltar',
+    summaryTitle: 'Sessão concluída', summarySubtitle: 'Bom trabalho — veja como foi',
+    progressTitle: 'Seu progresso', exportBtn: '📋 Exportar para terapeuta',
+    aboutTitle: 'Sobre o ReWrite', settingsTitle: 'Configurações',
+    tabExercises: 'Exercícios', tabProgress: 'Progresso', tabAbout: 'Info', tabSettings: 'Config.',
+    excellent:'Excelente!',excellentMsg:'Belo traçado — continue assim.',good:'Bom esforço',goodMsg:'Boa forma — tente ficar mais perto do guia.',improving:'Continue',improvingMsg:'Você está progredindo — cada tentativa conta.',early:'Parabéns por tentar',earlyMsg:'A reabilitação leva tempo e paciência.',
+    sumEncHigh:'Trabalho excepcional hoje.',sumEncMid:'Boa sessão.',sumEncLow:'Cada sessão importa.',sumEncEarly:'O passo mais importante é continuar tentando.',
+  },
+  fr_ca: {
+    headerSubtitle: 'Rééducation de l\'écriture',
+    exercisesTitle: 'Pratiquer l\'écriture', exercisesSubtitle: 'Choisissez un type d\'exercice',
+    disclaimer: '<strong>Outil de bien-être uniquement.</strong> ReWrite soutient la rééducation de l\'écriture mais n\'est pas un dispositif médical. Suivez toujours les conseils de votre ergothérapeute.',
+    exLettersTitle: 'Lettres individuelles', exLettersDesc: 'Tracez les lettres. Concentrez-vous sur la forme et la taille.',
+    exNumbersTitle: 'Chiffres', exNumbersDesc: 'Pratiquez l\'écriture des chiffres 0–9.',
+    exWordsTitle: 'Mots courants', exWordsDesc: 'Tracez des mots courts du quotidien.',
+    exSentencesTitle: 'Phrases', exSentencesDesc: 'Écrivez des phrases complètes pour gagner en endurance.',
+    tipText: 'Conseil : Des séances courtes quotidiennes (10–15 min) sont plus efficaces.',
+    tracePrompt: 'Tracez soigneusement :', clearBtn: '↻ Effacer', submitBtn: '✓ Soumettre',
+    nextBtn: 'Suivant →', finishBtn: 'Terminer ✓', exitBtn: '← Retour',
+    summaryTitle: 'Séance terminée', summarySubtitle: 'Bon travail — voici vos résultats',
+    progressTitle: 'Votre progression', exportBtn: '📋 Exporter pour le thérapeute',
+    aboutTitle: 'À propos de ReWrite', settingsTitle: 'Paramètres',
+    tabExercises: 'Exercices', tabProgress: 'Progrès', tabAbout: 'Info', tabSettings: 'Réglages',
+    excellent:'Excellent !',excellentMsg:'Beau tracé — continuez ainsi.',good:'Bon effort',goodMsg:'Bonne forme — essayez de rester plus près du guide.',improving:'Continuez',improvingMsg:'Vous progressez — chaque tentative compte.',early:'Bravo d\'avoir essayé',earlyMsg:'La rééducation demande du temps et de la patience.',
+    sumEncHigh:'Travail exceptionnel aujourd\'hui.',sumEncMid:'Bonne séance.',sumEncLow:'Chaque séance compte.',sumEncEarly:'Le plus important est de continuer à essayer.',
   },
 };
 
