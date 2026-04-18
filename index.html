@@ -4,21 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ReWrite — Handwriting Rehabilitation</title>
-  <link rel="canonical" href="https://ansteyapps.com/rewrite/">
-  <style>body{font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#faf7f2;color:#2c3e2d;text-align:center}a{color:#3a7a5a}</style>
+  <meta http-equiv="refresh" content="2;url=https://ansteyapps.com/rewrite/">
+  <style>body{font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#faf7f2;color:#2c3e2d;text-align:center}a{color:#3a7a5a}p{font-size:18px}</style>
 </head>
 <body>
-  <p>Redirecting to <a href="https://ansteyapps.com/rewrite/">ansteyapps.com/rewrite</a>…</p>
+  <p>Redirecting to <a href="https://ansteyapps.com/rewrite/">ansteyapps.com</a>…</p>
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').then(() => {
-        setTimeout(() => window.location.replace("https://ansteyapps.com/rewrite/"), 1000);
-      }).catch(() => {
-        window.location.replace("https://ansteyapps.com/rewrite/");
-      });
-    } else {
+    async function clearAndRedirect() {
+      try {
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(r => r.unregister()));
+        }
+        if ('caches' in window) {
+          const names = await caches.keys();
+          await Promise.all(names.map(n => caches.delete(n)));
+        }
+      } catch(e) {}
       window.location.replace("https://ansteyapps.com/rewrite/");
     }
+    clearAndRedirect();
   </script>
 </body>
 </html>
