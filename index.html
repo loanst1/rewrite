@@ -4,12 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ReWrite — Handwriting Rehabilitation</title>
-  <meta http-equiv="refresh" content="0;url=https://ansteyapps.com/rewrite/">
   <link rel="canonical" href="https://ansteyapps.com/rewrite/">
   <style>body{font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#faf7f2;color:#2c3e2d;text-align:center}a{color:#3a7a5a}</style>
 </head>
 <body>
   <p>Redirecting to <a href="https://ansteyapps.com/rewrite/">ansteyapps.com/rewrite</a>…</p>
-  <script>window.location.replace("https://ansteyapps.com/rewrite/");</script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').then(() => {
+        setTimeout(() => window.location.replace("https://ansteyapps.com/rewrite/"), 1000);
+      }).catch(() => {
+        window.location.replace("https://ansteyapps.com/rewrite/");
+      });
+    } else {
+      window.location.replace("https://ansteyapps.com/rewrite/");
+    }
+  </script>
 </body>
 </html>
