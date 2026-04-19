@@ -1559,9 +1559,39 @@ function calculateScore() {
   }
 
   const guideBB = getBBox(charData, w, h, 30);
-  const drawBB = getBBox(drawData, w, h, 15);
+  let drawBB = getBBox(drawData, w, h, 15);
 
   if (guideBB.count === 0 || drawBB.count === 0) return 5;
+
+  // Remove outlier stray marks before normalising
+  // Find centroid of drawn pixels, exclude pixels far from the main cluster
+  let cx=0, cy=0, drawPts=[];
+  for (let y=0; y<h; y++) {
+    for (let x=0; x<w; x++) {
+      if (drawData[(y*w+x)*4+3] > 15) { cx+=x; cy+=y; drawPts.push({x,y}); }
+    }
+  }
+  if (drawPts.length > 10) {
+    cx /= drawPts.length; cy /= drawPts.length;
+    // Calculate standard deviation of distances from centroid
+    let sumDist2 = 0;
+    for (const p of drawPts) sumDist2 += (p.x-cx)*(p.x-cx) + (p.y-cy)*(p.y-cy);
+    const stdDist = Math.sqrt(sumDist2 / drawPts.length);
+    const cutoff = stdDist * 2.5; // exclude pixels beyond 2.5 std devs
+    // Recompute bounding box excluding outliers
+    let minX=w, minY=h, maxX=0, maxY=0, kept=0;
+    for (const p of drawPts) {
+      const d = Math.sqrt((p.x-cx)*(p.x-cx) + (p.y-cy)*(p.y-cy));
+      if (d <= cutoff) {
+        if (p.x<minX) minX=p.x; if (p.x>maxX) maxX=p.x;
+        if (p.y<minY) minY=p.y; if (p.y>maxY) maxY=p.y;
+        kept++;
+      }
+    }
+    if (kept > drawPts.length * 0.5) {
+      drawBB = {minX, minY, maxX, maxY, count:kept, w:maxX-minX+1, h:maxY-minY+1};
+    }
+  }
 
   // 2. Render both into normalised 80x80 canvases
   const NS = 80; // normalised size
