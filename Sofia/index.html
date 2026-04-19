@@ -1537,79 +1537,99 @@ function calculateScore() {
   const drawData = drawCtx.getImageData(0, 0, w, h).data;
   drawCtx.restore();
 
-  // Build distance field — how far is each pixel from the nearest guide pixel?
-  // Uses two-pass approximation (left-right, then right-left) for speed
-  const RADIUS = 6; // reduced from 10 — tighter tolerance for accuracy
-  const dist = new Float32Array(w * h).fill(RADIUS + 1);
-  // Mark guide pixels as distance 0
-  for (let i = 0; i < charData.length; i += 4) {
-    if (charData[i + 3] > 30) dist[i >> 2] = 0;
+  // === SHAPE-BASED SCORING ===
+  // Instead of penalising positional offset, we normalise both the guide
+  // and the drawing to the same bounding box, then compare shapes.
+  // This means a correctly-formed letter written anywhere on the canvas
+  // scores high, even if it's not perfectly centred on the guide.
+
+  // 1. Find bounding boxes
+  function getBBox(data, w, h, threshold) {
+    let minX=w, minY=h, maxX=0, maxY=0, count=0;
+    for (let y=0; y<h; y++) {
+      for (let x=0; x<w; x++) {
+        if (data[(y*w+x)*4+3] > threshold) {
+          if (x<minX) minX=x; if (x>maxX) maxX=x;
+          if (y<minY) minY=y; if (y>maxY) maxY=y;
+          count++;
+        }
+      }
+    }
+    return {minX, minY, maxX, maxY, count, w: maxX-minX+1, h: maxY-minY+1};
   }
-  // Forward pass
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const i = y * w + x;
+
+  const guideBB = getBBox(charData, w, h, 30);
+  const drawBB = getBBox(drawData, w, h, 15);
+
+  if (guideBB.count === 0 || drawBB.count === 0) return 5;
+
+  // 2. Render both into normalised 80x80 canvases
+  const NS = 80; // normalised size
+  const normGuide = document.createElement('canvas');
+  normGuide.width = NS; normGuide.height = NS;
+  const ngCtx = normGuide.getContext('2d');
+  ngCtx.drawImage(charCanvas, guideBB.minX, guideBB.minY, guideBB.w, guideBB.h, 0, 0, NS, NS);
+  const ngData = ngCtx.getImageData(0, 0, NS, NS).data;
+
+  const normDraw = document.createElement('canvas');
+  normDraw.width = NS; normDraw.height = NS;
+  const ndCtx = normDraw.getContext('2d');
+  ndCtx.drawImage(drawCanvas, drawBB.minX, drawBB.minY, drawBB.w, drawBB.h, 0, 0, NS, NS);
+  const ndData = ndCtx.getImageData(0, 0, NS, NS).data;
+
+  // 3. Compare normalised shapes using distance field
+  const RADIUS = 6;
+  const dist = new Float32Array(NS * NS).fill(RADIUS + 1);
+  for (let i = 0; i < ngData.length; i += 4) {
+    if (ngData[i + 3] > 30) dist[i >> 2] = 0;
+  }
+  for (let y = 0; y < NS; y++) {
+    for (let x = 0; x < NS; x++) {
+      const i = y * NS + x;
       if (x > 0) dist[i] = Math.min(dist[i], dist[i - 1] + 1);
-      if (y > 0) dist[i] = Math.min(dist[i], dist[(y - 1) * w + x] + 1);
+      if (y > 0) dist[i] = Math.min(dist[i], dist[(y - 1) * NS + x] + 1);
     }
   }
-  // Backward pass
-  for (let y = h - 1; y >= 0; y--) {
-    for (let x = w - 1; x >= 0; x--) {
-      const i = y * w + x;
-      if (x < w - 1) dist[i] = Math.min(dist[i], dist[i + 1] + 1);
-      if (y < h - 1) dist[i] = Math.min(dist[i], dist[(y + 1) * w + x] + 1);
+  for (let y = NS - 1; y >= 0; y--) {
+    for (let x = NS - 1; x >= 0; x--) {
+      const i = y * NS + x;
+      if (x < NS - 1) dist[i] = Math.min(dist[i], dist[i + 1] + 1);
+      if (y < NS - 1) dist[i] = Math.min(dist[i], dist[(y + 1) * NS + x] + 1);
     }
   }
 
-  // Score every drawn pixel based on distance to nearest guide pixel
-  // On-guide = full credit, within RADIUS = partial credit that fades with distance
-  let totalCredit = 0, drawnPx = 0;
-  for (let i = 0; i < w * h; i++) {
-    if (drawData[i * 4 + 3] > 15) {
+  // Score drawn pixels on normalised canvas
+  let totalCredit = 0, drawnPx = 0, guidePx = 0, coveredPx = 0;
+  for (let i = 0; i < NS * NS; i++) {
+    if (ndData[i * 4 + 3] > 15) {
       drawnPx++;
       const d = dist[i];
       if (d <= 0) totalCredit += 1.0;
-      else if (d <= RADIUS) totalCredit += 1.0 - (d / RADIUS) * 0.7; // fades from 1.0 to 0.3
-      // else: too far from guide, no credit
+      else if (d <= RADIUS) totalCredit += 1.0 - (d / RADIUS) * 0.7;
+    }
+    if (ngData[i * 4 + 3] > 30) {
+      guidePx++;
+      if (ndData[i * 4 + 3] > 15) coveredPx++;
     }
   }
 
-  // Also check guide coverage — what fraction of the guide was traced nearby?
-  let charPx = 0, coveredPx = 0;
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const i = y * w + x;
-      if (charData[i * 4 + 3] > 30) {
-        charPx++;
-        // Check if any drawn pixel within RADIUS
-        let near = false;
-        for (let dy = -RADIUS; dy <= RADIUS && !near; dy++) {
-          for (let dx = -RADIUS; dx <= RADIUS && !near; dx++) {
-            const nx = x + dx, ny = y + dy;
-            if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
-              if (drawData[(ny * w + nx) * 4 + 3] > 15 && Math.abs(dx) + Math.abs(dy) <= RADIUS) near = true;
-            }
-          }
-        }
-        if (near) coveredPx++;
-      }
-    }
-  }
+  const precision = drawnPx > 0 ? totalCredit / drawnPx : 0;
+  const recall = guidePx > 0 ? coveredPx / guidePx : 0;
 
-  const precision = drawnPx > 0 ? totalCredit / drawnPx : 0; // how close drawn pixels are to guide
-  const recall = charPx > 0 ? coveredPx / charPx : 0; // how much of the guide was covered
-
-  // Ink ratio penalty — penalise drawing far more than the guide contains
-  // A good trace has inkRatio ~1-2x. Scribbles have 5-10x.
-  const inkRatio = charPx > 0 ? drawnPx / charPx : 0;
+  // Ink ratio penalty — scribbles produce far more ink than the guide
+  const inkRatio = guidePx > 0 ? drawnPx / guidePx : 0;
   const inkPenalty = inkRatio > 2.5 ? Math.max(0, 1 - (inkRatio - 2.5) * 0.15) : 1;
 
-  // Precision-heavy coverage: precision matters more than recall
-  // (punishes drawing outside the guide, even if you covered it)
-  const coverage = Math.min((precision * 0.65 + recall * 0.35) * inkPenalty, 1);
+  // Precision-heavy shape matching
+  const shapeMatch = Math.min((precision * 0.6 + recall * 0.4) * inkPenalty, 1);
 
-  // Smoothness — rewards controlled, steady strokes (pen direction consistency)
+  // 4. Aspect ratio similarity bonus — did they get the proportions right?
+  const guideAR = guideBB.w / Math.max(guideBB.h, 1);
+  const drawAR = drawBB.w / Math.max(drawBB.h, 1);
+  const arDiff = Math.abs(guideAR - drawAR) / Math.max(guideAR, drawAR);
+  const arBonus = Math.max(0, 1 - arDiff * 2); // 1.0 if same ratio, 0 if very different
+
+  // 5. Smoothness
   let totalVar = 0, pts = 0;
   for (const s of strokes) {
     for (let i = 1; i < s.length - 1; i++) {
@@ -1621,9 +1641,8 @@ function calculateScore() {
   }
   const smoothness = pts > 0 ? Math.max(0, 1 - (totalVar / pts) / (Math.PI * 0.5)) : 0.5;
 
-  // Weighted: 70% coverage accuracy, 30% smoothness
-  let score = (coverage * 0.7 + smoothness * 0.3) * 100;
-  // Minimal floor: 5% for any genuine attempt (so users aren't demoralised by 0%)
+  // Final score: 55% shape match, 20% aspect ratio, 25% smoothness
+  let score = (shapeMatch * 0.55 + arBonus * 0.20 + smoothness * 0.25) * 100;
   if (hasStrokes && strokes.length > 0) score = Math.max(score, 5);
   return Math.min(100, Math.round(score));
 }
