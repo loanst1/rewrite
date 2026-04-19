@@ -276,6 +276,11 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 [dir="rtl"] .session-row{direction:ltr}
 [dir="rtl"] .stat-grid{direction:ltr}
 [dir="rtl"] .about-section ul{padding-left:0;padding-right:18px}
+
+/* Stroke-guide overlay positioning */
+.canvas-container{position:relative}
+.canvas-container #guideCanvas{position:relative;pointer-events:none;z-index:1}
+.canvas-container #drawCanvas{position:absolute;top:0;left:0;z-index:2}
 </style>
 </head>
 <body>
@@ -616,6 +621,2423 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   </button>
 </nav>
 
+<script>
+/* ═══ BEGIN stroke-guides/all-guides-combined.js (inlined) ═══ */
+// Latin alphabet stroke paths for handwriting rehabilitation.
+//
+// Coordinate system: 0-100 on both axes; y increases downward.
+//   Lowercase x-height body: y ~ 30-85 (ascenders reach y ~ 10, descenders y ~ 95)
+//   Uppercase body:          y ~ 10-85
+//   Typical x range:         ~20-80
+//
+// Each stroke's "points" array is a sequence of drawing commands:
+//   [x, y]                          -> moveTo (only the first point) or lineTo
+//   [cx1, cy1, cx2, cy2, x, y]      -> bezierCurveTo from previous point
+//
+// Stroke order follows standard Western print handwriting conventions:
+//   top-to-bottom, left-to-right, counter-clockwise for round letters,
+//   crossbars and dots last.
+
+window.STROKE_GUIDES = window.STROKE_GUIDES || {};
+window.STROKE_GUIDES.latin = {
+
+  // ===================== LOWERCASE =====================
+
+  'a': { strokes: [
+    // counter-clockwise bowl starting at top-right
+    { points: [
+      [70, 45],
+      [70, 33, 58, 30, 50, 30],
+      [32, 30, 22, 42, 22, 55],
+      [22, 68, 32, 80, 50, 80],
+      [60, 80, 68, 75, 70, 70]
+    ]},
+    // right-side downstroke with small tail
+    { points: [
+      [70, 30],
+      [70, 85],
+      [75, 85]
+    ]}
+  ]},
+
+  'b': { strokes: [
+    // ascender downstroke
+    { points: [ [28, 10], [28, 85] ] },
+    // bowl, clockwise from top of stem
+    { points: [
+      [28, 45],
+      [35, 32, 55, 32, 65, 42],
+      [75, 52, 75, 68, 65, 78],
+      [55, 88, 35, 88, 28, 75]
+    ]}
+  ]},
+
+  'c': { strokes: [
+    // single counter-clockwise arc open on the right
+    { points: [
+      [75, 40],
+      [65, 30, 45, 28, 32, 38],
+      [20, 50, 20, 65, 32, 77],
+      [45, 87, 65, 85, 75, 75]
+    ]}
+  ]},
+
+  'd': { strokes: [
+    // counter-clockwise bowl
+    { points: [
+      [70, 45],
+      [70, 33, 58, 30, 50, 30],
+      [32, 30, 22, 42, 22, 55],
+      [22, 68, 32, 80, 50, 80],
+      [60, 80, 68, 75, 70, 70]
+    ]},
+    // ascender stem on the right
+    { points: [ [70, 10], [70, 85] ] }
+  ]},
+
+  'e': { strokes: [
+    // horizontal crossbar first
+    { points: [ [25, 55], [70, 55] ] },
+    // then counter-clockwise arc from the crossbar end
+    { points: [
+      [70, 55],
+      [72, 42, 60, 30, 47, 30],
+      [30, 30, 22, 42, 22, 55],
+      [22, 68, 32, 80, 50, 80],
+      [60, 80, 68, 76, 74, 70]
+    ]}
+  ]},
+
+  'f': { strokes: [
+    // descender-less hook + stem
+    { points: [
+      [70, 18],
+      [60, 10, 45, 12, 42, 25],
+      [42, 85]
+    ]},
+    // crossbar
+    { points: [ [28, 35], [60, 35] ] }
+  ]},
+
+  'g': { strokes: [
+    // counter-clockwise bowl
+    { points: [
+      [70, 45],
+      [70, 33, 58, 30, 50, 30],
+      [32, 30, 22, 42, 22, 55],
+      [22, 68, 32, 80, 50, 80],
+      [60, 80, 68, 75, 70, 70]
+    ]},
+    // descender tail
+    { points: [
+      [70, 30],
+      [70, 88],
+      [65, 95, 45, 97, 30, 90]
+    ]}
+  ]},
+
+  'h': { strokes: [
+    // ascender stem
+    { points: [ [25, 10], [25, 85] ] },
+    // shoulder + right leg
+    { points: [
+      [25, 45],
+      [35, 30, 60, 30, 68, 45],
+      [68, 85]
+    ]}
+  ]},
+
+  'i': { strokes: [
+    // stem
+    { points: [ [50, 35], [50, 85] ] },
+    // dot
+    { points: [ [50, 20], [50, 22] ] }
+  ]},
+
+  'j': { strokes: [
+    // stem + descender hook
+    { points: [
+      [55, 35],
+      [55, 88],
+      [50, 95, 35, 96, 25, 90]
+    ]},
+    // dot
+    { points: [ [55, 20], [55, 22] ] }
+  ]},
+
+  'k': { strokes: [
+    // ascender stem
+    { points: [ [25, 10], [25, 85] ] },
+    // upper diagonal into junction
+    { points: [ [65, 45], [25, 65] ] },
+    // lower diagonal leg
+    { points: [ [38, 58], [70, 85] ] }
+  ]},
+
+  'l': { strokes: [
+    { points: [ [50, 10], [50, 85] ] }
+  ]},
+
+  'm': { strokes: [
+    // left stem
+    { points: [ [20, 30], [20, 85] ] },
+    // first arch
+    { points: [
+      [20, 42],
+      [28, 30, 45, 30, 50, 42],
+      [50, 85]
+    ]},
+    // second arch
+    { points: [
+      [50, 42],
+      [58, 30, 75, 30, 80, 42],
+      [80, 85]
+    ]}
+  ]},
+
+  'n': { strokes: [
+    // left stem
+    { points: [ [25, 30], [25, 85] ] },
+    // arch into right leg
+    { points: [
+      [25, 42],
+      [35, 30, 60, 30, 68, 42],
+      [68, 85]
+    ]}
+  ]},
+
+  'o': { strokes: [
+    // counter-clockwise full oval
+    { points: [
+      [50, 30],
+      [32, 30, 22, 42, 22, 55],
+      [22, 68, 32, 80, 50, 80],
+      [68, 80, 78, 68, 78, 55],
+      [78, 42, 68, 30, 50, 30]
+    ]}
+  ]},
+
+  'q': { strokes: [
+    // counter-clockwise bowl
+    { points: [
+      [70, 45],
+      [70, 33, 58, 30, 50, 30],
+      [32, 30, 22, 42, 22, 55],
+      [22, 68, 32, 80, 50, 80],
+      [60, 80, 68, 75, 70, 70]
+    ]},
+    // right stem with descender flick
+    { points: [
+      [70, 30],
+      [70, 88],
+      [75, 95, 82, 95, 85, 92]
+    ]}
+  ]},
+
+  'p': { strokes: [
+    // descender stem
+    { points: [ [28, 30], [28, 95] ] },
+    // bowl, clockwise from top of stem
+    { points: [
+      [28, 42],
+      [35, 30, 55, 30, 65, 40],
+      [75, 50, 75, 65, 65, 75],
+      [55, 85, 35, 85, 28, 73]
+    ]}
+  ]},
+
+  'r': { strokes: [
+    // stem
+    { points: [ [25, 30], [25, 85] ] },
+    // small shoulder hook
+    { points: [
+      [25, 42],
+      [35, 30, 55, 28, 70, 38]
+    ]}
+  ]},
+
+  's': { strokes: [
+    // S-curve, top-to-bottom
+    { points: [
+      [72, 38],
+      [65, 30, 45, 28, 35, 35],
+      [22, 45, 35, 52, 50, 55],
+      [65, 58, 78, 65, 65, 75],
+      [55, 83, 35, 82, 25, 75]
+    ]}
+  ]},
+
+  't': { strokes: [
+    // stem with slight foot
+    { points: [
+      [45, 18],
+      [45, 80],
+      [55, 85, 65, 83, 72, 78]
+    ]},
+    // crossbar last
+    { points: [ [28, 35], [62, 35] ] }
+  ]},
+
+  'u': { strokes: [
+    // U-bowl into right stem
+    { points: [
+      [25, 30],
+      [25, 75],
+      [32, 85, 55, 85, 68, 75]
+    ]},
+    // right stem
+    { points: [ [68, 30], [68, 85] ] }
+  ]},
+
+  'v': { strokes: [
+    // left diagonal
+    { points: [ [22, 30], [50, 85] ] },
+    // right diagonal
+    { points: [ [50, 85], [78, 30] ] }
+  ]},
+
+  'w': { strokes: [
+    { points: [ [15, 30], [33, 85] ] },
+    { points: [ [33, 85], [50, 45] ] },
+    { points: [ [50, 45], [67, 85] ] },
+    { points: [ [67, 85], [85, 30] ] }
+  ]},
+
+  'x': { strokes: [
+    // top-left to bottom-right first
+    { points: [ [22, 30], [78, 85] ] },
+    // then top-right to bottom-left
+    { points: [ [78, 30], [22, 85] ] }
+  ]},
+
+  'y': { strokes: [
+    // left diagonal into junction
+    { points: [ [22, 30], [50, 70] ] },
+    // right diagonal continuing into descender
+    { points: [ [78, 30], [35, 95] ] }
+  ]},
+
+  'z': { strokes: [
+    // top horizontal
+    { points: [ [25, 32], [72, 32] ] },
+    // diagonal
+    { points: [ [72, 32], [25, 82] ] },
+    // bottom horizontal
+    { points: [ [25, 82], [72, 82] ] }
+  ]},
+
+  // ===================== UPPERCASE =====================
+
+  'A': { strokes: [
+    // left diagonal
+    { points: [ [20, 85], [50, 10] ] },
+    // right diagonal
+    { points: [ [50, 10], [80, 85] ] },
+    // crossbar
+    { points: [ [30, 58], [70, 58] ] }
+  ]},
+
+  'B': { strokes: [
+    // stem
+    { points: [ [25, 10], [25, 85] ] },
+    // top bowl
+    { points: [
+      [25, 10],
+      [55, 10, 70, 15, 70, 28],
+      [70, 42, 55, 48, 25, 48]
+    ]},
+    // bottom bowl
+    { points: [
+      [25, 48],
+      [60, 48, 75, 54, 75, 66],
+      [75, 80, 60, 85, 25, 85]
+    ]}
+  ]},
+
+  'C': { strokes: [
+    { points: [
+      [80, 25],
+      [68, 12, 45, 8, 30, 22],
+      [15, 35, 15, 60, 30, 73],
+      [45, 87, 68, 83, 80, 70]
+    ]}
+  ]},
+
+  'D': { strokes: [
+    // stem
+    { points: [ [25, 10], [25, 85] ] },
+    // bowl
+    { points: [
+      [25, 10],
+      [55, 10, 80, 20, 80, 48],
+      [80, 75, 55, 85, 25, 85]
+    ]}
+  ]},
+
+  'E': { strokes: [
+    // stem
+    { points: [ [25, 10], [25, 85] ] },
+    // top bar
+    { points: [ [25, 10], [75, 10] ] },
+    // middle bar
+    { points: [ [25, 48], [65, 48] ] },
+    // bottom bar
+    { points: [ [25, 85], [75, 85] ] }
+  ]},
+
+  'F': { strokes: [
+    { points: [ [25, 10], [25, 85] ] },
+    { points: [ [25, 10], [75, 10] ] },
+    { points: [ [25, 48], [65, 48] ] }
+  ]},
+
+  'G': { strokes: [
+    // C-shape
+    { points: [
+      [80, 25],
+      [68, 12, 45, 8, 30, 22],
+      [15, 35, 15, 60, 30, 73],
+      [45, 87, 70, 85, 80, 72]
+    ]},
+    // inner shelf
+    { points: [ [80, 72], [80, 55], [60, 55] ] }
+  ]},
+
+  'H': { strokes: [
+    { points: [ [22, 10], [22, 85] ] },
+    { points: [ [78, 10], [78, 85] ] },
+    { points: [ [22, 48], [78, 48] ] }
+  ]},
+
+  'I': { strokes: [
+    { points: [ [50, 10], [50, 85] ] },
+    { points: [ [35, 10], [65, 10] ] },
+    { points: [ [35, 85], [65, 85] ] }
+  ]},
+
+  'J': { strokes: [
+    // main down + hook
+    { points: [
+      [65, 10],
+      [65, 70],
+      [65, 82, 55, 88, 42, 88],
+      [30, 88, 22, 82, 22, 72]
+    ]},
+    // top serif
+    { points: [ [50, 10], [80, 10] ] }
+  ]},
+
+  'K': { strokes: [
+    { points: [ [25, 10], [25, 85] ] },
+    { points: [ [75, 10], [25, 48] ] },
+    { points: [ [40, 40], [78, 85] ] }
+  ]},
+
+  'L': { strokes: [
+    { points: [ [25, 10], [25, 85] ] },
+    { points: [ [25, 85], [75, 85] ] }
+  ]},
+
+  'M': { strokes: [
+    { points: [ [18, 85], [18, 10] ] },
+    { points: [ [18, 10], [50, 70] ] },
+    { points: [ [50, 70], [82, 10] ] },
+    { points: [ [82, 10], [82, 85] ] }
+  ]},
+
+  'N': { strokes: [
+    { points: [ [22, 85], [22, 10] ] },
+    { points: [ [22, 10], [78, 85] ] },
+    { points: [ [78, 85], [78, 10] ] }
+  ]},
+
+  'O': { strokes: [
+    { points: [
+      [50, 10],
+      [28, 10, 15, 30, 15, 48],
+      [15, 68, 28, 85, 50, 85],
+      [72, 85, 85, 68, 85, 48],
+      [85, 30, 72, 10, 50, 10]
+    ]}
+  ]},
+
+  'P': { strokes: [
+    { points: [ [25, 10], [25, 85] ] },
+    { points: [
+      [25, 10],
+      [55, 10, 72, 18, 72, 32],
+      [72, 46, 55, 52, 25, 52]
+    ]}
+  ]},
+
+  'Q': { strokes: [
+    // full oval
+    { points: [
+      [50, 10],
+      [28, 10, 15, 30, 15, 48],
+      [15, 68, 28, 85, 50, 85],
+      [72, 85, 85, 68, 85, 48],
+      [85, 30, 72, 10, 50, 10]
+    ]},
+    // tail
+    { points: [ [58, 70], [85, 92] ] }
+  ]},
+
+  'R': { strokes: [
+    { points: [ [25, 10], [25, 85] ] },
+    { points: [
+      [25, 10],
+      [55, 10, 72, 18, 72, 32],
+      [72, 46, 55, 52, 25, 52]
+    ]},
+    // leg
+    { points: [ [45, 52], [78, 85] ] }
+  ]},
+
+  'S': { strokes: [
+    { points: [
+      [78, 22],
+      [68, 10, 40, 8, 28, 18],
+      [15, 30, 30, 42, 50, 48],
+      [70, 54, 85, 66, 72, 78],
+      [60, 88, 32, 88, 22, 78]
+    ]}
+  ]},
+
+  'T': { strokes: [
+    { points: [ [50, 10], [50, 85] ] },
+    { points: [ [20, 10], [80, 10] ] }
+  ]},
+
+  'U': { strokes: [
+    // left stem + curve
+    { points: [
+      [22, 10],
+      [22, 65],
+      [22, 80, 35, 88, 50, 88],
+      [65, 88, 78, 80, 78, 65]
+    ]},
+    // right stem
+    { points: [ [78, 65], [78, 10] ] }
+  ]},
+
+  'V': { strokes: [
+    { points: [ [20, 10], [50, 85] ] },
+    { points: [ [50, 85], [80, 10] ] }
+  ]},
+
+  'W': { strokes: [
+    { points: [ [12, 10], [32, 85] ] },
+    { points: [ [32, 85], [50, 35] ] },
+    { points: [ [50, 35], [68, 85] ] },
+    { points: [ [68, 85], [88, 10] ] }
+  ]},
+
+  'X': { strokes: [
+    { points: [ [20, 10], [80, 85] ] },
+    { points: [ [80, 10], [20, 85] ] }
+  ]},
+
+  'Y': { strokes: [
+    { points: [ [20, 10], [50, 48] ] },
+    { points: [ [80, 10], [50, 48] ] },
+    { points: [ [50, 48], [50, 85] ] }
+  ]},
+
+  'Z': { strokes: [
+    { points: [ [22, 10], [78, 10] ] },
+    { points: [ [78, 10], [22, 85] ] },
+    { points: [ [22, 85], [78, 85] ] }
+  ]},
+
+  // ===================== DIGITS =====================
+
+  '0': { strokes: [
+    { points: [
+      [50, 10],
+      [30, 10, 20, 30, 20, 48],
+      [20, 66, 30, 85, 50, 85],
+      [70, 85, 80, 66, 80, 48],
+      [80, 30, 70, 10, 50, 10]
+    ]}
+  ]},
+
+  '1': { strokes: [
+    // flag + stem
+    { points: [ [30, 25], [50, 10], [50, 85] ] },
+    // base
+    { points: [ [30, 85], [70, 85] ] }
+  ]},
+
+  '2': { strokes: [
+    // curved top + diagonal + base
+    { points: [
+      [22, 25],
+      [30, 12, 55, 8, 68, 18],
+      [80, 28, 75, 42, 60, 52],
+      [45, 62, 28, 72, 22, 85],
+      [75, 85]
+    ]}
+  ]},
+
+  '3': { strokes: [
+    // top curve + middle pinch + bottom curve
+    { points: [
+      [22, 22],
+      [32, 10, 58, 8, 70, 18],
+      [82, 30, 70, 42, 50, 45]
+    ]},
+    { points: [
+      [50, 45],
+      [72, 45, 82, 58, 75, 72],
+      [65, 85, 35, 88, 22, 78]
+    ]}
+  ]},
+
+  '4': { strokes: [
+    // diagonal down + horizontal bar
+    { points: [ [65, 10], [20, 58], [75, 58] ] },
+    // vertical stem
+    { points: [ [65, 30], [65, 85] ] }
+  ]},
+
+  '5': { strokes: [
+    // top bar + down + bowl
+    { points: [ [70, 12], [30, 12], [25, 45] ] },
+    { points: [
+      [25, 45],
+      [40, 38, 65, 40, 75, 55],
+      [82, 70, 70, 85, 50, 87],
+      [35, 87, 25, 82, 20, 75]
+    ]}
+  ]},
+
+  '6': { strokes: [
+    // long curve from top-right down and around into bowl
+    { points: [
+      [72, 18],
+      [55, 8, 32, 15, 25, 38],
+      [18, 58, 20, 78, 35, 85],
+      [55, 92, 78, 82, 78, 65],
+      [78, 50, 62, 42, 48, 42],
+      [35, 42, 25, 50, 22, 60]
+    ]}
+  ]},
+
+  '7': { strokes: [
+    { points: [ [22, 12], [78, 12] ] },
+    { points: [ [78, 12], [40, 85] ] }
+  ]},
+
+  '8': { strokes: [
+    // top bowl (counter-clockwise)
+    { points: [
+      [50, 45],
+      [35, 45, 25, 35, 28, 22],
+      [32, 10, 48, 8, 55, 12],
+      [72, 18, 72, 38, 55, 45],
+      [50, 45]
+    ]},
+    // bottom bowl
+    { points: [
+      [50, 45],
+      [30, 48, 18, 62, 22, 75],
+      [28, 88, 52, 90, 65, 85],
+      [82, 78, 82, 58, 65, 50],
+      [58, 47, 50, 45, 50, 45]
+    ]}
+  ]},
+
+  '9': { strokes: [
+    // bowl first (counter-clockwise)
+    { points: [
+      [75, 40],
+      [75, 25, 62, 15, 48, 15],
+      [32, 15, 22, 28, 22, 40],
+      [22, 52, 32, 62, 48, 62],
+      [62, 62, 72, 55, 75, 45]
+    ]},
+    // right side + tail down
+    { points: [
+      [75, 40],
+      [75, 85],
+      [70, 90, 55, 92, 40, 88]
+    ]}
+  ]}
+
+};
+// Japanese stroke order data for hiragana and katakana
+// Coordinate system: 0-100, characters fill roughly 15-85 range
+// Point formats:
+//   [x, y]                          -> moveTo (first point) or lineTo
+//   [cx1, cy1, cx2, cy2, x, y]      -> bezierCurveTo
+// Stroke order follows standard school-taught (教育) Japanese calligraphy order.
+
+window.STROKE_GUIDES = window.STROKE_GUIDES || {};
+
+window.STROKE_GUIDES.hiragana = {
+  // あ (3): top horizontal, vertical with curl, central loop
+  'あ': { strokes: [
+    { points: [[22, 30], [78, 30]] },
+    { points: [[55, 18], [60, 50, 55, 75, 40, 82]] },
+    { points: [[72, 40], [40, 40, 22, 65, 40, 80], [65, 90, 75, 55, 50, 50]] }
+  ]},
+  // い (2): left hook, right short
+  'い': { strokes: [
+    { points: [[28, 32], [22, 60, 30, 80, 48, 78]] },
+    { points: [[72, 38], [70, 55, 72, 65, 70, 72]] }
+  ]},
+  // う (2): top short stroke, main curve
+  'う': { strokes: [
+    { points: [[42, 22], [62, 22]] },
+    { points: [[28, 42], [50, 30, 78, 38, 72, 58], [66, 78, 45, 82, 28, 78]] }
+  ]},
+  // え (2): top tick, main zigzag curve
+  'え': { strokes: [
+    { points: [[48, 18], [55, 26]] },
+    { points: [[25, 42], [45, 35, 65, 38, 68, 48], [70, 58, 45, 65, 35, 75], [30, 80, 45, 82, 78, 80]] }
+  ]},
+  // お (3): horizontal, vertical-with-loop (one stroke), right dot
+  'お': { strokes: [
+    { points: [[22, 32], [70, 32]] },
+    { points: [[48, 18], [52, 42, 48, 55, 30, 55], [18, 55, 22, 78, 40, 80], [62, 82, 68, 60, 52, 48]] },
+    { points: [[75, 45], [80, 58, 78, 68, 72, 72]] }
+  ]},
+  // か (3): top curve with hook, left swoop, right dot
+  'か': { strokes: [
+    { points: [[20, 35], [50, 28, 70, 30, 68, 42], [65, 55, 60, 70, 55, 82]] },
+    { points: [[38, 22], [32, 50, 22, 72, 12, 82]] },
+    { points: [[68, 48], [75, 60]] }
+  ]},
+  // き (4): top horizontal, second horizontal, diagonal-vertical, bottom curl
+  'き': { strokes: [
+    { points: [[22, 28], [72, 28]] },
+    { points: [[22, 45], [75, 42]] },
+    { points: [[62, 18], [30, 38, 22, 55, 28, 65]] },
+    { points: [[30, 62], [45, 68, 70, 78, 62, 88]] }
+  ]},
+  // く (1): single angle stroke
+  'く': { strokes: [
+    { points: [[65, 22], [30, 50], [65, 82]] }
+  ]},
+  // け (3): left vertical, left horizontal tick, right vertical with curl
+  'け': { strokes: [
+    { points: [[28, 22], [26, 82]] },
+    { points: [[18, 42], [42, 40]] },
+    { points: [[60, 22], [62, 55, 58, 75, 75, 72]] }
+  ]},
+  // こ (2): top horizontal, bottom curve
+  'こ': { strokes: [
+    { points: [[25, 30], [70, 28]] },
+    { points: [[22, 70], [35, 78, 60, 78, 78, 72]] }
+  ]},
+  // さ (3): horizontal, vertical curve, bottom hook
+  'さ': { strokes: [
+    { points: [[22, 32], [72, 30]] },
+    { points: [[58, 20], [30, 35, 22, 60, 35, 72]] },
+    { points: [[38, 55], [55, 55, 75, 60, 72, 78]] }
+  ]},
+  // し (1): J-curve
+  'し': { strokes: [
+    { points: [[35, 18], [28, 55, 40, 80, 78, 70]] }
+  ]},
+  // す (2): horizontal, vertical loop
+  'す': { strokes: [
+    { points: [[22, 32], [72, 30]] },
+    { points: [[58, 20], [55, 45, 48, 55, 30, 58], [60, 58, 68, 70, 50, 80], [35, 85, 28, 78, 30, 72]] }
+  ]},
+  // せ (3): horizontal, vertical, right vertical with hook
+  'せ': { strokes: [
+    { points: [[18, 42], [70, 40]] },
+    { points: [[38, 22], [40, 50, 38, 72, 52, 75]] },
+    { points: [[68, 25], [70, 50, 68, 70, 80, 68]] }
+  ]},
+  // そ (1): zigzag continuous
+  'そ': { strokes: [
+    { points: [[25, 25], [65, 25], [30, 50], [70, 48], [65, 65, 35, 75, 28, 82]] }
+  ]},
+  // た (4): horizontal, vertical-curl, right dot, bottom curve
+  'た': { strokes: [
+    { points: [[20, 30], [55, 28]] },
+    { points: [[42, 18], [45, 45, 40, 68, 28, 75]] },
+    { points: [[62, 42], [60, 52]] },
+    { points: [[60, 62], [70, 60, 80, 68, 75, 80]] }
+  ]},
+  // ち (2): top horizontal, curve loop
+  'ち': { strokes: [
+    { points: [[22, 28], [72, 30]] },
+    { points: [[62, 18], [35, 30, 30, 55, 50, 55], [75, 55, 78, 80, 45, 82]] }
+  ]},
+  // つ (1): single horizontal curve
+  'つ': { strokes: [
+    { points: [[22, 38], [45, 30, 75, 32, 78, 50], [78, 65, 60, 75, 30, 72]] }
+  ]},
+  // て (1): top horizontal, curve down
+  'て': { strokes: [
+    { points: [[25, 28], [75, 25], [55, 40, 40, 70, 40, 82]] }
+  ]},
+  // と (2): left vertical with dot, right curve
+  'と': { strokes: [
+    { points: [[38, 35], [45, 42]] },
+    { points: [[38, 22], [35, 55, 38, 78, 75, 80]] }
+  ]},
+  // な (4): horizontal, vertical-curl, right dot, bottom loop
+  'な': { strokes: [
+    { points: [[22, 28], [58, 26]] },
+    { points: [[42, 18], [48, 40, 42, 60, 28, 68]] },
+    { points: [[68, 22], [72, 32]] },
+    { points: [[75, 45], [58, 48, 55, 68, 68, 72], [82, 78, 78, 62, 68, 62]] }
+  ]},
+  // に (3): left vertical, right top horizontal, right bottom horizontal
+  'に': { strokes: [
+    { points: [[25, 22], [22, 72, 28, 82, 40, 78]] },
+    { points: [[55, 30], [78, 28]] },
+    { points: [[52, 68], [80, 68]] }
+  ]},
+  // ぬ (2): left curve, right complex loop
+  'ぬ': { strokes: [
+    { points: [[25, 30], [22, 60, 30, 80, 45, 80]] },
+    { points: [[48, 25], [70, 75], [55, 72, 45, 58, 62, 52], [78, 48, 80, 72, 60, 82]] }
+  ]},
+  // ね (2): left vertical, right loop
+  'ね': { strokes: [
+    { points: [[28, 22], [25, 82]] },
+    { points: [[18, 42], [42, 38, 60, 50, 60, 65], [60, 78, 48, 82, 42, 75], [38, 68, 48, 60, 58, 62], [72, 65, 80, 78, 75, 82]] }
+  ]},
+  // の (1): single spiral loop
+  'の': { strokes: [
+    { points: [[70, 28], [40, 25, 20, 50, 25, 72], [32, 85, 65, 85, 75, 62], [82, 42, 65, 28, 55, 38], [48, 48, 50, 68, 65, 72]] }
+  ]},
+  // は (3): left vertical, right top horizontal, right loop
+  'は': { strokes: [
+    { points: [[25, 22], [22, 72, 28, 82, 40, 78]] },
+    { points: [[50, 32], [78, 30]] },
+    { points: [[62, 22], [60, 50, 52, 62, 62, 70], [75, 78, 82, 62, 70, 55]] }
+  ]},
+  // ひ (1): swoop with loop
+  'ひ': { strokes: [
+    { points: [[22, 40], [30, 30, 38, 35, 35, 45], [32, 58, 22, 70, 30, 78], [50, 85, 78, 78, 78, 55]] }
+  ]},
+  // ふ (4): top dot, main curve, left dot, right dot
+  'ふ': { strokes: [
+    { points: [[45, 20], [52, 28]] },
+    { points: [[30, 38], [55, 35, 60, 55, 45, 62], [32, 68, 30, 58, 38, 55]] },
+    { points: [[22, 62], [18, 75]] },
+    { points: [[75, 58], [80, 72]] }
+  ]},
+  // へ (1): shallow peak
+  'へ': { strokes: [
+    { points: [[22, 58], [50, 40], [80, 62]] }
+  ]},
+  // ほ (4): left vertical, right top horizontal, right middle horizontal, right loop
+  'ほ': { strokes: [
+    { points: [[25, 22], [22, 72, 28, 82, 40, 78]] },
+    { points: [[50, 28], [78, 26]] },
+    { points: [[50, 48], [78, 46]] },
+    { points: [[62, 38], [60, 58, 52, 68, 62, 75], [75, 82, 82, 68, 70, 62]] }
+  ]},
+  // ま (3): top horizontal, bottom horizontal, vertical with loop
+  'ま': { strokes: [
+    { points: [[22, 30], [72, 28]] },
+    { points: [[22, 55], [72, 52]] },
+    { points: [[50, 18], [52, 55, 45, 72, 30, 80], [55, 82, 62, 72, 55, 65]] }
+  ]},
+  // み (2): main curve, loop
+  'み': { strokes: [
+    { points: [[25, 30], [28, 55, 22, 72, 35, 78], [55, 82, 62, 62, 50, 55]] },
+    { points: [[45, 45], [75, 22], [70, 42, 72, 62, 80, 78]] }
+  ]},
+  // む (3): horizontal, vertical-loop, right dot
+  'む': { strokes: [
+    { points: [[22, 35], [68, 33]] },
+    { points: [[48, 22], [48, 55, 40, 70, 25, 75], [55, 80, 65, 62, 52, 55]] },
+    { points: [[78, 48], [82, 58, 80, 68, 72, 72]] }
+  ]},
+  // め (2): left swoop, right loop
+  'め': { strokes: [
+    { points: [[32, 28], [25, 60, 22, 78, 38, 80]] },
+    { points: [[45, 22], [75, 72], [58, 82, 38, 65, 55, 55], [75, 48, 82, 72, 60, 82]] }
+  ]},
+  // も (3): vertical with hook, top horizontal, middle horizontal
+  'も': { strokes: [
+    { points: [[35, 20], [32, 60, 42, 78, 75, 75]] },
+    { points: [[22, 38], [58, 38]] },
+    { points: [[22, 55], [58, 55]] }
+  ]},
+  // や (3): curve with dot, left tick, vertical
+  'や': { strokes: [
+    { points: [[25, 38], [55, 32, 78, 40, 72, 58]] },
+    { points: [[42, 25], [48, 48]] },
+    { points: [[55, 30], [52, 72, 48, 82, 42, 82]] }
+  ]},
+  // ゆ (2): main loop, vertical through middle
+  'ゆ': { strokes: [
+    { points: [[32, 35], [28, 65, 38, 78, 55, 78], [75, 78, 78, 55, 70, 40], [62, 28, 45, 28, 32, 35]] },
+    { points: [[55, 22], [52, 72, 48, 82, 40, 82]] }
+  ]},
+  // よ (2): top tick, main vertical loop
+  'よ': { strokes: [
+    { points: [[45, 22], [48, 35]] },
+    { points: [[25, 42], [65, 42], [60, 65, 50, 78, 30, 78], [55, 82, 65, 72, 60, 60]] }
+  ]},
+  // ら (2): top tick, main curve
+  'ら': { strokes: [
+    { points: [[30, 22], [60, 22]] },
+    { points: [[38, 38], [55, 35, 75, 45, 70, 60], [65, 75, 40, 82, 25, 75]] }
+  ]},
+  // り (2): left vertical, right vertical with hook
+  'り': { strokes: [
+    { points: [[32, 22], [30, 60, 35, 78, 20, 82]] },
+    { points: [[65, 22], [68, 55, 65, 70, 55, 72]] }
+  ]},
+  // る (1): continuous loop at bottom
+  'る': { strokes: [
+    { points: [[25, 25], [65, 25], [30, 50], [70, 45, 78, 65, 60, 75], [40, 82, 28, 72, 40, 65]] }
+  ]},
+  // れ (2): left vertical, right curve with hook
+  'れ': { strokes: [
+    { points: [[28, 22], [25, 82]] },
+    { points: [[18, 42], [42, 38, 58, 48, 58, 62], [58, 72, 48, 80, 42, 75], [38, 68, 48, 60, 58, 62], [72, 65, 82, 75, 78, 82]] }
+  ]},
+  // ろ (1): similar to る without loop
+  'ろ': { strokes: [
+    { points: [[25, 25], [65, 25], [30, 50], [70, 48, 78, 68, 55, 78], [40, 82, 30, 78, 28, 72]] }
+  ]},
+  // わ (2): left vertical, right curve
+  'わ': { strokes: [
+    { points: [[28, 22], [25, 82]] },
+    { points: [[18, 42], [42, 38, 62, 48, 62, 62], [62, 75, 48, 82, 38, 78]] }
+  ]},
+  // を (3): top horizontal, angle, bottom curve
+  'を': { strokes: [
+    { points: [[22, 30], [65, 28]] },
+    { points: [[55, 18], [42, 40], [62, 42]] },
+    { points: [[32, 58], [50, 55, 72, 60, 72, 72], [72, 82, 50, 82, 32, 75]] }
+  ]},
+  // ん (1): single swoop
+  'ん': { strokes: [
+    { points: [[25, 35], [30, 25, 38, 28, 35, 40], [30, 60, 22, 75, 35, 80], [55, 82, 70, 65, 78, 42]] }
+  ]}
+};
+
+window.STROKE_GUIDES.katakana = {
+  // ア (2): top angle, left swoop
+  'ア': { strokes: [
+    { points: [[22, 25], [75, 25], [68, 40]] },
+    { points: [[55, 30], [50, 55, 40, 72, 22, 82]] }
+  ]},
+  // イ (2): top diagonal, vertical
+  'イ': { strokes: [
+    { points: [[62, 20], [28, 50]] },
+    { points: [[45, 35], [52, 82]] }
+  ]},
+  // ウ (3): top dot, top angle, left swoop
+  'ウ': { strokes: [
+    { points: [[50, 18], [52, 28]] },
+    { points: [[22, 35], [78, 35], [78, 50]] },
+    { points: [[38, 42], [35, 65, 30, 78, 22, 82]] }
+  ]},
+  // エ (3): top horizontal, middle vertical, bottom horizontal
+  'エ': { strokes: [
+    { points: [[22, 25], [78, 25]] },
+    { points: [[50, 25], [50, 78]] },
+    { points: [[18, 78], [82, 78]] }
+  ]},
+  // オ (3): top horizontal, vertical, left swoop
+  'オ': { strokes: [
+    { points: [[22, 32], [72, 32]] },
+    { points: [[52, 18], [52, 82]] },
+    { points: [[52, 45], [40, 58, 30, 72, 22, 78]] }
+  ]},
+  // カ (2): top angle, left swoop
+  'カ': { strokes: [
+    { points: [[22, 30], [70, 30], [70, 58, 65, 75, 60, 82]] },
+    { points: [[40, 22], [38, 55, 30, 75, 18, 82]] }
+  ]},
+  // キ (3): top diagonal, middle diagonal, vertical
+  'キ': { strokes: [
+    { points: [[25, 30], [72, 25]] },
+    { points: [[22, 52], [75, 48]] },
+    { points: [[58, 18], [52, 55, 45, 75, 30, 82]] }
+  ]},
+  // ク (2): top angle, left swoop
+  'ク': { strokes: [
+    { points: [[22, 28], [68, 28], [62, 45]] },
+    { points: [[45, 32], [40, 58, 30, 75, 18, 82]] }
+  ]},
+  // ケ (3): left tick, angle, vertical
+  'ケ': { strokes: [
+    { points: [[35, 22], [22, 45]] },
+    { points: [[30, 30], [72, 30]] },
+    { points: [[55, 35], [52, 82]] }
+  ]},
+  // コ (2): top angle, bottom horizontal
+  'コ': { strokes: [
+    { points: [[22, 25], [75, 25], [75, 75]] },
+    { points: [[22, 75], [75, 75]] }
+  ]},
+  // サ (3): left vertical, horizontal, right vertical
+  'サ': { strokes: [
+    { points: [[30, 22], [28, 60]] },
+    { points: [[18, 42], [78, 40]] },
+    { points: [[58, 22], [55, 75, 50, 82, 42, 82]] }
+  ]},
+  // シ (3): top dot, middle dot, bottom swoop
+  'シ': { strokes: [
+    { points: [[22, 28], [32, 32]] },
+    { points: [[22, 48], [32, 52]] },
+    { points: [[25, 25], [58, 68, 38, 75, 22, 78]] }
+  ]},
+  // ス (2): top angle, swoop
+  'ス': { strokes: [
+    { points: [[22, 28], [72, 28], [28, 65]] },
+    { points: [[40, 55], [78, 82]] }
+  ]},
+  // セ (2): horizontal-vertical, right vertical
+  'セ': { strokes: [
+    { points: [[20, 35], [72, 32], [38, 45], [42, 78, 62, 82, 75, 70]] },
+    { points: [[55, 20], [52, 55]] }
+  ]},
+  // ソ (2): top dot, swoop
+  'ソ': { strokes: [
+    { points: [[30, 25], [35, 35]] },
+    { points: [[65, 22], [55, 60, 40, 75, 22, 82]] }
+  ]},
+  // タ (3): top angle, swoop, dot
+  'タ': { strokes: [
+    { points: [[22, 28], [62, 28], [58, 48]] },
+    { points: [[42, 32], [30, 60, 22, 75, 12, 82]] },
+    { points: [[50, 55], [75, 72]] }
+  ]},
+  // チ (3): top diagonal, horizontal, vertical
+  'チ': { strokes: [
+    { points: [[28, 25], [65, 22]] },
+    { points: [[22, 45], [78, 42]] },
+    { points: [[58, 32], [52, 75, 45, 82, 30, 82]] }
+  ]},
+  // ツ (3): top dot, top dot, swoop
+  'ツ': { strokes: [
+    { points: [[25, 22], [28, 38]] },
+    { points: [[50, 22], [52, 38]] },
+    { points: [[72, 25], [70, 55, 55, 75, 25, 82]] }
+  ]},
+  // テ (3): top horizontal, middle horizontal, vertical
+  'テ': { strokes: [
+    { points: [[25, 22], [70, 22]] },
+    { points: [[18, 42], [78, 40]] },
+    { points: [[55, 42], [50, 75, 42, 82, 28, 82]] }
+  ]},
+  // ト (2): vertical, right tick
+  'ト': { strokes: [
+    { points: [[38, 18], [38, 82]] },
+    { points: [[38, 48], [68, 58]] }
+  ]},
+  // ナ (2): horizontal, vertical
+  'ナ': { strokes: [
+    { points: [[18, 32], [78, 30]] },
+    { points: [[55, 18], [52, 75, 48, 82, 35, 82]] }
+  ]},
+  // ニ (2): top horizontal, bottom horizontal
+  'ニ': { strokes: [
+    { points: [[25, 32], [70, 30]] },
+    { points: [[18, 72], [78, 70]] }
+  ]},
+  // ヌ (2): top angle, diagonal
+  'ヌ': { strokes: [
+    { points: [[22, 28], [72, 28], [22, 75]] },
+    { points: [[35, 50], [78, 82]] }
+  ]},
+  // ネ (4): top dot, horizontal, vertical-with-hook (curls left), right diagonal
+  'ネ': { strokes: [
+    { points: [[48, 15], [55, 22]] },
+    { points: [[22, 32], [78, 30]] },
+    { points: [[52, 32], [50, 60, 45, 72, 25, 80]] },
+    { points: [[42, 55], [72, 82]] }
+  ]},
+  // ノ (1): single diagonal swoop
+  'ノ': { strokes: [
+    { points: [[68, 22], [28, 80]] }
+  ]},
+  // ハ (2): left swoop, right swoop
+  'ハ': { strokes: [
+    { points: [[40, 25], [22, 78]] },
+    { points: [[58, 28], [78, 78]] }
+  ]},
+  // ヒ (2): middle tick, bottom angle
+  'ヒ': { strokes: [
+    { points: [[35, 32], [52, 38]] },
+    { points: [[32, 22], [28, 72], [75, 68]] }
+  ]},
+  // フ (1): top angle to swoop
+  'フ': { strokes: [
+    { points: [[22, 28], [72, 28], [35, 78]] }
+  ]},
+  // ヘ (1): shallow peak
+  'ヘ': { strokes: [
+    { points: [[22, 55], [50, 35], [80, 60]] }
+  ]},
+  // ホ (4): horizontal, vertical, left swoop, right swoop
+  'ホ': { strokes: [
+    { points: [[18, 35], [82, 32]] },
+    { points: [[50, 22], [50, 82]] },
+    { points: [[42, 50], [28, 72]] },
+    { points: [[58, 50], [72, 72]] }
+  ]},
+  // マ (2): top angle, swoop
+  'マ': { strokes: [
+    { points: [[22, 28], [72, 28], [40, 55]] },
+    { points: [[40, 45], [55, 65, 52, 78, 45, 82]] }
+  ]},
+  // ミ (3): three horizontals
+  'ミ': { strokes: [
+    { points: [[25, 28], [68, 32]] },
+    { points: [[22, 50], [65, 52]] },
+    { points: [[22, 72], [72, 75]] }
+  ]},
+  // ム (2): left angle swoop, right diagonal-horizontal
+  'ム': { strokes: [
+    { points: [[48, 22], [25, 55], [42, 62]] },
+    { points: [[35, 45], [55, 72], [80, 72]] }
+  ]},
+  // メ (2): diagonal, counter diagonal
+  'メ': { strokes: [
+    { points: [[65, 22], [22, 78]] },
+    { points: [[32, 35], [78, 80]] }
+  ]},
+  // モ (3): top horizontal, middle horizontal, vertical with hook
+  'モ': { strokes: [
+    { points: [[22, 32], [68, 32]] },
+    { points: [[18, 52], [72, 50]] },
+    { points: [[50, 20], [48, 65, 55, 80, 75, 78]] }
+  ]},
+  // ヤ (2): angle tick, vertical
+  'ヤ': { strokes: [
+    { points: [[25, 42], [72, 32], [55, 45]] },
+    { points: [[55, 22], [52, 82]] }
+  ]},
+  // ユ (2): vertical-horizontal, bottom horizontal
+  'ユ': { strokes: [
+    { points: [[40, 25], [40, 65], [75, 65]] },
+    { points: [[18, 78], [82, 78]] }
+  ]},
+  // ヨ (3): top horizontal (with right vertical), middle horizontal, bottom horizontal
+  'ヨ': { strokes: [
+    { points: [[22, 25], [72, 25], [72, 75]] },
+    { points: [[30, 50], [68, 50]] },
+    { points: [[22, 75], [72, 75]] }
+  ]},
+  // ラ (2): top horizontal, angle swoop
+  'ラ': { strokes: [
+    { points: [[28, 25], [68, 25]] },
+    { points: [[22, 45], [72, 45], [68, 65, 45, 78, 25, 82]] }
+  ]},
+  // リ (2): left short vertical, right long vertical with hook
+  'リ': { strokes: [
+    { points: [[32, 25], [30, 62]] },
+    { points: [[65, 22], [68, 68, 62, 80, 45, 82]] }
+  ]},
+  // ル (2): left vertical-swoop, right vertical with hook
+  'ル': { strokes: [
+    { points: [[32, 22], [30, 60, 25, 75, 15, 82]] },
+    { points: [[55, 22], [58, 72, 65, 80, 82, 72]] }
+  ]},
+  // レ (1): J hook
+  'レ': { strokes: [
+    { points: [[32, 22], [30, 65], [72, 35]] }
+  ]},
+  // ロ (3): left vertical, top-right angle, bottom horizontal
+  'ロ': { strokes: [
+    { points: [[25, 25], [25, 78]] },
+    { points: [[25, 25], [75, 25], [75, 78]] },
+    { points: [[25, 78], [75, 78]] }
+  ]},
+  // ワ (2): top angle, left swoop
+  'ワ': { strokes: [
+    { points: [[22, 28], [75, 28], [75, 50]] },
+    { points: [[35, 35], [32, 65, 25, 78, 18, 82]] }
+  ]},
+  // ヲ (2): top horizontal, angle with swoop
+  'ヲ': { strokes: [
+    { points: [[22, 28], [72, 28]] },
+    { points: [[28, 50], [72, 50], [30, 82]] }
+  ]},
+  // ン (2): top dot, swoop up
+  'ン': { strokes: [
+    { points: [[22, 32], [32, 38]] },
+    { points: [[22, 55], [55, 80, 72, 72, 75, 38]] }
+  ]}
+};
+// Chinese character stroke order data
+// Coordinate system: 0-100 (0,0 = top-left, 100,100 = bottom-right)
+// Stroke order follows PRC (Mainland China) standard per Xinhua Zidian.
+// Format per stroke:
+//   { points: [[x,y], [x,y], ...] }          // straight lineTo segments
+//   { points: [[x,y], [cx1,cy1,cx2,cy2,x,y]] } // bezierCurveTo segment
+// First point of each stroke is the moveTo start position.
+
+window.STROKE_GUIDES = window.STROKE_GUIDES || {};
+window.STROKE_GUIDES.chinese = {
+  // 一 (one) — single horizontal
+  '一': { strokes: [
+    { points: [[15, 50], [85, 50]] }
+  ]},
+
+  // 二 (two) — top horizontal then bottom horizontal
+  '二': { strokes: [
+    { points: [[25, 35], [75, 35]] },
+    { points: [[15, 70], [85, 70]] }
+  ]},
+
+  // 三 (three) — top, middle, bottom
+  '三': { strokes: [
+    { points: [[25, 25], [70, 25]] },
+    { points: [[30, 50], [65, 50]] },
+    { points: [[15, 78], [85, 78]] }
+  ]},
+
+  // 四 (four) — outer frame, then interior, then closing bottom
+  '四': { strokes: [
+    { points: [[22, 22], [22, 82]] },                            // left vertical
+    { points: [[22, 22], [78, 22], [78, 22, 78, 22, 78, 82]] },  // top + right vertical (turn)
+    { points: [[38, 40], [38, 70]] },                             // inner left (short slanted/vertical)
+    { points: [[62, 40], [62, 70]] },                             // inner right (hook-like)
+    { points: [[22, 82], [78, 82]] }                              // closing bottom
+  ]},
+
+  // 五 (five)
+  '五': { strokes: [
+    { points: [[22, 25], [78, 25]] },   // top horizontal
+    { points: [[35, 25], [35, 55]] },   // left vertical
+    { points: [[35, 55], [75, 55], [75, 55, 75, 55, 75, 78]] }, // middle box: horiz + turn down
+    { points: [[15, 78], [85, 78]] }    // bottom horizontal
+  ]},
+
+  // 六 (six)
+  '六': { strokes: [
+    { points: [[48, 12], [52, 25]] },   // top dot
+    { points: [[18, 38], [82, 38]] },   // horizontal
+    { points: [[30, 60], [18, 85]] },   // left diagonal (left-falling)
+    { points: [[70, 60], [82, 85]] }    // right dot/diagonal
+  ]},
+
+  // 七 (seven)
+  '七': { strokes: [
+    { points: [[22, 42], [70, 38]] },   // slight upward horizontal
+    { points: [[50, 20], [50, 75], [50, 75, 50, 75, 85, 78]] } // vertical with hook right
+  ]},
+
+  // 八 (eight) — left-falling, right-falling
+  '八': { strokes: [
+    { points: [[45, 25], [15, 85]] },   // left-falling (piě)
+    { points: [[55, 25], [85, 85]] }    // right-falling (nà)
+  ]},
+
+  // 九 (nine)
+  '九': { strokes: [
+    { points: [[25, 25], [20, 80]] },   // left-falling
+    { points: [[20, 40], [80, 40], [80, 40, 80, 80, 50, 80]] } // horizontal + hook curl
+  ]},
+
+  // 十 (ten) — horizontal then vertical
+  '十': { strokes: [
+    { points: [[15, 50], [85, 50]] },
+    { points: [[50, 15], [50, 85]] }
+  ]},
+
+  // 大 (big) — horizontal, left-falling, right-falling
+  '大': { strokes: [
+    { points: [[15, 35], [85, 35]] },
+    { points: [[50, 20], [18, 88]] },
+    { points: [[50, 45], [85, 88]] }
+  ]},
+
+  // 小 (small) — center vertical/hook, left dot, right dot
+  '小': { strokes: [
+    { points: [[50, 20], [50, 75], [50, 75, 48, 85, 40, 80]] }, // vertical hook
+    { points: [[30, 40], [22, 70]] },   // left dot (piě)
+    { points: [[70, 40], [78, 70]] }    // right dot
+  ]},
+
+  // 上 (up)
+  '上': { strokes: [
+    { points: [[40, 25], [40, 70]] },   // vertical
+    { points: [[40, 50], [72, 50]] },   // short horizontal
+    { points: [[15, 80], [85, 80]] }    // long bottom horizontal
+  ]},
+
+  // 下 (down)
+  '下': { strokes: [
+    { points: [[15, 28], [85, 28]] },   // top horizontal
+    { points: [[50, 28], [50, 85]] },   // vertical
+    { points: [[50, 50], [72, 45]] }    // right dot
+  ]},
+
+  // 中 (middle)
+  '中': { strokes: [
+    { points: [[28, 25], [28, 75]] },                 // left vertical
+    { points: [[28, 25], [72, 25], [72, 25, 72, 25, 72, 75]] }, // top + right vertical
+    { points: [[28, 75], [72, 75]] },                 // bottom
+    { points: [[50, 10], [50, 90]] }                  // center vertical
+  ]},
+
+  // 人 (person) — left-falling, right-falling
+  '人': { strokes: [
+    { points: [[50, 18], [18, 85]] },
+    { points: [[50, 45], [85, 85]] }
+  ]},
+
+  // 口 (mouth)
+  '口': { strokes: [
+    { points: [[22, 25], [22, 78]] },                 // left vertical
+    { points: [[22, 25], [78, 25], [78, 25, 78, 25, 78, 78]] }, // top + right vertical
+    { points: [[22, 78], [78, 78]] }                  // closing bottom
+  ]},
+
+  // 日 (sun/day)
+  '日': { strokes: [
+    { points: [[28, 18], [28, 82]] },
+    { points: [[28, 18], [72, 18], [72, 18, 72, 18, 72, 82]] },
+    { points: [[28, 50], [72, 50]] },                 // middle horizontal
+    { points: [[28, 82], [72, 82]] }                  // closing bottom
+  ]},
+
+  // 月 (moon/month)
+  '月': { strokes: [
+    { points: [[25, 20], [22, 85]] },                                       // left-falling stroke
+    { points: [[25, 20], [70, 20], [75, 20, 75, 25, 75, 80], [60, 90]] },   // hook-box right side
+    { points: [[25, 42], [72, 42]] },                                       // inner horizontal 1
+    { points: [[25, 62], [72, 62]] }                                        // inner horizontal 2
+  ]},
+
+  // 水 (water)
+  '水': { strokes: [
+    { points: [[50, 15], [50, 80], [50, 80, 48, 88, 40, 82]] }, // center vertical hook
+    { points: [[45, 40], [25, 55], [25, 55, 35, 70, 28, 82]] }, // upper-left curve down
+    { points: [[30, 45], [42, 60]] },                            // lower-left short stroke
+    { points: [[60, 45], [85, 80]] }                             // right-falling
+  ]},
+
+  // 火 (fire)
+  '火': { strokes: [
+    { points: [[35, 22], [25, 45]] },   // left dot
+    { points: [[62, 22], [72, 45]] },   // right dot
+    { points: [[50, 30], [22, 88]] },   // long left-falling
+    { points: [[50, 45], [85, 88]] }    // right-falling
+  ]},
+
+  // 木 (tree/wood)
+  '木': { strokes: [
+    { points: [[15, 40], [85, 40]] },   // horizontal
+    { points: [[50, 18], [50, 90]] },   // vertical
+    { points: [[50, 55], [22, 85]] },   // left-falling
+    { points: [[50, 55], [82, 85]] }    // right-falling
+  ]},
+
+  // 金 (gold/metal)
+  '金': { strokes: [
+    { points: [[50, 12], [22, 42]] },   // top left-falling
+    { points: [[50, 12], [78, 42]] },   // top right-falling (roof)
+    { points: [[30, 42], [70, 42]] },   // upper horizontal under roof
+    { points: [[38, 55], [62, 55]] },   // short horizontal
+    { points: [[42, 48], [42, 68]] },   // small vertical-left dot
+    { points: [[58, 48], [58, 68]] },   // small vertical-right dot
+    { points: [[50, 42], [50, 78]] },   // center vertical
+    { points: [[18, 88], [82, 88]] }    // bottom horizontal
+  ]},
+
+  // 土 (earth/soil)
+  '土': { strokes: [
+    { points: [[28, 28], [72, 28]] },   // top horizontal (shorter)
+    { points: [[50, 28], [50, 78]] },   // vertical
+    { points: [[15, 78], [85, 78]] }    // bottom horizontal (longer)
+  ]},
+
+  // 山 (mountain)
+  '山': { strokes: [
+    { points: [[50, 18], [50, 75]] },                               // center vertical
+    { points: [[22, 40], [22, 80], [22, 80, 22, 80, 78, 80]] },     // left + bottom
+    { points: [[78, 35], [78, 80]] }                                // right vertical
+  ]},
+
+  // 川 (river)
+  '川': { strokes: [
+    { points: [[22, 20], [18, 85]] },   // left-falling
+    { points: [[50, 22], [50, 88]] },   // center vertical
+    { points: [[78, 20], [80, 88]] }    // right vertical
+  ]},
+
+  // 田 (field)
+  '田': { strokes: [
+    { points: [[22, 20], [22, 82]] },                                       // left vertical
+    { points: [[22, 20], [78, 20], [78, 20, 78, 20, 78, 82]] },             // top + right
+    { points: [[50, 20], [50, 82]] },                                       // center vertical
+    { points: [[22, 50], [78, 50]] },                                       // center horizontal
+    { points: [[22, 82], [78, 82]] }                                        // closing bottom
+  ]},
+
+  // 天 (sky/heaven)
+  '天': { strokes: [
+    { points: [[22, 25], [78, 25]] },   // top horizontal (shorter)
+    { points: [[15, 48], [85, 48]] },   // second horizontal (longer)
+    { points: [[50, 48], [20, 88]] },   // left-falling
+    { points: [[50, 48], [85, 88]] }    // right-falling
+  ]},
+
+  // 地 (earth/ground)
+  '地': { strokes: [
+    // 土 radical (left)
+    { points: [[10, 40], [40, 40]] },
+    { points: [[25, 22], [25, 70]] },
+    { points: [[8, 70], [42, 68]] },
+    // 也 (right)
+    { points: [[48, 30], [90, 30]] },                                       // horizontal
+    { points: [[60, 22], [58, 85], [58, 85, 90, 85, 90, 60]] },             // vertical + hook
+    { points: [[78, 40], [78, 75]] }                                        // right vertical
+  ]},
+
+  // 手 (hand)
+  '手': { strokes: [
+    { points: [[30, 20], [55, 15]] },    // top left-falling
+    { points: [[20, 35], [75, 35]] },    // first horizontal
+    { points: [[15, 58], [82, 58]] },    // second horizontal (longer)
+    { points: [[50, 20], [50, 88], [50, 88, 48, 92, 42, 88]] } // center vertical hook
+  ]},
+
+  // 目 (eye)
+  '目': { strokes: [
+    { points: [[30, 18], [30, 85]] },                                       // left vertical
+    { points: [[30, 18], [70, 18], [70, 18, 70, 18, 70, 85]] },             // top + right
+    { points: [[30, 40], [70, 40]] },                                       // inner horizontal 1
+    { points: [[30, 62], [70, 62]] },                                       // inner horizontal 2
+    { points: [[30, 85], [70, 85]] }                                        // closing bottom
+  ]},
+
+  // 耳 (ear)
+  '耳': { strokes: [
+    { points: [[28, 18], [72, 18]] },   // top horizontal
+    { points: [[32, 18], [32, 82]] },   // left vertical
+    { points: [[32, 38], [68, 38]] },   // inner horizontal 1
+    { points: [[32, 58], [68, 58]] },   // inner horizontal 2
+    { points: [[68, 18], [68, 82]] },   // right vertical
+    { points: [[15, 82], [85, 82]] }    // bottom horizontal (longer)
+  ]},
+
+  // 足 (foot)
+  '足': { strokes: [
+    // 口 top
+    { points: [[32, 15], [32, 48]] },
+    { points: [[32, 15], [68, 15], [68, 15, 68, 15, 68, 48]] },
+    { points: [[32, 48], [68, 48]] },
+    // lower body
+    { points: [[50, 48], [50, 75]] },                                       // vertical
+    { points: [[25, 75], [75, 75]] },                                       // horizontal
+    { points: [[50, 75], [22, 92]] },                                       // left-falling
+    { points: [[50, 75], [90, 90]] }                                        // right-stretch (nà)
+  ]}
+};
+// Arabic letter stroke order data (isolated forms)
+// Coordinate system: 0-100 (0,0 = top-left, 100,100 = bottom-right)
+// Writing direction: RIGHT-TO-LEFT. The main body of each letter starts
+// on the right and ends on the left. Dots (i'jām) and hamza are drawn
+// AFTER the letter body as separate short strokes, following traditional
+// Arabic handwriting convention.
+// Format per stroke:
+//   { points: [[x,y], [x,y], ...] }             // straight lineTo segments
+//   { points: [[x,y], [cx1,cy1,cx2,cy2,x,y]] }  // bezierCurveTo segment
+
+window.STROKE_GUIDES = window.STROKE_GUIDES || {};
+window.STROKE_GUIDES.arabic = {
+
+  // ا  alif — single vertical stroke, top to bottom
+  'ا': { strokes: [
+    { points: [[50, 15], [50, 85]] }
+  ]},
+
+  // ب  bāʾ — shallow bowl opening upward (right to left), then one dot below
+  'ب': { strokes: [
+    { points: [[85, 45], [85, 65, 15, 65, 15, 45]] },
+    { points: [[50, 82], [52, 82]] }  // single dot below
+  ]},
+
+  // ت  tāʾ — same bowl, two dots ABOVE
+  'ت': { strokes: [
+    { points: [[85, 45], [85, 65, 15, 65, 15, 45]] },
+    { points: [[40, 28], [42, 28]] },
+    { points: [[60, 28], [62, 28]] }
+  ]},
+
+  // ث  thāʾ — bowl + three dots above (arranged triangularly)
+  'ث': { strokes: [
+    { points: [[85, 45], [85, 65, 15, 65, 15, 45]] },
+    { points: [[50, 18], [52, 18]] },
+    { points: [[38, 32], [40, 32]] },
+    { points: [[60, 32], [62, 32]] }
+  ]},
+
+  // ج  jīm — rounded cap curving down into a descending loop/tail, single dot inside
+  'ج': { strokes: [
+    { points: [[85, 40], [75, 30, 55, 30, 45, 45], [45, 45, 25, 55, 20, 75], [20, 75, 25, 90, 50, 85]] },
+    { points: [[50, 62], [52, 62]] }  // dot inside
+  ]},
+
+  // ح  ḥāʾ — same body shape, no dot
+  'ح': { strokes: [
+    { points: [[85, 40], [75, 30, 55, 30, 45, 45], [45, 45, 25, 55, 20, 75], [20, 75, 25, 90, 50, 85]] }
+  ]},
+
+  // خ  khāʾ — body + one dot ABOVE
+  'خ': { strokes: [
+    { points: [[85, 40], [75, 30, 55, 30, 45, 45], [45, 45, 25, 55, 20, 75], [20, 75, 25, 90, 50, 85]] },
+    { points: [[50, 18], [52, 18]] }
+  ]},
+
+  // د  dāl — sharp angle: short diagonal down-right then sweeping curve to the left
+  'د': { strokes: [
+    { points: [[70, 28], [78, 45], [78, 45, 60, 70, 25, 70]] }
+  ]},
+
+  // ذ  dhāl — same as dāl + dot above
+  'ذ': { strokes: [
+    { points: [[70, 28], [78, 45], [78, 45, 60, 70, 25, 70]] },
+    { points: [[55, 15], [57, 15]] }
+  ]},
+
+  // ر  rāʾ — simple descending curve from top-right swooping below baseline to left
+  'ر': { strokes: [
+    { points: [[75, 35], [75, 55, 50, 80, 18, 80]] }
+  ]},
+
+  // ز  zāy — rāʾ + dot above
+  'ز': { strokes: [
+    { points: [[75, 35], [75, 55, 50, 80, 18, 80]] },
+    { points: [[60, 18], [62, 18]] }
+  ]},
+
+  // س  sīn — three teeth then a final bowl sweeping left
+  'س': { strokes: [
+    { points: [[88, 45], [82, 35, 78, 55, 72, 45], [66, 35, 62, 55, 56, 45], [50, 35, 46, 55, 40, 45]] },
+    { points: [[40, 45], [40, 70, 20, 75, 10, 60]] }
+  ]},
+
+  // ش  shīn — same body + three dots above
+  'ش': { strokes: [
+    { points: [[88, 45], [82, 35, 78, 55, 72, 45], [66, 35, 62, 55, 56, 45], [50, 35, 46, 55, 40, 45]] },
+    { points: [[40, 45], [40, 70, 20, 75, 10, 60]] },
+    { points: [[62, 20], [64, 20]] },
+    { points: [[50, 28], [52, 28]] },
+    { points: [[74, 28], [76, 28]] }
+  ]},
+
+  // ص  ṣād — oval loop on right, then continuing bowl tail to lower-left
+  'ص': { strokes: [
+    { points: [[75, 40], [55, 30, 40, 40, 50, 55], [60, 68, 85, 60, 85, 45]] },
+    { points: [[50, 55], [35, 65, 20, 75, 10, 60]] }
+  ]},
+
+  // ض  ṣād + dot above
+  'ض': { strokes: [
+    { points: [[75, 40], [55, 30, 40, 40, 50, 55], [60, 68, 85, 60, 85, 45]] },
+    { points: [[50, 55], [35, 65, 20, 75, 10, 60]] },
+    { points: [[65, 18], [67, 18]] }
+  ]},
+
+  // ط  ṭāʾ — oval body like ṣād, then a tall vertical stroke on the right (added last)
+  'ط': { strokes: [
+    { points: [[75, 45], [55, 35, 40, 45, 50, 60], [60, 72, 85, 65, 85, 50]] },
+    { points: [[50, 60], [35, 70, 20, 78, 10, 65]] },
+    { points: [[75, 15], [75, 62]] }  // vertical up-stroke last
+  ]},
+
+  // ظ  ẓāʾ — ṭāʾ + dot above the body
+  'ظ': { strokes: [
+    { points: [[75, 45], [55, 35, 40, 45, 50, 60], [60, 72, 85, 65, 85, 50]] },
+    { points: [[50, 60], [35, 70, 20, 78, 10, 65]] },
+    { points: [[75, 15], [75, 62]] },
+    { points: [[55, 25], [57, 25]] }
+  ]},
+
+  // ع  ʿayn — small hook at top right, sweeping down into a deep closed loop below
+  'ع': { strokes: [
+    { points: [[78, 40], [70, 30, 55, 35, 55, 50], [55, 60, 70, 55, 75, 48]] },
+    { points: [[75, 48], [75, 70, 40, 85, 15, 70]] }
+  ]},
+
+  // غ  ghayn — ʿayn + dot above
+  'غ': { strokes: [
+    { points: [[78, 40], [70, 30, 55, 35, 55, 50], [55, 60, 70, 55, 75, 48]] },
+    { points: [[75, 48], [75, 70, 40, 85, 15, 70]] },
+    { points: [[60, 18], [62, 18]] }
+  ]},
+
+  // ف  fāʾ — small round head on right, tail sweeping left along baseline; one dot ABOVE
+  'ف': { strokes: [
+    { points: [[72, 35], [58, 30, 55, 50, 70, 50], [82, 50, 82, 35, 72, 35]] },
+    { points: [[70, 50], [55, 58, 30, 65, 15, 58]] },
+    { points: [[68, 18], [70, 18]] }
+  ]},
+
+  // ق  qāf — like fāʾ's head but with a deep descending tail below baseline; two dots ABOVE
+  'ق': { strokes: [
+    { points: [[72, 35], [58, 30, 55, 50, 70, 50], [82, 50, 82, 35, 72, 35]] },
+    { points: [[70, 50], [75, 75, 40, 90, 15, 75]] },
+    { points: [[62, 18], [64, 18]] },
+    { points: [[78, 18], [80, 18]] }
+  ]},
+
+  // ك  kāf — tall vertical stroke on right descending into a hook, with interior hamza-like mark
+  'ك': { strokes: [
+    { points: [[78, 15], [78, 70], [78, 70, 40, 75, 15, 70]] },
+    { points: [[55, 55], [68, 55]] }  // small inner hamza/tick
+  ]},
+
+  // ل  lām — tall vertical that curves into a deep U-shaped bowl below the baseline
+  'ل': { strokes: [
+    { points: [[70, 15], [70, 60], [70, 85, 30, 85, 25, 60]] }
+  ]},
+
+  // م  mīm — small closed circular head on right, then short tail dropping straight down
+  'م': { strokes: [
+    { points: [[70, 45], [55, 35, 40, 50, 55, 60], [70, 65, 80, 55, 70, 45]] },
+    { points: [[55, 60], [55, 88]] }
+  ]},
+
+  // ن  nūn — deep rounded bowl (like a cup) + single dot above
+  'ن': { strokes: [
+    { points: [[80, 40], [85, 70, 15, 70, 20, 40]] },
+    { points: [[50, 22], [52, 22]] }
+  ]},
+
+  // ه  hāʾ (isolated) — closed teardrop/figure-eight loop
+  'ه': { strokes: [
+    { points: [[50, 25], [25, 30, 25, 60, 50, 60], [75, 60, 75, 30, 50, 25]] },
+    { points: [[50, 38], [38, 42, 38, 55, 50, 55], [62, 55, 62, 42, 50, 38]] }
+  ]},
+
+  // و  wāw — round head on upper right with a long descending tail left/down
+  'و': { strokes: [
+    { points: [[65, 35], [45, 30, 40, 55, 60, 58], [80, 60, 80, 40, 68, 35]] },
+    { points: [[60, 58], [55, 75, 30, 85, 15, 78]] }
+  ]},
+
+  // ي  yāʾ (isolated) — wide sweeping bowl below baseline with two dots BELOW
+  'ي': { strokes: [
+    { points: [[85, 35], [90, 60, 70, 80, 45, 75], [20, 70, 10, 50, 20, 40]] },
+    { points: [[45, 88], [47, 88]] },
+    { points: [[60, 88], [62, 88]] }
+  ]}
+};
+// Devanagari (Hindi) stroke order data
+// Coordinate system: 0-100 (0,0 = top-left, 100,100 = bottom-right)
+// Headline (shirorekha) is drawn LAST for each character — this is the
+// defining convention of Devanagari handwriting.
+// Baseline of the headline: y = 20 (approx). Body of letter extends below.
+// Format per stroke:
+//   { points: [[x,y], [x,y], ...] }             // straight lineTo segments
+//   { points: [[x,y], [cx1,cy1,cx2,cy2,x,y]] }  // bezierCurveTo segment
+
+window.STROKE_GUIDES = window.STROKE_GUIDES || {};
+window.STROKE_GUIDES.devanagari = {
+
+  // ═══════════ VOWELS (स्वर) ═══════════
+
+  // अ  (a)
+  'अ': { strokes: [
+    { points: [[30, 40], [30, 80, 55, 85, 60, 55], [60, 40, 45, 38, 35, 55]] }, // left loop
+    { points: [[60, 25], [60, 85]] },  // right vertical with small hook
+    { points: [[60, 85], [72, 82, 75, 78, 78, 75]] }, // hook tail
+    { points: [[15, 20], [85, 20]] }   // headline (last)
+  ]},
+
+  // आ  (ā) — अ + vertical bar on right (mātrā)
+  'आ': { strokes: [
+    { points: [[25, 40], [25, 80, 48, 85, 53, 55], [53, 40, 38, 38, 30, 55]] },
+    { points: [[53, 25], [53, 85]] },
+    { points: [[53, 85], [62, 82, 65, 78, 68, 75]] },
+    { points: [[78, 25], [78, 85]] },  // standalone right bar
+    { points: [[15, 20], [88, 20]] }   // headline last
+  ]},
+
+  // इ  (i)
+  'इ': { strokes: [
+    { points: [[25, 40], [45, 30, 70, 35, 75, 55], [78, 75, 55, 85, 35, 75]] }, // curved body
+    { points: [[20, 35], [40, 25]] },  // top hook
+    { points: [[15, 20], [85, 20]] }   // headline
+  ]},
+
+  // ई  (ī)
+  'ई': { strokes: [
+    { points: [[25, 40], [45, 30, 70, 35, 75, 55], [78, 75, 55, 85, 35, 75]] },
+    { points: [[20, 35], [40, 25]] },
+    { points: [[70, 35], [85, 25, 90, 40, 80, 50]] },  // extra right hook for ī
+    { points: [[15, 20], [90, 20]] }
+  ]},
+
+  // उ  (u)
+  'उ': { strokes: [
+    { points: [[30, 30], [30, 70, 55, 85, 75, 65]] },  // main body curl
+    { points: [[75, 65], [80, 50, 70, 40, 55, 50]] },  // upper hook
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // ऊ  (ū)
+  'ऊ': { strokes: [
+    { points: [[30, 30], [30, 70, 55, 85, 75, 65]] },
+    { points: [[75, 65], [80, 50, 70, 40, 55, 50]] },
+    { points: [[55, 75], [50, 92]] },  // extra descender tail (distinguishes ū)
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // ऋ  (ṛ)
+  'ऋ': { strokes: [
+    { points: [[30, 35], [30, 70, 55, 80, 65, 60], [65, 45, 50, 40, 40, 55]] },
+    { points: [[65, 60], [80, 75, 75, 90, 55, 88]] },  // curl tail
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // ए  (e)
+  'ए': { strokes: [
+    { points: [[30, 35], [20, 55, 35, 85, 60, 80], [80, 75, 80, 45, 70, 35]] },
+    { points: [[70, 35], [75, 50]] },  // small inner hook
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // ऐ  (ai) — ए + chandra-bindu-like tick above on top-right; tick drawn AFTER headline is unusual, but
+  // traditionally diacritic marks above shirorekha are drawn after the line.
+  'ऐ': { strokes: [
+    { points: [[30, 35], [20, 55, 35, 85, 60, 80], [80, 75, 80, 45, 70, 35]] },
+    { points: [[70, 35], [75, 50]] },
+    { points: [[15, 20], [85, 20]] },  // headline
+    { points: [[50, 10], [60, 5]] }    // chandra diacritic (top mark, drawn last)
+  ]},
+
+  // ओ  (o) — आ-like body + top mark (avagraha-style)
+  'ओ': { strokes: [
+    { points: [[25, 40], [25, 80, 48, 85, 53, 55], [53, 40, 38, 38, 30, 55]] },
+    { points: [[53, 25], [53, 85]] },
+    { points: [[53, 85], [62, 82, 65, 78, 68, 75]] },
+    { points: [[78, 25], [78, 85]] },
+    { points: [[15, 20], [88, 20]] },  // headline
+    { points: [[40, 10], [60, 5]] }    // top diagonal mark
+  ]},
+
+  // औ  (au) — ओ with an additional mark above
+  'औ': { strokes: [
+    { points: [[25, 40], [25, 80, 48, 85, 53, 55], [53, 40, 38, 38, 30, 55]] },
+    { points: [[53, 25], [53, 85]] },
+    { points: [[53, 85], [62, 82, 65, 78, 68, 75]] },
+    { points: [[78, 25], [78, 85]] },
+    { points: [[15, 20], [88, 20]] },
+    { points: [[40, 10], [60, 5]] },
+    { points: [[70, 10], [82, 5]] }    // second top mark (distinguishes au)
+  ]},
+
+  // अं  (aṃ) — anusvara: अ body + small dot above headline (dot drawn last)
+  'अं': { strokes: [
+    { points: [[30, 40], [30, 80, 55, 85, 60, 55], [60, 40, 45, 38, 35, 55]] },
+    { points: [[60, 25], [60, 85]] },
+    { points: [[60, 85], [72, 82, 75, 78, 78, 75]] },
+    { points: [[15, 20], [85, 20]] },  // headline
+    { points: [[50, 8], [52, 8]] }     // anusvara dot (above, last)
+  ]},
+
+  // अः  (aḥ) — visarga: अ body + two dots on the right side (drawn after headline)
+  'अः': { strokes: [
+    { points: [[30, 40], [30, 80, 55, 85, 60, 55], [60, 40, 45, 38, 35, 55]] },
+    { points: [[60, 25], [60, 85]] },
+    { points: [[60, 85], [72, 82, 75, 78, 78, 75]] },
+    { points: [[15, 20], [85, 20]] },
+    { points: [[90, 40], [92, 40]] },  // visarga dot 1
+    { points: [[90, 65], [92, 65]] }   // visarga dot 2
+  ]},
+
+  // ═══════════ CONSONANTS (व्यंजन) ═══════════
+
+  // क  (ka) — left loop + crossbar + right vertical
+  'क': { strokes: [
+    { points: [[35, 40], [15, 55, 25, 80, 50, 75], [60, 70, 55, 50, 40, 50]] }, // left loop
+    { points: [[40, 50], [80, 50]] },   // horizontal bar
+    { points: [[80, 25], [80, 85]] },   // right vertical
+    { points: [[15, 20], [90, 20]] }    // headline
+  ]},
+
+  // ख  (kha) — क-like left part + right vertical, different left form
+  'ख': { strokes: [
+    { points: [[30, 40], [20, 55, 30, 85, 55, 80], [65, 75, 60, 55, 50, 55]] },
+    { points: [[50, 55], [55, 70], [55, 70, 45, 80, 35, 75]] },  // small curl
+    { points: [[75, 25], [75, 85]] },
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // ग  (ga)
+  'ग': { strokes: [
+    { points: [[25, 35], [25, 80, 50, 85, 60, 60]] },   // left curl
+    { points: [[60, 30], [60, 85]] },                    // main vertical
+    { points: [[60, 85], [68, 84, 72, 80, 78, 75]] },    // tail hook
+    { points: [[15, 20], [80, 20]] }
+  ]},
+
+  // घ  (gha)
+  'घ': { strokes: [
+    { points: [[25, 35], [15, 55, 25, 82, 50, 82], [75, 82, 85, 55, 75, 35]] },  // wide U
+    { points: [[75, 35], [75, 85]] },   // right vertical
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // ङ  (ṅa) — घ-like + dot above
+  'ङ': { strokes: [
+    { points: [[30, 35], [20, 55, 30, 82, 55, 82], [80, 82, 85, 55, 70, 40]] },
+    { points: [[70, 40], [70, 85]] },
+    { points: [[15, 20], [85, 20]] },
+    { points: [[50, 8], [52, 8]] }     // dot above
+  ]},
+
+  // च  (ca)
+  'च': { strokes: [
+    { points: [[25, 35], [15, 60, 35, 85, 60, 80], [80, 72, 80, 45, 65, 40]] },
+    { points: [[65, 40], [75, 55, 65, 55, 60, 50]] },   // inner hook
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // छ  (cha)
+  'छ': { strokes: [
+    { points: [[28, 40], [20, 60, 35, 82, 55, 82], [78, 82, 82, 55, 65, 45]] },
+    { points: [[65, 45], [75, 55, 62, 60, 58, 52]] },
+    { points: [[80, 28], [90, 30]] },   // upper right flag
+    { points: [[15, 20], [80, 20]] }
+  ]},
+
+  // ज  (ja)
+  'ज': { strokes: [
+    { points: [[25, 35], [15, 55, 30, 82, 50, 80]] },
+    { points: [[50, 80], [70, 78, 65, 55, 50, 55]] },
+    { points: [[75, 25], [75, 85]] },
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // झ  (jha)
+  'झ': { strokes: [
+    { points: [[25, 35], [20, 60, 35, 80, 50, 78]] },
+    { points: [[50, 78], [65, 75, 62, 55, 48, 55]] },
+    { points: [[55, 40], [55, 85]] },   // central vertical
+    { points: [[75, 25], [75, 85]] },
+    { points: [[15, 20], [88, 20]] }
+  ]},
+
+  // ञ  (ña)
+  'ञ': { strokes: [
+    { points: [[25, 40], [25, 80, 48, 85, 52, 55], [52, 40, 38, 38, 30, 55]] },
+    { points: [[55, 40], [70, 60, 55, 85, 80, 80]] },
+    { points: [[15, 20], [88, 20]] }
+  ]},
+
+  // ट  (ṭa) — loop
+  'ट': { strokes: [
+    { points: [[30, 40], [45, 30, 75, 35, 78, 55], [80, 75, 55, 85, 35, 75]] },
+    { points: [[35, 75], [25, 70, 22, 55, 30, 45]] },  // closes into loop
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // ठ  (ṭha) — ट + small circle inside
+  'ठ': { strokes: [
+    { points: [[30, 40], [45, 30, 75, 35, 78, 55], [80, 75, 55, 85, 35, 75]] },
+    { points: [[35, 75], [25, 70, 22, 55, 30, 45]] },
+    { points: [[50, 50], [40, 55, 45, 70, 55, 68], [65, 65, 62, 50, 52, 50]] },  // inner small circle
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // ड  (ḍa)
+  'ड': { strokes: [
+    { points: [[25, 30], [75, 35]] },                  // top diagonal down
+    { points: [[75, 35], [80, 55, 60, 80, 35, 75]] },  // curve down-left
+    { points: [[35, 75], [30, 88]] },                   // small tail
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // ढ  (ḍha) — ड + small dot-like hook below
+  'ढ': { strokes: [
+    { points: [[25, 30], [75, 35]] },
+    { points: [[75, 35], [80, 55, 60, 80, 35, 75]] },
+    { points: [[35, 75], [30, 88]] },
+    { points: [[60, 88], [62, 88]] },   // small extra mark
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // ण  (ṇa)
+  'ण': { strokes: [
+    { points: [[25, 40], [20, 60, 30, 82, 50, 80], [65, 78, 60, 55, 45, 55]] },
+    { points: [[50, 55], [55, 70], [55, 70, 45, 80, 35, 75]] },
+    { points: [[72, 25], [72, 85]] },
+    { points: [[72, 85], [80, 84, 85, 80, 90, 75]] },  // tail hook
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // त  (ta)
+  'त': { strokes: [
+    { points: [[25, 40], [15, 60, 30, 82, 50, 80], [70, 78, 72, 55, 55, 45]] },
+    { points: [[55, 45], [65, 55, 55, 60, 50, 55]] },  // small inner curl
+    { points: [[72, 30], [80, 35]] },                   // small tick at top
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // थ  (tha) — ta + circle inside
+  'थ': { strokes: [
+    { points: [[25, 40], [15, 60, 30, 82, 50, 80], [70, 78, 72, 55, 55, 45]] },
+    { points: [[55, 45], [65, 55, 55, 60, 50, 55]] },
+    { points: [[45, 50], [35, 55, 40, 70, 50, 68], [60, 66, 55, 50, 47, 50]] },  // inner circle
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // द  (da)
+  'द': { strokes: [
+    { points: [[70, 30], [40, 40, 25, 60, 35, 80], [50, 90, 75, 85, 80, 65]] },
+    { points: [[80, 65], [78, 50, 65, 45, 55, 55]] },
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // ध  (dha)
+  'ध': { strokes: [
+    { points: [[25, 40], [15, 60, 25, 85, 50, 82], [75, 82, 82, 55, 75, 40]] },
+    { points: [[45, 50], [35, 55, 40, 70, 50, 68], [60, 66, 55, 50, 47, 50]] },
+    { points: [[75, 30], [75, 85]] },
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // न  (na)
+  'न': { strokes: [
+    { points: [[25, 40], [15, 60, 25, 80, 45, 82], [68, 80, 62, 55, 50, 50]] },
+    { points: [[50, 50], [60, 58, 52, 65, 45, 58]] },
+    { points: [[75, 30], [75, 85]] },
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // प  (pa)
+  'प': { strokes: [
+    { points: [[25, 40], [25, 85]] },                         // left vertical
+    { points: [[25, 40], [40, 30, 60, 30, 70, 45]] },         // top arch
+    { points: [[70, 45], [72, 60, 55, 65, 45, 55]] },         // inner hook
+    { points: [[75, 45], [75, 85]] },                         // right vertical
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // फ  (pha) — प + small loop on right
+  'फ': { strokes: [
+    { points: [[25, 40], [25, 85]] },
+    { points: [[25, 40], [40, 30, 60, 30, 70, 45]] },
+    { points: [[70, 45], [72, 60, 55, 65, 45, 55]] },
+    { points: [[75, 45], [75, 85]] },
+    { points: [[75, 55], [90, 55, 90, 70, 80, 70]] },  // right loop
+    { points: [[15, 20], [90, 20]] }
+  ]},
+
+  // ब  (ba)
+  'ब': { strokes: [
+    { points: [[25, 40], [25, 85]] },
+    { points: [[25, 40], [40, 30, 60, 30, 70, 45], [72, 60, 55, 65, 45, 55]] },
+    { points: [[25, 85], [70, 82, 75, 60, 70, 45]] },  // bottom curl connecting to right
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // भ  (bha)
+  'भ': { strokes: [
+    { points: [[30, 40], [25, 60, 35, 85, 55, 82], [72, 80, 68, 60, 55, 55]] },
+    { points: [[55, 55], [65, 62, 58, 68, 50, 60]] },
+    { points: [[75, 30], [75, 85]] },
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // म  (ma)
+  'म': { strokes: [
+    { points: [[25, 40], [25, 85]] },
+    { points: [[25, 40], [40, 30, 60, 30, 72, 42]] },
+    { points: [[72, 42], [85, 55, 78, 80, 55, 80], [35, 80, 35, 60, 50, 55]] },
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // य  (ya)
+  'य': { strokes: [
+    { points: [[25, 40], [20, 60, 32, 82, 50, 80], [70, 78, 68, 55, 52, 52]] },
+    { points: [[52, 52], [62, 58, 55, 65, 48, 58]] },
+    { points: [[68, 40], [72, 55, 82, 80, 85, 85]] },
+    { points: [[15, 20], [88, 20]] }
+  ]},
+
+  // र  (ra)
+  'र': { strokes: [
+    { points: [[30, 30], [30, 85]] },                         // vertical
+    { points: [[30, 50], [50, 45, 65, 55, 60, 75]] },         // right curve (small leg)
+    { points: [[15, 20], [75, 20]] }
+  ]},
+
+  // ल  (la)
+  'ल': { strokes: [
+    { points: [[25, 40], [25, 80, 45, 88, 60, 82], [80, 75, 80, 50, 65, 45]] },
+    { points: [[65, 45], [55, 55, 60, 65, 50, 60]] },
+    { points: [[75, 30], [75, 60]] },                         // short right vertical
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // व  (va)
+  'व': { strokes: [
+    { points: [[30, 40], [25, 60, 40, 82, 58, 80], [78, 78, 78, 55, 62, 45]] },
+    { points: [[62, 45], [72, 55, 62, 60, 55, 55]] },
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // श  (śa)
+  'श': { strokes: [
+    { points: [[25, 40], [15, 60, 25, 85, 45, 82]] },
+    { points: [[45, 82], [50, 65, 40, 50, 30, 55]] },         // inner curl
+    { points: [[55, 40], [55, 85]] },
+    { points: [[75, 30], [75, 85]] },
+    { points: [[15, 20], [88, 20]] }
+  ]},
+
+  // ष  (ṣa)
+  'ष': { strokes: [
+    { points: [[30, 40], [45, 30, 70, 35, 75, 55], [78, 75, 55, 85, 35, 75]] },
+    { points: [[35, 75], [28, 70, 25, 55, 32, 45]] },
+    { points: [[75, 30], [75, 85]] },
+    { points: [[15, 20], [85, 20]] }
+  ]},
+
+  // स  (sa)
+  'स': { strokes: [
+    { points: [[25, 40], [15, 60, 25, 82, 45, 82], [65, 82, 70, 55, 55, 50]] },
+    { points: [[55, 50], [40, 45, 38, 60, 48, 65]] },         // inner curl
+    { points: [[75, 30], [75, 85]] },
+    { points: [[15, 20], [88, 20]] }
+  ]},
+
+  // ह  (ha)
+  'ह': { strokes: [
+    { points: [[30, 40], [25, 60, 35, 82, 55, 82], [75, 82, 80, 55, 65, 45]] },
+    { points: [[65, 45], [75, 55, 62, 60, 55, 52]] },
+    { points: [[55, 52], [58, 70, 75, 80, 80, 85]] },         // tail descending right
+    { points: [[15, 20], [85, 20]] }
+  ]}
+};
+// Korean Hangul jamo stroke order data
+// Coordinate system: 0-100 (0,0 = top-left, 100,100 = bottom-right)
+// Standard Hangul stroke order: top → bottom, left → right.
+// Format per stroke:
+//   { points: [[x,y], [x,y], ...] }             // straight lineTo segments
+//   { points: [[x,y], [cx1,cy1,cx2,cy2,x,y]] }  // bezierCurveTo segment
+
+window.STROKE_GUIDES = window.STROKE_GUIDES || {};
+window.STROKE_GUIDES.korean = {
+
+  // ═══════════ CONSONANTS (자음) ═══════════
+
+  // ㄱ  (giyeok) — horizontal right, then hook down
+  'ㄱ': { strokes: [
+    { points: [[20, 30], [80, 30], [80, 85]] }
+  ]},
+
+  // ㄴ  (nieun) — vertical down, then horizontal right
+  'ㄴ': { strokes: [
+    { points: [[25, 20], [25, 80], [85, 80]] }
+  ]},
+
+  // ㄷ  (digeut) — top horizontal, then left vertical + bottom horizontal
+  'ㄷ': { strokes: [
+    { points: [[20, 25], [80, 25]] },
+    { points: [[20, 25], [20, 80], [85, 80]] }
+  ]},
+
+  // ㄹ  (rieul) — three connected parts, written in order:
+  // 1) top ㄱ shape, 2) middle horizontal, 3) bottom ㄴ shape (well, mirrored)
+  'ㄹ': { strokes: [
+    { points: [[20, 22], [80, 22], [80, 48]] },      // top ㄱ
+    { points: [[20, 48], [80, 48]] },                 // middle horizontal
+    { points: [[20, 48], [20, 82], [85, 82]] }        // bottom ㄴ
+  ]},
+
+  // ㅁ  (mieum) — square: left vertical, then top+right vertical, then closing bottom
+  'ㅁ': { strokes: [
+    { points: [[22, 25], [22, 82]] },
+    { points: [[22, 25], [82, 25], [82, 82]] },
+    { points: [[22, 82], [82, 82]] }
+  ]},
+
+  // ㅂ  (bieup) — two verticals, middle horizontal, closing bottom
+  'ㅂ': { strokes: [
+    { points: [[22, 20], [22, 85]] },    // left vertical
+    { points: [[78, 20], [78, 85]] },    // right vertical
+    { points: [[22, 55], [78, 55]] },    // middle horizontal
+    { points: [[22, 85], [78, 85]] }     // bottom horizontal
+  ]},
+
+  // ㅅ  (siot) — left-falling diagonal, then right-falling diagonal
+  'ㅅ': { strokes: [
+    { points: [[50, 20], [18, 85]] },
+    { points: [[50, 45], [85, 85]] }
+  ]},
+
+  // ㅇ  (ieung) — circle, traditionally written in one continuous stroke
+  'ㅇ': { strokes: [
+    { points: [[50, 22], [20, 22, 20, 82, 50, 82], [80, 82, 80, 22, 50, 22]] }
+  ]},
+
+  // ㅈ  (jieut) — top horizontal, then two diagonals like ㅅ below
+  'ㅈ': { strokes: [
+    { points: [[15, 25], [85, 25]] },
+    { points: [[50, 25], [18, 85]] },
+    { points: [[50, 50], [85, 85]] }
+  ]},
+
+  // ㅊ  (chieut) — small top stroke, then ㅈ
+  'ㅊ': { strokes: [
+    { points: [[45, 10], [55, 18]] },    // top tick
+    { points: [[15, 30], [85, 30]] },    // horizontal
+    { points: [[50, 30], [18, 88]] },    // left diagonal
+    { points: [[50, 52], [85, 88]] }     // right diagonal
+  ]},
+
+  // ㅋ  (kieuk) — ㄱ + middle horizontal
+  'ㅋ': { strokes: [
+    { points: [[20, 25], [80, 25], [80, 85]] },
+    { points: [[20, 55], [75, 55]] }
+  ]},
+
+  // ㅌ  (tieut) — three horizontals with left vertical, basically ㄷ with extra middle bar
+  'ㅌ': { strokes: [
+    { points: [[20, 22], [80, 22]] },
+    { points: [[20, 22], [20, 82]] },
+    { points: [[20, 52], [78, 52]] },
+    { points: [[20, 82], [85, 82]] }
+  ]},
+
+  // ㅍ  (pieup) — top horizontal, two verticals, bottom horizontal
+  'ㅍ': { strokes: [
+    { points: [[15, 28], [85, 28]] },    // top horizontal
+    { points: [[32, 28], [32, 78]] },    // left vertical
+    { points: [[68, 28], [68, 78]] },    // right vertical
+    { points: [[15, 78], [85, 78]] }     // bottom horizontal
+  ]},
+
+  // ㅎ  (hieut) — top tick, horizontal, then circle
+  'ㅎ': { strokes: [
+    { points: [[45, 8], [55, 18]] },     // top tick
+    { points: [[18, 30], [82, 30]] },    // horizontal
+    { points: [[50, 48], [28, 48, 28, 85, 50, 85], [72, 85, 72, 48, 50, 48]] }  // circle
+  ]},
+
+  // ═══════════ VOWELS (모음) ═══════════
+
+  // ㅏ  (a) — long vertical, then short right horizontal
+  'ㅏ': { strokes: [
+    { points: [[45, 15], [45, 88]] },
+    { points: [[45, 52], [82, 52]] }
+  ]},
+
+  // ㅑ  (ya) — long vertical, two right horizontals
+  'ㅑ': { strokes: [
+    { points: [[42, 15], [42, 88]] },
+    { points: [[42, 38], [82, 38]] },
+    { points: [[42, 65], [82, 65]] }
+  ]},
+
+  // ㅓ  (eo) — short left horizontal, then long vertical
+  'ㅓ': { strokes: [
+    { points: [[18, 52], [55, 52]] },
+    { points: [[55, 15], [55, 88]] }
+  ]},
+
+  // ㅕ  (yeo) — two left horizontals, then long vertical
+  'ㅕ': { strokes: [
+    { points: [[18, 38], [58, 38]] },
+    { points: [[18, 65], [58, 65]] },
+    { points: [[58, 15], [58, 88]] }
+  ]},
+
+  // ㅗ  (o) — short vertical, then long horizontal
+  'ㅗ': { strokes: [
+    { points: [[50, 22], [50, 60]] },
+    { points: [[12, 60], [88, 60]] }
+  ]},
+
+  // ㅛ  (yo) — two short verticals, then long horizontal
+  'ㅛ': { strokes: [
+    { points: [[35, 22], [35, 60]] },
+    { points: [[65, 22], [65, 60]] },
+    { points: [[12, 60], [88, 60]] }
+  ]},
+
+  // ㅜ  (u) — long horizontal, then short vertical below
+  'ㅜ': { strokes: [
+    { points: [[12, 40], [88, 40]] },
+    { points: [[50, 40], [50, 82]] }
+  ]},
+
+  // ㅠ  (yu) — long horizontal, then two short verticals below
+  'ㅠ': { strokes: [
+    { points: [[12, 40], [88, 40]] },
+    { points: [[35, 40], [35, 82]] },
+    { points: [[65, 40], [65, 82]] }
+  ]},
+
+  // ㅡ  (eu) — single long horizontal
+  'ㅡ': { strokes: [
+    { points: [[12, 50], [88, 50]] }
+  ]},
+
+  // ㅣ  (i) — single long vertical
+  'ㅣ': { strokes: [
+    { points: [[50, 12], [50, 88]] }
+  ]}
+};
+/**
+ * ReWrite — Stroke Guide Renderer
+ * 
+ * Renders dotted letter outlines with numbered start points and directional arrows
+ * on the guide canvas layer. Progressive visibility based on exercise difficulty.
+ * 
+ * Guide levels:
+ *   1 = Full guide: dotted path + numbered starts + directional arrows
+ *   2 = Dotted path + numbered starts (no arrows)
+ *   3 = Dotted path only (faded)
+ *   0 = No guide (blank canvas — current behavior for words/sentences)
+ */
+
+// ─── Guide Renderer ───
+
+function renderStrokeGuide(guideCanvas, char, guideLevel) {
+  if (!guideCanvas || !char || guideLevel <= 0) return;
+
+  var ctx = guideCanvas.getContext('2d');
+  var w = guideCanvas.width;
+  var h = guideCanvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  // Determine which script this character belongs to
+  var strokeData = getStrokeData(char);
+  if (!strokeData || !strokeData.strokes || strokeData.strokes.length === 0) return;
+
+  var scale = Math.min(w, h) / 100;
+  var offsetX = (w - 100 * scale) / 2;
+  var offsetY = (h - 100 * scale) / 2;
+
+  // Opacity based on guide level
+  var pathAlpha = guideLevel >= 3 ? 0.2 : guideLevel >= 2 ? 0.3 : 0.35;
+  var arrowAlpha = guideLevel >= 1 ? 0.5 : 0;
+  var numberAlpha = guideLevel <= 2 ? 0.7 : 0;
+
+  var accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#b85c38';
+
+  strokeData.strokes.forEach(function(stroke, strokeIndex) {
+    if (!stroke.points || stroke.points.length === 0) return;
+
+    // ─── 1. Draw dotted path ───
+    ctx.save();
+    ctx.setLineDash([4 * scale, 6 * scale]);
+    ctx.lineWidth = 3 * scale;
+    ctx.strokeStyle = 'rgba(42,42,40,' + pathAlpha + ')';
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+
+    var prevX, prevY;
+    stroke.points.forEach(function(pt, i) {
+      var x, y;
+      if (pt.length === 2) {
+        // moveTo or lineTo
+        x = pt[0] * scale + offsetX;
+        y = pt[1] * scale + offsetY;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      } else if (pt.length === 6) {
+        // bezierCurveTo
+        var cx1 = pt[0] * scale + offsetX;
+        var cy1 = pt[1] * scale + offsetY;
+        var cx2 = pt[2] * scale + offsetX;
+        var cy2 = pt[3] * scale + offsetY;
+        x = pt[4] * scale + offsetX;
+        y = pt[5] * scale + offsetY;
+        ctx.bezierCurveTo(cx1, cy1, cx2, cy2, x, y);
+      } else if (pt.length === 4) {
+        // quadraticCurveTo
+        var qcx = pt[0] * scale + offsetX;
+        var qcy = pt[1] * scale + offsetY;
+        x = pt[2] * scale + offsetX;
+        y = pt[3] * scale + offsetY;
+        ctx.quadraticCurveTo(qcx, qcy, x, y);
+      }
+      prevX = x;
+      prevY = y;
+    });
+    ctx.stroke();
+    ctx.restore();
+
+    // ─── 2. Draw numbered start point ───
+    if (guideLevel <= 2 && stroke.points.length > 0) {
+      var startPt = stroke.points[0];
+      var sx = startPt[0] * scale + offsetX;
+      var sy = startPt[1] * scale + offsetY;
+      var radius = 8 * scale;
+
+      // Circle
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(sx, sy, radius, 0, Math.PI * 2);
+      ctx.fillStyle = accentColor;
+      ctx.globalAlpha = numberAlpha;
+      ctx.fill();
+
+      // Number
+      ctx.fillStyle = '#fff';
+      ctx.globalAlpha = 1;
+      ctx.font = 'bold ' + (10 * scale) + 'px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(strokeIndex + 1), sx, sy + 0.5 * scale);
+      ctx.restore();
+    }
+
+    // ─── 3. Draw directional arrows ───
+    if (guideLevel === 1 && stroke.points.length >= 2) {
+      // Place arrows at ~25%, 50%, 75% along the path
+      var pathPoints = samplePath(stroke.points, scale, offsetX, offsetY, 12);
+      var arrowPositions = [
+        Math.floor(pathPoints.length * 0.3),
+        Math.floor(pathPoints.length * 0.6),
+        Math.floor(pathPoints.length * 0.85)
+      ];
+
+      arrowPositions.forEach(function(idx) {
+        if (idx <= 0 || idx >= pathPoints.length) return;
+        var px = pathPoints[idx].x;
+        var py = pathPoints[idx].y;
+        var dx = pathPoints[idx].x - pathPoints[idx - 1].x;
+        var dy = pathPoints[idx].y - pathPoints[idx - 1].y;
+        var angle = Math.atan2(dy, dx);
+
+        drawArrow(ctx, px, py, angle, 5 * scale, accentColor, arrowAlpha);
+      });
+    }
+  });
+}
+
+// ─── Sample points along a stroke path for arrow placement ───
+function samplePath(points, scale, offsetX, offsetY, numSamples) {
+  var result = [];
+  var prevX, prevY;
+
+  points.forEach(function(pt, i) {
+    if (pt.length === 2) {
+      var x = pt[0] * scale + offsetX;
+      var y = pt[1] * scale + offsetY;
+      if (i === 0) {
+        result.push({ x: x, y: y });
+      } else {
+        // Interpolate straight line
+        var steps = Math.max(2, Math.ceil(numSamples / points.length));
+        for (var t = 1; t <= steps; t++) {
+          var frac = t / steps;
+          result.push({
+            x: prevX + (x - prevX) * frac,
+            y: prevY + (y - prevY) * frac
+          });
+        }
+      }
+      prevX = x;
+      prevY = y;
+    } else if (pt.length === 6) {
+      var cx1 = pt[0] * scale + offsetX;
+      var cy1 = pt[1] * scale + offsetY;
+      var cx2 = pt[2] * scale + offsetX;
+      var cy2 = pt[3] * scale + offsetY;
+      var ex = pt[4] * scale + offsetX;
+      var ey = pt[5] * scale + offsetY;
+      var steps = Math.max(4, Math.ceil(numSamples / points.length));
+      for (var t = 1; t <= steps; t++) {
+        var frac = t / steps;
+        var bx = bezierPoint(prevX, cx1, cx2, ex, frac);
+        var by = bezierPoint(prevY, cy1, cy2, ey, frac);
+        result.push({ x: bx, y: by });
+      }
+      prevX = ex;
+      prevY = ey;
+    } else if (pt.length === 4) {
+      var qcx = pt[0] * scale + offsetX;
+      var qcy = pt[1] * scale + offsetY;
+      var qex = pt[2] * scale + offsetX;
+      var qey = pt[3] * scale + offsetY;
+      var steps = Math.max(4, Math.ceil(numSamples / points.length));
+      for (var t = 1; t <= steps; t++) {
+        var frac = t / steps;
+        var qx = quadPoint(prevX, qcx, qex, frac);
+        var qy = quadPoint(prevY, qcy, qey, frac);
+        result.push({ x: qx, y: qy });
+      }
+      prevX = qex;
+      prevY = qey;
+    }
+  });
+
+  return result;
+}
+
+function bezierPoint(p0, p1, p2, p3, t) {
+  var u = 1 - t;
+  return u * u * u * p0 + 3 * u * u * t * p1 + 3 * u * t * t * p2 + t * t * t * p3;
+}
+
+function quadPoint(p0, p1, p2, t) {
+  var u = 1 - t;
+  return u * u * p0 + 2 * u * t * p1 + t * t * p2;
+}
+
+// ─── Draw a small directional arrow ───
+function drawArrow(ctx, x, y, angle, size, color, alpha) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(size, 0);
+  ctx.lineTo(-size * 0.6, -size * 0.5);
+  ctx.lineTo(-size * 0.3, 0);
+  ctx.lineTo(-size * 0.6, size * 0.5);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+// ─── Look up stroke data for a character ───
+function getStrokeData(char) {
+  var g = window.STROKE_GUIDES;
+  if (!g) return null;
+
+  // Check each script
+  var scripts = ['latin', 'hiragana', 'katakana', 'chinese', 'arabic', 'devanagari', 'korean'];
+  for (var i = 0; i < scripts.length; i++) {
+    if (g[scripts[i]] && g[scripts[i]][char]) {
+      return g[scripts[i]][char];
+    }
+  }
+  return null;
+}
+
+// ─── Determine guide level based on exercise context ───
+function getGuideLevel(exerciseType, exerciseIndex, totalExercises) {
+  // Letters: full guides for first third, reduced for middle, minimal for last third
+  if (exerciseType === 'letters') {
+    var progress = exerciseIndex / Math.max(1, totalExercises - 1);
+    if (progress < 0.33) return 1;      // Full: dots + numbers + arrows
+    if (progress < 0.66) return 2;      // Medium: dots + numbers
+    return 3;                            // Light: dots only
+  }
+  // Numbers: medium guides
+  if (exerciseType === 'numbers') {
+    return 2;
+  }
+  // Words and sentences: no guides
+  return 0;
+}
+
+/* ═══ END stroke-guides ═══ */
+</script>
 <script>
 // ══════════════ EXERCISE DATA ══════════════
 const EXERCISES_BASE = {
@@ -1362,6 +3784,49 @@ function loadExercise() {
 let charCanvas = null;
 let charCtx = null;
 
+
+// ══════════════ STROKE GUIDE INTEGRATION ══════════════
+// Render stroke-order guide (dots + numbers + arrows) on top of the
+// existing ruled-lines + light reference character backdrop. Uses
+// destination-over compositing to preserve the backdrop drawn by
+// setupCanvas(). Guide level is 0 (none) for words/sentences, so this
+// function is a no-op for those exercise types.
+function renderGuideForCurrent() {
+  try {
+    var guideC = document.getElementById('guideCanvas');
+    if (!guideC || typeof renderStrokeGuide !== 'function' || typeof getGuideLevel !== 'function') return;
+    var targetEl = document.getElementById('targetChar');
+    if (!targetEl) return;
+    var ch = (targetEl.textContent || '').trim();
+    if (!ch || ch.length !== 1) return; // Only single-char exercises (letters/numbers)
+    var total = (typeof sessionExercises !== 'undefined' && sessionExercises) ? sessionExercises.length : 8;
+    var idx = (typeof currentIndex !== 'undefined') ? (currentIndex || 0) : 0;
+    var exType = (typeof currentType !== 'undefined') ? (currentType || 'letters') : 'letters';
+    var level = getGuideLevel(exType, idx, total || 8);
+    if (level <= 0) return;
+    var ctx = guideC.getContext('2d');
+    // Snapshot current canvas (ruled lines + light reference letter drawn by setupCanvas)
+    var snapshot;
+    try { snapshot = ctx.getImageData(0, 0, guideC.width, guideC.height); } catch (e) { snapshot = null; }
+    // Render stroke guide with identity transform (renderer uses raw canvas-buffer coords)
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    renderStrokeGuide(guideC, ch, level);
+    // Composite the backdrop underneath the stroke-guide marks
+    if (snapshot) {
+      var tmp = document.createElement('canvas');
+      tmp.width = guideC.width; tmp.height = guideC.height;
+      tmp.getContext('2d').putImageData(snapshot, 0, 0);
+      ctx.globalCompositeOperation = 'destination-over';
+      ctx.drawImage(tmp, 0, 0);
+    }
+    ctx.restore();
+  } catch (err) {
+    // Fail silently so a bad glyph never breaks the exercise flow
+    if (window.console && console.warn) console.warn('Stroke guide render failed:', err);
+  }
+}
+
 function setupCanvas(text) {
   const container = document.getElementById('canvasContainer');
   const guideC = document.getElementById('guideCanvas');
@@ -1468,6 +3933,9 @@ function setupCanvas(text) {
   drawC.onmousedown = drawC.ontouchstart = startDraw;
   drawC.onmousemove = drawC.ontouchmove = draw;
   drawC.onmouseup = drawC.onmouseleave = drawC.ontouchend = endDraw;
+
+  // Render stroke-order guide on top of ruled lines + reference letter
+  renderGuideForCurrent();
 }
 
 function getPos(e, canvas) {
@@ -1520,6 +3988,9 @@ function clearCanvas() {
   hasStrokes = false;
   document.getElementById('submitBtn').disabled = true;
   document.getElementById('canvasHint').style.opacity = '1';
+  // Re-render stroke-order guide (guide canvas is separate from draw canvas,
+  // so it isn't cleared above, but call this for belt-and-suspenders).
+  renderGuideForCurrent();
 }
 
 // ══════════════ SCORING ══════════════
