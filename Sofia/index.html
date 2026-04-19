@@ -278,7 +278,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 
 <!-- ══════════════ Language Picker ══════════════ -->
 <div class="lang-overlay" id="langOverlay">
-  <svg width="64" height="64" viewBox="0 0 512 512" fill="none"><rect width="512" height="512" rx="96" fill="#3a7a5a"/><path d="M256 96 L384 320 L256 384 L128 320Z" fill="none" stroke="white" stroke-width="24" stroke-linejoin="round"/><path d="M256 192V384" stroke="white" stroke-width="24" stroke-linecap="round"/><circle cx="256" cy="96" r="28" fill="white"/><line x1="100" y1="432" x2="412" y2="432" stroke="white" stroke-width="16" stroke-linecap="round" stroke-opacity=".5"/></svg>
+  <svg width="64" height="64" viewBox="0 0 512 512" fill="none"><rect width="512" height="512" rx="96" fill="#b85c38"/><path d="M256 96 L384 320 L256 384 L128 320Z" fill="none" stroke="white" stroke-width="24" stroke-linejoin="round"/><path d="M256 192V384" stroke="white" stroke-width="24" stroke-linecap="round"/><circle cx="256" cy="96" r="28" fill="white"/><line x1="100" y1="432" x2="412" y2="432" stroke="white" stroke-width="16" stroke-linecap="round" stroke-opacity=".5"/></svg>
   <h2>ReWrite</h2>
   <p>Handwriting Rehabilitation</p>
   <p style="font-size:12px;color:var(--text3)">Choose your language</p>
@@ -334,7 +334,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   <div class="exercise-grid">
     <div class="exercise-card-group">
       <button class="exercise-card" onclick="startExerciseType('letters')">
-        <div class="exercise-icon" style="background:#e8f5ec;color:#3a7a5a">Aa</div>
+        <div class="exercise-icon" style="background:#e8f5ec;color:#b85c38">Aa</div>
         <div>
           <h3 id="exLettersTitle">Individual Letters</h3>
           <p id="exLettersDesc">Trace uppercase and lowercase letters. Focus on form, size and proportion.</p>
@@ -1825,7 +1825,7 @@ async function refreshProgress() {
   });
 
   const peDiv = document.getElementById('perExerciseBreakdown');
-  const colours = { letters: '#3a7a5a', numbers: '#3a5a9a', words: '#8a6a3a', sentences: '#7a3a7a' };
+  const colours = { letters: '#b85c38', numbers: '#3a5a9a', words: '#8a6a3a', sentences: '#7a3a7a' };
   const icons = { letters: 'Aa', numbers: '12', words: 'cat', sentences: '...' };
   const bgColours = { letters: '#e8f5ec', numbers: '#e8f0fa', words: '#faf0e8', sentences: '#f5e8f5' };
   let peHtml = '';
@@ -1945,7 +1945,7 @@ function renderTrendChart(sessions) {
   // Data line
   if (pts.length > 1) {
     const step = chartW / (pts.length - 1);
-    ctx.strokeStyle = '#3a7a5a';
+    ctx.strokeStyle = '#b85c38';
     ctx.lineWidth = 2.5;
     ctx.lineJoin = 'round';
     ctx.beginPath();
@@ -1972,7 +1972,7 @@ function renderTrendChart(sessions) {
       const y = padT + chartH - (v / 100) * chartH;
       ctx.beginPath();
       ctx.arc(x, y, 3.5, 0, Math.PI * 2);
-      ctx.fillStyle = v >= 80 ? '#3a7a5a' : v >= 50 ? '#b45309' : '#999';
+      ctx.fillStyle = v >= 80 ? '#b85c38' : v >= 50 ? '#b45309' : '#999';
       ctx.fill();
     });
 
@@ -2010,7 +2010,7 @@ function applyDarkMode(isDark) {
   toggle.innerHTML = isDark ? SUN_SVG : MOON_SVG;
   // Update theme-color meta tag
   const metaTheme = document.querySelector('meta[name="theme-color"]');
-  if (metaTheme) metaTheme.setAttribute('content', isDark ? '#2d6147' : '#3a7a5a');
+  if (metaTheme) metaTheme.setAttribute('content', isDark ? '#2d6147' : '#b85c38');
 }
 
 function toggleDarkMode() {
