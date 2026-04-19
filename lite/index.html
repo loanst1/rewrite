@@ -5,26 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, user-scalable=yes">
 <title>ReWrite Lite — Handwriting Rehabilitation</title>
 <meta name="description" content="Free guided handwriting exercises for stroke survivors and anyone rebuilding writing skills. Trace letters and words with built-in progress tracking.">
-<meta name="theme-color" content="#3a7a5a">
+<meta name="theme-color" content="#b85c38">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="RW Lite">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%233a7a5a'/><path d='M256 96 L384 320 L256 384 L128 320Z' fill='none' stroke='white' stroke-width='24' stroke-linejoin='round'/><path d='M256 192V384' stroke='white' stroke-width='24' stroke-linecap='round'/><circle cx='256' cy='96' r='28' fill='white'/><line x1='100' y1='432' x2='412' y2='432' stroke='white' stroke-width='16' stroke-linecap='round' stroke-opacity='.5'/></svg>">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%233a7a5a'/><path d='M256 96 L384 320 L256 384 L128 320Z' fill='none' stroke='white' stroke-width='24' stroke-linejoin='round'/><path d='M256 192V384' stroke='white' stroke-width='24' stroke-linecap='round'/><circle cx='256' cy='96' r='28' fill='white'/></svg>">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%23b85c38'/><line x1='90' y1='340' x2='422' y2='340' stroke='%23f5f1e8' stroke-width='2' opacity='.25' stroke-dasharray='8 7'/><g transform='translate(70,140)'><path d='M10 160 Q40 40,100 110 T200 140 Q250 160,290 100 T360 120' fill='none' stroke='%23f5f1e8' stroke-width='19' stroke-linecap='round' stroke-linejoin='round'/><circle cx='360' cy='120' r='11' fill='%23f5f1e8'/></g></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%23b85c38'/><g transform='translate(70,140)'><path d='M10 160 Q40 40,100 110 T200 140 Q250 160,290 100 T360 120' fill='none' stroke='%23f5f1e8' stroke-width='19' stroke-linecap='round' stroke-linejoin='round'/><circle cx='360' cy='120' r='11' fill='%23f5f1e8'/></g></svg>">
 <style>
 /* ── Reset & Base ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#faf7f2;--bg2:#f3ede4;--card:#fff;--text:#2c3e2d;--text2:#5a6b5c;--text3:#8a9a8c;
-  --accent:#3a7a5a;--accent-light:#e8f5ec;--accent-dark:#2d6147;
-  --success:#3a8a5a;--warning:#c48a2a;--danger:#c45a4a;
-  --border:#e4ddd4;--shadow:0 2px 12px rgba(0,0,0,.06);
+  --bg:#fbf8f1;--bg2:#f5f1e8;--card:#fff;--text:#2a2a28;--text2:#6b6b68;--text3:#8a9a8c;
+  --accent:#b85c38;--accent-light:#f6e9e0;--accent-dark:#d27650;
+  --success:#2e6e58;--warning:#c48a2a;--danger:#c45a4a;
+  --border:rgba(42,42,40,0.12);--shadow:0 2px 12px rgba(0,0,0,.06);
   --radius:16px;--radius-sm:10px;
-  --font:'Segoe UI','SF Pro Display',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
   --min-touch:48px;
 }
-html{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;scroll-behavior:smooth;font-size:16px}
+html{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;scroll-behavior:smooth;font-size:16px}
 body{min-height:100dvh;display:flex;flex-direction:column;overflow-x:hidden}
 button{font:inherit;cursor:pointer;border:none;background:none;color:inherit;-webkit-tap-highlight-color:transparent}
 input,select,textarea{font:inherit}
@@ -38,7 +42,7 @@ canvas{display:block;touch-action:none}
   display:flex;align-items:center;justify-content:space-between;
   box-shadow:0 2px 8px rgba(0,0,0,.12);
 }
-.app-header h1{font-size:18px;font-weight:700;letter-spacing:-.3px;display:flex;align-items:center;gap:8px}
+.app-header h1{font-size:18px;font-weight:600;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;font-family:var(--serif)}
 .app-header .subtitle{font-size:11px;font-weight:400;opacity:.8;display:block}
 .header-right{display:flex;align-items:center;gap:8px}
 .header-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;transition:background .15s}
@@ -251,15 +255,15 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 
 /* ── Dark Mode ── */
 [data-theme="dark"]{
-  --bg:#1a1d1a;--bg2:#222622;--card:#252925;--text:#d4ddd5;--text2:#9aaa9c;--text3:#6a7a6c;
-  --accent:#5aaa7a;--accent-light:#1e3a2a;--accent-dark:#7acca0;
-  --success:#5aaa7a;--warning:#daa04a;--danger:#da7a6a;
-  --border:#3a3e3a;--shadow:0 2px 12px rgba(0,0,0,.2);
+  --bg:#1a1a18;--bg2:#252320;--card:#2e2b28;--text:#d4d4d0;--text2:#9a9a96;--text3:#6a6a68;
+  --accent:#d27650;--accent-light:#3a2820;--accent-dark:#e8956a;
+  --success:#4a9a7a;--warning:#daa04a;--danger:#da7a6a;
+  --border:rgba(245,241,232,0.12);--shadow:0 2px 12px rgba(0,0,0,.2);
 }
-[data-theme="dark"] .app-header{background:#2d6147}
+[data-theme="dark"] .app-header{background:#8a3e22}
 [data-theme="dark"] .tab-bar{background:var(--card);border-color:var(--border)}
-[data-theme="dark"] .disclaimer{background:#2a2a1a;border-color:#4a4a2a;color:#c0b060}
-[data-theme="dark"] .canvas-hint{background:rgba(30,40,30,.85);color:var(--text2)}
+[data-theme="dark"] .disclaimer{background:#2a2218;border-color:#4a3828;color:#d4b090}
+[data-theme="dark"] .canvas-hint{background:rgba(30,26,22,.85);color:var(--text2)}
 
 /* ── RTL (Arabic) ── */
 [dir="rtl"] .exercise-card{flex-direction:row-reverse;text-align:right}
@@ -290,7 +294,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 
 <!-- ══════════════ Language Picker ══════════════ -->
 <div class="lang-overlay" id="langOverlay">
-  <svg width="64" height="64" viewBox="0 0 512 512" fill="none"><rect width="512" height="512" rx="96" fill="#3a7a5a"/><path d="M256 96 L384 320 L256 384 L128 320Z" fill="none" stroke="white" stroke-width="24" stroke-linejoin="round"/><path d="M256 192V384" stroke="white" stroke-width="24" stroke-linecap="round"/><circle cx="256" cy="96" r="28" fill="white"/><line x1="100" y1="432" x2="412" y2="432" stroke="white" stroke-width="16" stroke-linecap="round" stroke-opacity=".5"/></svg>
+  <svg width="64" height="64" viewBox="0 0 512 512" fill="none"><rect width="512" height="512" rx="96" fill="#b85c38"/><line x1="90" y1="340" x2="422" y2="340" stroke="#f5f1e8" stroke-width="2" opacity=".25" stroke-dasharray="8 7"/><g transform="translate(70,140)"><path d="M10 160 Q40 40,100 110 T200 140 Q250 160,290 100 T360 120" fill="none" stroke="#f5f1e8" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/><circle cx="360" cy="120" r="11" fill="#f5f1e8"/></g></svg>
   <h2>ReWrite Lite</h2>
   <p>Free Handwriting Rehabilitation</p>
   <p style="font-size:12px;color:var(--text3)">Choose your language</p>
@@ -317,7 +321,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 <!-- ══════════════ Header ══════════════ -->
 <header class="app-header">
   <h1>
-    <svg width="28" height="28" viewBox="0 0 512 512" fill="none"><rect width="512" height="512" rx="96" fill="rgba(255,255,255,.2)"/><path d="M256 96 L384 320 L256 384 L128 320Z" fill="none" stroke="white" stroke-width="24" stroke-linejoin="round"/><path d="M256 192V384" stroke="white" stroke-width="24" stroke-linecap="round"/><circle cx="256" cy="96" r="28" fill="white"/></svg>
+    <svg width="28" height="28" viewBox="0 0 512 512" fill="none"><rect width="512" height="512" rx="96" fill="rgba(255,255,255,.2)"/><g transform="translate(70,140)"><path d="M10 160 Q40 40,100 110 T200 140 Q250 160,290 100 T360 120" fill="none" stroke="white" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/><circle cx="360" cy="120" r="11" fill="white"/></g></svg>
     <span>ReWrite <span style="background:rgba(255,255,255,0.22);font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;vertical-align:middle;letter-spacing:.4px">LITE</span><span class="subtitle" id="headerSubtitle">Handwriting Rehab</span></span>
   </h1>
   <div class="header-right">
@@ -346,7 +350,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   <div class="exercise-grid">
     <div class="exercise-card-group">
       <button class="exercise-card" onclick="startExerciseType('letters')">
-        <div class="exercise-icon" style="background:#e8f5ec;color:#3a7a5a">Aa</div>
+        <div class="exercise-icon" style="background:#f6e9e0;color:#b85c38">Aa</div>
         <div>
           <h3 id="exLettersTitle">Individual Letters</h3>
           <p id="exLettersDesc">Trace uppercase and lowercase letters. Focus on form, size and proportion.</p>
@@ -2194,7 +2198,7 @@ function applyDarkMode(isDark) {
   toggle.innerHTML = isDark ? SUN_SVG : MOON_SVG;
   // Update theme-color meta tag
   const metaTheme = document.querySelector('meta[name="theme-color"]');
-  if (metaTheme) metaTheme.setAttribute('content', isDark ? '#2d6147' : '#3a7a5a');
+  if (metaTheme) metaTheme.setAttribute('content', isDark ? '#8a3e22' : '#b85c38');
 }
 
 function toggleDarkMode() {
