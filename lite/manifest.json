@@ -1,0 +1,20 @@
+{
+  "name": "ReWrite Lite",
+  "short_name": "RW Lite",
+  "description": "Free handwriting rehabilitation exercises. Trace letters and words to rebuild writing skills.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#faf7f2",
+  "theme_color": "#3a7a5a",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%233a7a5a'/><path d='M256 96 L384 320 L256 384 L128 320Z' fill='none' stroke='white' stroke-width='24' stroke-linejoin='round'/><path d='M256 192V384' stroke='white' stroke-width='24' stroke-linecap='round'/><circle cx='256' cy='96' r='28' fill='white'/></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "medical", "education"],
+  "lang": "en"
+}
