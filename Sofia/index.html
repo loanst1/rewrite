@@ -5,26 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, user-scalable=yes">
 <title>ReWrite — Handwriting Rehabilitation</title>
 <meta name="description" content="Guided handwriting exercises for stroke survivors and anyone rebuilding writing skills. Trace letters, words and sentences with built-in progress tracking.">
-<meta name="theme-color" content="#3a7a5a">
+<meta name="theme-color" content="#b85c38">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="ReWrite">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%233a7a5a'/><path d='M256 96 L384 320 L256 384 L128 320Z' fill='none' stroke='white' stroke-width='24' stroke-linejoin='round'/><path d='M256 192V384' stroke='white' stroke-width='24' stroke-linecap='round'/><circle cx='256' cy='96' r='28' fill='white'/><line x1='100' y1='432' x2='412' y2='432' stroke='white' stroke-width='16' stroke-linecap='round' stroke-opacity='.5'/></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%233a7a5a'/><path d='M256 96 L384 320 L256 384 L128 320Z' fill='none' stroke='white' stroke-width='24' stroke-linejoin='round'/><path d='M256 192V384' stroke='white' stroke-width='24' stroke-linecap='round'/><circle cx='256' cy='96' r='28' fill='white'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ── Reset & Base ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#faf7f2;--bg2:#f3ede4;--card:#fff;--text:#2c3e2d;--text2:#5a6b5c;--text3:#8a9a8c;
-  --accent:#3a7a5a;--accent-light:#e8f5ec;--accent-dark:#2d6147;
+  --bg:#fbf8f1;--bg2:#f5f1e8;--card:#fff;--text:#2a2a28;--text2:#6b6b68;--text3:#8a9a8c;
+  --accent:#b85c38;--accent-light:#f6e9e0;--accent-dark:#d27650;
   --success:#3a8a5a;--warning:#c48a2a;--danger:#c45a4a;
-  --border:#e4ddd4;--shadow:0 2px 12px rgba(0,0,0,.06);
+  --border:rgba(42,42,40,0.12);--shadow:0 2px 12px rgba(0,0,0,.06);
   --radius:16px;--radius-sm:10px;
   --font:'Segoe UI','SF Pro Display',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
   --min-touch:48px;
 }
-html{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;scroll-behavior:smooth;font-size:16px}
+html{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;scroll-behavior:smooth;font-size:16px}
 body{min-height:100dvh;display:flex;flex-direction:column;overflow-x:hidden}
 button{font:inherit;cursor:pointer;border:none;background:none;color:inherit;-webkit-tap-highlight-color:transparent}
 input,select,textarea{font:inherit}

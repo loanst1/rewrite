@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rewrite-v16';
+const CACHE_NAME = 'rewrite-v17';
 const ASSETS = [
   './',
   './index.html',
