@@ -524,9 +524,9 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
     <h3 id="benchmarksTitle">Understanding benchmarks</h3>
     <p id="benchmarksText">Scores are compared against typical performance bands. These are guides only — visual, motor, cognitive and fatigue factors all affect scores. What matters most is your personal improvement over time.</p>
     <div style="margin-top:10px">
-      <div class="benchmark"><div class="benchmark-dot bench-green"></div> <span id="benchGreen">Strong performance (≥80%) — close match to the guide</span></div>
-      <div class="benchmark" style="margin-top:4px"><div class="benchmark-dot bench-amber"></div> <span id="benchAmber">Developing (50–79%) — improving, keep practising</span></div>
-      <div class="benchmark" style="margin-top:4px"><div class="benchmark-dot bench-grey"></div> <span id="benchGrey">Early stage (&lt;50%) — every attempt builds new pathways</span></div>
+      <div class="benchmark"><div class="benchmark-dot bench-green"></div> <span id="benchGreen">Strong — close match to the guide</span></div>
+      <div class="benchmark" style="margin-top:4px"><div class="benchmark-dot bench-amber"></div> <span id="benchAmber">Developing — improving, keep practising</span></div>
+      <div class="benchmark" style="margin-top:4px"><div class="benchmark-dot bench-grey"></div> <span id="benchGrey">Early stage — every attempt builds new pathways</span></div>
     </div>
   </div>
 
@@ -1688,7 +1688,13 @@ function showScoreFeedback(score) {
   ring.style.stroke = score >= 80 ? 'var(--success)' : score >= 50 ? 'var(--warning)' : 'var(--text3)';
   setTimeout(() => { ring.style.strokeDashoffset = offset; }, 50);
 
-  document.getElementById('scoreValue').textContent = score + '%';
+  // Show band label in the ring instead of percentage
+  let bandLabel;
+  if (score >= 80) bandLabel = '★★★';
+  else if (score >= 60) bandLabel = '★★';
+  else if (score >= 40) bandLabel = '★';
+  else bandLabel = '·';
+  document.getElementById('scoreValue').textContent = bandLabel;
 
   // Label + message
   let label, msg;
@@ -1703,7 +1709,7 @@ function showScoreFeedback(score) {
   const benchDiv = document.getElementById('benchmarkDisplay');
   const band = score >= SCORE_BANDS.green ? 'green' : score >= SCORE_BANDS.amber ? 'amber' : 'grey';
   const bandLabel = score >= SCORE_BANDS.green ? 'Strong' : score >= SCORE_BANDS.amber ? 'Developing' : 'Early stage';
-  benchDiv.innerHTML = `<div class="benchmark" style="justify-content:center"><div class="benchmark-dot bench-${band}"></div> ${bandLabel} (${score}%)</div>`;
+  benchDiv.innerHTML = `<div class="benchmark" style="justify-content:center"><div class="benchmark-dot bench-${band}"></div> ${bandLabel}</div>`;
 
   // Next/Finish button
   const isLast = currentIndex + 1 >= sessionExercises.length;
@@ -1749,9 +1755,11 @@ function showSessionSummary(avg, best, total) {
 
   document.getElementById('summaryTitle').textContent = s.summaryTitle || 'Session Complete';
   document.getElementById('summarySubtitle').textContent = s.summarySubtitle || 'Great work';
-  document.getElementById('summaryScore').textContent = avg + '%';
+  let summaryBand = avg >= 80 ? '★★★' : avg >= 60 ? '★★' : avg >= 40 ? '★' : '·';
+  document.getElementById('summaryScore').textContent = summaryBand;
   document.getElementById('sumExCount').textContent = total;
-  document.getElementById('sumBest').textContent = best + '%';
+  let bestBand = best >= 80 ? 'Strong' : best >= 50 ? 'Developing' : 'Early';
+  document.getElementById('sumBest').textContent = bestBand;
 
   // Ring
   const offset = 314.16 - (avg / 100) * 314.16;
@@ -1804,8 +1812,8 @@ async function refreshProgress() {
 
   document.getElementById('statSessions').textContent = total;
   document.getElementById('statExercises').textContent = totalEx;
-  document.getElementById('statAvgScore').textContent = avg + '%';
-  document.getElementById('statBestScore').textContent = best + '%';
+  document.getElementById('statAvgScore').textContent = avg >= 80 ? 'Strong' : avg >= 50 ? 'Developing' : 'Early';
+  document.getElementById('statBestScore').textContent = best >= 80 ? 'Strong' : best >= 50 ? 'Developing' : 'Early';
 
   // Per-exercise breakdown
   const byType = {};
@@ -1913,7 +1921,7 @@ function renderTrendChart(sessions) {
   [0, 25, 50, 75, 100].forEach(v => {
     const y = padT + chartH - (v / 100) * chartH;
     ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(cssW - padR, y); ctx.stroke();
-    ctx.fillText(v + '%', padL - 4, y + 3);
+    ctx.fillText(v === 80 ? 'Strong' : v === 50 ? 'Developing' : '', padL - 4, y + 3);
   });
 
   // Benchmark reference lines: 80% (Strong) and 50% (Developing)
