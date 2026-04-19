@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, user-scalable=yes">
 <title>ReWrite Lite — Handwriting Rehabilitation</title>
 <meta name="description" content="Free guided handwriting exercises for stroke survivors and anyone rebuilding writing skills. Trace letters and words with built-in progress tracking.">
@@ -280,8 +279,8 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 <div id="upgradeOverlay" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.5);align-items:center;justify-content:center">
   <div style="background:var(--card);border-radius:16px;padding:32px 24px;max-width:360px;width:90%;text-align:center">
     <div style="font-size:40px;margin-bottom:12px">✍️</div>
-    <h2 style="font-size:20px;margin-bottom:8px">Unlock all exercises</h2>
-    <p style="color:var(--text2);font-size:14px;margin-bottom:16px">The full version includes numbers, sentences, and all difficulty levels — plus detailed progress tracking to share with your therapist.</p>
+    <h2 style="font-size:20px;margin-bottom:8px">Ready for more practice?</h2>
+    <p style="color:var(--text2);font-size:14px;margin-bottom:16px">You've been working on letters and words. The full version adds numbers for forms and addresses, full sentences for everyday writing, and detailed progress exports to share with your occupational therapist — one-time purchase, no subscriptions.</p>
     <p style="font-weight:700;font-size:18px;margin-bottom:16px">£29.99 — one-time purchase</p>
     <a href="#" id="upgradeLink" style="display:inline-block;background:var(--accent);color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin-bottom:8px">Get Full Version</a>
     <br>
@@ -382,13 +381,13 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
       </div>
     </div>
     <div class="exercise-card-group">
-      <button class="exercise-card" onclick="showUpgradePrompt()" style="opacity:0.6;cursor:pointer;position:relative">
+      <button class="exercise-card" onclick="startExerciseType('sentences')" style="opacity:1.0;cursor:pointer;position:relative">
         <div class="exercise-icon" style="background:#f5e8f5;color:#7a3a7a">...</div>
         <div>
           <h3 id="exSentencesTitle">Sentences</h3>
           <p id="exSentencesDesc">Write full sentences. Builds endurance and flow.</p>
         </div>
-        <span style="margin-left:auto;flex-shrink:0;background:#f5e8f5;color:#7a3a7a;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;white-space:nowrap">🔒 Full version</span>
+        <span style="margin-left:auto;flex-shrink:0;background:#f5e8f5;color:#7a3a7a;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;white-space:nowrap">3 free samples</span>
       </button>
     </div>
   </div>
@@ -557,12 +556,38 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   <div class="about-section">
     <h3 id="privacyTitle">Privacy</h3>
     <p id="privacyText">All data is stored locally on your device only. Nothing is sent to any server. No account is needed. Your progress stays private.</p>
+    <p><a href="https://rewriterehab.com/privacy-policy.html" style="color:var(--accent)" target="_blank">Privacy Policy</a></p>
   </div>
 
   <div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:var(--radius-sm);padding:16px;margin-top:16px;text-align:center">
     <p style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:6px">✨ Upgrade to ReWrite Full</p>
     <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Numbers, sentences, all difficulty levels, and detailed progress tracking. One-time purchase — no subscription.</p>
     <button onclick="showUpgradePrompt()" style="background:var(--accent);color:#fff;padding:10px 20px;border-radius:8px;font-weight:600;font-size:13px;border:none;cursor:pointer">Learn more — £29.99</button>
+  </div>
+
+  <div style="background:rgba(58,122,90,0.08);border:1px solid rgba(58,122,90,0.2);border-radius:12px;padding:16px;margin-top:12px">
+    <h3 style="color:var(--accent);font-size:15px;margin-bottom:6px">If cost is a barrier</h3>
+    <p style="font-size:13px;color:var(--text2)">If the full version's price is a barrier to your rehabilitation, please email <a href="mailto:liam@ansteyapps.com" style="color:var(--accent)">liam@ansteyapps.com</a>. We want the full app to be available to everyone who needs it.</p>
+  </div>
+
+  <div style="padding:16px;margin-top:12px;background:var(--card);border-radius:12px;border:1px solid var(--border)">
+    <h3 style="font-size:15px;margin-bottom:8px">What's in each version</h3>
+    <table style="width:100%;font-size:13px;border-collapse:collapse">
+      <thead><tr>
+        <th style="text-align:left;padding:6px 4px;border-bottom:1px solid var(--border)"></th>
+        <th style="text-align:center;padding:6px 4px;border-bottom:1px solid var(--border)">Lite (free)</th>
+        <th style="text-align:center;padding:6px 4px;border-bottom:1px solid var(--border)">Full (£29.99)</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:6px 4px">Letters</td><td style="text-align:center">✓</td><td style="text-align:center">✓</td></tr>
+        <tr><td style="padding:6px 4px">Words</td><td style="text-align:center">✓</td><td style="text-align:center">✓</td></tr>
+        <tr><td style="padding:6px 4px">Numbers</td><td style="text-align:center">—</td><td style="text-align:center">✓</td></tr>
+        <tr><td style="padding:6px 4px">Sentences</td><td style="text-align:center">3 samples</td><td style="text-align:center">✓</td></tr>
+        <tr><td style="padding:6px 4px">16 languages</td><td style="text-align:center">✓</td><td style="text-align:center">✓</td></tr>
+        <tr><td style="padding:6px 4px">Dark mode</td><td style="text-align:center">✓</td><td style="text-align:center">✓</td></tr>
+        <tr><td style="padding:6px 4px">No subscription</td><td style="text-align:center">✓</td><td style="text-align:center">✓</td></tr>
+      </tbody>
+    </table>
   </div>
 
   <div style="text-align:center;margin-top:20px;padding:16px;border-top:1px solid var(--border)">
@@ -631,6 +656,24 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 </nav>
 
 <script>
+(function setUpgradeLink() {
+  var link = document.getElementById('upgradeLink');
+  if (!link) return;
+  var ua = navigator.userAgent;
+  var url;
+  if (/iPad|iPhone|iPod/.test(ua)) {
+    url = 'https://ansteyapps.com/rewrite/';
+  } else if (/Android/.test(ua)) {
+    url = 'https://ansteyapps.com/rewrite/';
+  } else if (/Silk|Kindle/.test(ua)) {
+    url = 'https://ansteyapps.com/rewrite/';
+  } else {
+    url = 'https://ansteyapps.com/rewrite/';
+  }
+  link.href = url;
+  link.target = '_blank';
+})();
+
 // ══════════════ EXERCISE DATA ══════════════
 const EXERCISES_BASE = {
   letters: {
@@ -818,6 +861,10 @@ const SCORE_BANDS = {
   amber: 50    // 50–79% developing
                 // <50% early stage
 };
+
+// ══════════════ LITE SENTENCE SAMPLES ══════════════
+var LITE_SENTENCE_SAMPLES = ['The cat sat.', 'I can do this.', 'One step at a time.'];
+var liteSentenceCount = parseInt(localStorage.getItem('rewriteLite_sentenceCount') || '0');
 
 // ══════════════ STATE ══════════════
 let currentLang = 'en';
@@ -1314,9 +1361,24 @@ function showUpgradePrompt() {
 }
 
 function startExerciseType(type) {
-  // Guard: numbers and sentences are locked in Lite
-  if (type === 'numbers' || type === 'sentences') {
+  // Guard: numbers are locked in Lite
+  if (type === 'numbers') {
     showUpgradePrompt();
+    return;
+  }
+  if (type === 'sentences') {
+    if (liteSentenceCount >= 3) {
+      showUpgradePrompt();
+      return;
+    }
+    currentType = 'sentences';
+    currentDifficulty = 'easy';
+    sessionExercises = [LITE_SENTENCE_SAMPLES[liteSentenceCount]];
+    currentIndex = 0;
+    scores = [];
+    liteSentenceCount++;
+    localStorage.setItem('rewriteLite_sentenceCount', String(liteSentenceCount));
+    showExerciseScreen();
     return;
   }
   currentType = type;
