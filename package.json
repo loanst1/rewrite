@@ -1,0 +1,20 @@
+{
+  "name": "rewrite",
+  "version": "1.0.0",
+  "description": "Handwriting rehabilitation for stroke recovery",
+  "main": "index.html",
+  "scripts": {
+    "cap:sync": "npx cap sync"
+  },
+  "author": "Ansteyapps Limited",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@capacitor/android": "^8.3.1",
+    "@capacitor/cli": "^8.3.1",
+    "@capacitor/core": "^8.3.1",
+    "@capacitor/ios": "^8.3.1",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2"
+  }
+}

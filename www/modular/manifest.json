@@ -1,0 +1,25 @@
+{
+  "name": "ReWrite — Handwriting Rehabilitation",
+  "short_name": "ReWrite",
+  "description": "Guided handwriting exercises for stroke survivors and anyone rebuilding writing skills. Trace letters, words and sentences with built-in progress tracking.",
+  "start_url": "/Sofia/index.html",
+  "scope": "/Sofia/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#faf7f2",
+  "theme_color": "#3a7a5a",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

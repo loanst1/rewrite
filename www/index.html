@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#b85c38">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>ReWrite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;-webkit-font-smoothing:antialiased}
+  body{
+    background:#b85c38;color:#f5f1e8;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces',Georgia,serif;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .splash{
+    display:flex;flex-direction:column;align-items:center;gap:36px;
+    opacity:0;
+    animation:fadeIn 400ms cubic-bezier(.22,1,.36,1) forwards,
+              fadeOut 400ms cubic-bezier(.4,0,1,1) 2900ms forwards;
+  }
+  .mark{width:200px;height:200px}
+  .mark svg{width:100%;height:100%;display:block}
+  .mark .stroke{
+    fill:none;stroke:#f5f1e8;stroke-width:19;
+    stroke-linecap:round;stroke-linejoin:round;
+    stroke-dasharray:720;stroke-dashoffset:720;
+    animation:draw 1200ms cubic-bezier(.22,1,.36,1) 100ms forwards;
+  }
+  .mark .dot{
+    opacity:0;
+    animation:fadeUp 300ms cubic-bezier(.22,1,.36,1) 1200ms forwards;
+  }
+  .wordmark{
+    font-size:42px;font-weight:600;letter-spacing:-0.02em;
+    opacity:0;
+    animation:rise 700ms cubic-bezier(.22,1,.36,1) 750ms forwards;
+  }
+  @keyframes fadeIn{to{opacity:1}}
+  @keyframes fadeOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(1.03)}}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  @keyframes fadeUp{to{opacity:1}}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  @media (prefers-reduced-motion:reduce){
+    .splash,.mark .stroke,.mark .dot,.wordmark{animation-duration:.001ms;animation-delay:0ms}
+    .splash{opacity:1;animation:fadeOut 400ms 2600ms forwards}
+    .mark .stroke{stroke-dashoffset:0}.mark .dot{opacity:1}
+  }
+
+  .signature{
+    position:fixed;
+    left:0;right:0;
+    bottom:calc(36px + env(safe-area-inset-bottom));
+    text-align:center;
+    font-family:'Fraunces',Georgia,serif;
+    font-size:13px;letter-spacing:0.02em;
+    color:#f5f1e8;opacity:0;
+    animation:sigFade 600ms cubic-bezier(.22,1,.36,1) 1400ms forwards;
+  }
+  .signature .first{font-weight:600}
+  .signature .second{font-weight:400;margin-left:3px}
+  .signature .sep{opacity:0.5;margin:0 6px;font-weight:300}
+  @keyframes sigFade{to{opacity:0.55}}
+  @media (prefers-reduced-motion:reduce){
+    .signature{animation:sigFade 0.001ms 2600ms forwards}
+  }
+
+</style>
+</head>
+<body>
+<div class="splash" role="status" aria-label="ReWrite loading">
+  <div class="mark" aria-hidden="true">
+    <svg viewBox="0 0 512 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(70,70)">
+        <path class="stroke" d="M10 160 Q40 40,100 110 T200 140 Q250 160,290 100 T360 120"/>
+        <circle class="dot" cx="360" cy="120" r="11" fill="#f5f1e8"/>
+      </g>
+    </svg>
+  </div>
+  <div class="wordmark">ReWrite</div>
+</div>
+<div class="signature" aria-hidden="true"><span class="first">Anstey</span><span class="second">Apps</span></div>
+<script>
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('splash:complete'));
+      const params = new URLSearchParams(window.location.search);
+      const next = params.get('next') || 'index.html';
+      if (next) {
+        window.location.replace('app.html');
+      }
+    }, 3300);
+  });
+</script>
+</body>
+</html>

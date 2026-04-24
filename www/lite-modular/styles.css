@@ -1,0 +1,258 @@
+/* ── Reset & Base ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#faf7f2;--bg2:#f3ede4;--card:#fff;--text:#2c3e2d;--text2:#5a6b5c;--text3:#8a9a8c;
+  --accent:#3a7a5a;--accent-light:#e8f5ec;--accent-dark:#2d6147;
+  --success:#3a8a5a;--warning:#c48a2a;--danger:#c45a4a;
+  --border:#e4ddd4;--shadow:0 2px 12px rgba(0,0,0,.06);
+  --radius:16px;--radius-sm:10px;
+  --font:'Segoe UI','SF Pro Display',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+  --min-touch:48px;
+}
+html{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;scroll-behavior:smooth;font-size:16px}
+body{min-height:100dvh;display:flex;flex-direction:column;overflow-x:hidden}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit;-webkit-tap-highlight-color:transparent}
+input,select,textarea{font:inherit}
+canvas{display:block;touch-action:none}
+
+/* ── App Shell ── */
+.app-header{
+  position:sticky;top:0;z-index:50;
+  background:var(--accent);color:#fff;
+  padding:0 16px;height:56px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+}
+.app-header h1{font-size:18px;font-weight:700;letter-spacing:-.3px;display:flex;align-items:center;gap:8px}
+.app-header .subtitle{font-size:11px;font-weight:400;opacity:.8;display:block}
+.header-right{display:flex;align-items:center;gap:8px}
+.header-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;transition:background .15s}
+.header-btn:hover{background:rgba(255,255,255,.15)}
+
+/* ── Tab Bar ── */
+.tab-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:50;
+  background:var(--card);border-top:1px solid var(--border);
+  display:flex;height:64px;
+  padding-bottom:env(safe-area-inset-bottom);
+  box-shadow:0 -2px 12px rgba(0,0,0,.04);
+}
+.tab-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;font-size:10px;font-weight:600;color:var(--text3);
+  transition:color .15s;min-height:var(--min-touch);
+}
+.tab-btn.active{color:var(--accent)}
+.tab-btn svg{width:22px;height:22px;transition:transform .15s}
+.tab-btn.active svg{transform:scale(1.08)}
+
+/* ── Panels ── */
+.panel{display:none;padding:16px 16px 80px;max-width:600px;margin:0 auto;width:100%}
+.panel.active{display:block}
+
+/* ── Cards ── */
+.card{background:var(--card);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.card-title{font-size:15px;font-weight:700;margin-bottom:8px;color:var(--text)}
+.card-subtitle{font-size:12px;color:var(--text3);margin-bottom:12px}
+
+/* ── Exercise Buttons ── */
+.exercise-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:16px}
+.exercise-card{
+  background:var(--card);border-radius:var(--radius);padding:18px 16px;
+  border:2px solid var(--border);box-shadow:var(--shadow);
+  display:flex;align-items:center;gap:14px;
+  transition:border-color .15s,transform .1s;
+  min-height:var(--min-touch);text-align:left;width:100%;
+}
+.exercise-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.exercise-card:active{transform:scale(.98)}
+.exercise-icon{
+  width:48px;height:48px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.exercise-card h3{font-size:15px;font-weight:700;margin-bottom:2px}
+.exercise-card p{font-size:12px;color:var(--text2);line-height:1.4}
+
+/* ── Level Selector ── */
+.level-selector{display:flex;gap:8px;margin-bottom:16px}
+.level-btn{
+  flex:1;padding:10px 8px;border-radius:var(--radius-sm);
+  font-size:13px;font-weight:600;text-align:center;
+  background:var(--bg2);color:var(--text2);border:2px solid transparent;
+  transition:all .15s;min-height:var(--min-touch);
+}
+.level-btn.active{background:var(--accent-light);color:var(--accent);border-color:var(--accent)}
+
+/* ── Canvas ── */
+.canvas-container{
+  position:relative;border-radius:var(--radius);overflow:hidden;
+  background:var(--card);border:2px solid var(--border);
+  margin-bottom:14px;
+}
+.canvas-container canvas{width:100%;height:auto;cursor:crosshair}
+.canvas-hint{
+  position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+  font-size:12px;color:var(--text3);background:rgba(255,255,255,.85);
+  padding:4px 14px;border-radius:20px;pointer-events:none;
+  transition:opacity .3s;
+}
+
+/* ── Action Buttons ── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:14px 24px;border-radius:var(--radius-sm);font-size:15px;font-weight:600;
+  transition:all .15s;min-height:var(--min-touch);
+}
+.btn-primary{background:var(--accent);color:#fff;width:100%}
+.btn-primary:hover{background:var(--accent-dark)}
+.btn-primary:active{transform:scale(.97)}
+.btn-outline{background:var(--bg2);color:var(--text);border:1px solid var(--border);width:100%}
+.btn-outline:hover{background:var(--border)}
+.btn-row{display:flex;gap:10px;margin-top:14px}
+.btn-row .btn{flex:1}
+.btn-sm{padding:10px 16px;font-size:13px;min-height:40px}
+
+/* ── Score Feedback ── */
+.score-display{text-align:center;padding:24px 16px;animation:fadeIn .3s ease}
+.score-ring-container{margin:0 auto 16px;width:120px;height:120px;position:relative}
+.score-ring-container svg{width:100%;height:100%}
+.score-value{font-size:28px;font-weight:800;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+.score-label{font-size:16px;font-weight:700;margin-bottom:4px}
+.score-message{font-size:13px;color:var(--text2);max-width:300px;margin:0 auto 16px;line-height:1.5}
+
+/* ── Benchmark Bands ── */
+.benchmark{display:flex;gap:6px;align-items:center;font-size:12px;margin-top:6px}
+.benchmark-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.bench-green{background:var(--success)}
+.bench-amber{background:var(--warning)}
+.bench-grey{background:var(--text3)}
+
+/* ── Progress Stats ── */
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.stat-card{background:var(--card);border-radius:var(--radius-sm);padding:14px;text-align:center;border:1px solid var(--border)}
+.stat-value{font-size:22px;font-weight:800;color:var(--accent)}
+.stat-label{font-size:11px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+
+/* ── Session Log ── */
+.session-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 0;border-bottom:1px solid var(--border);font-size:13px;
+}
+.session-row:last-child{border-bottom:none}
+.session-meta{color:var(--text2);font-size:11px;margin-top:2px}
+.session-score{font-weight:700;font-size:15px}
+
+/* ── Per-exercise breakdown ── */
+.exercise-stat-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.exercise-stat-row:last-child{border-bottom:none}
+.exercise-stat-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.exercise-stat-info{flex:1;min-width:0}
+.exercise-stat-name{font-size:13px;font-weight:600}
+.exercise-stat-detail{font-size:11px;color:var(--text3)}
+.bar-container{height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-top:4px}
+.bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+
+/* ── About ── */
+.about-section{margin-bottom:20px}
+.about-section h3{font-size:15px;font-weight:700;margin-bottom:6px;color:var(--accent)}
+.about-section p,.about-section li{font-size:13px;color:var(--text2);line-height:1.6}
+.about-section ul{padding-left:18px;margin-top:4px}
+.disclaimer{background:#fef3cd;border:1px solid #f0d78a;border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;font-size:12px;line-height:1.5;color:#7a6520}
+
+/* ── Settings ── */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)}
+.setting-row:last-child{border-bottom:none}
+.setting-label{font-size:14px;font-weight:600}
+.setting-desc{font-size:11px;color:var(--text3);margin-top:2px}
+.toggle{position:relative;width:48px;height:28px;border-radius:14px;background:var(--border);transition:background .2s;flex-shrink:0;cursor:pointer}
+.toggle.on{background:var(--accent)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.toggle.on::after{transform:translateX(20px)}
+select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);font-size:13px;min-height:var(--min-touch)}
+
+/* ── Language Picker (first launch) ── */
+.lang-overlay{
+  position:fixed;inset:0;z-index:100;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;gap:16px;
+}
+.lang-overlay.hidden{display:none}
+.lang-overlay h2{font-size:20px;font-weight:700;color:var(--accent);text-align:center}
+.lang-overlay p{font-size:13px;color:var(--text2);text-align:center;margin-bottom:8px}
+.lang-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;max-width:340px}
+.lang-btn{
+  padding:16px 12px;border-radius:var(--radius-sm);border:2px solid var(--border);
+  background:var(--card);text-align:center;transition:all .15s;min-height:var(--min-touch);
+}
+.lang-btn:hover{border-color:var(--accent);background:var(--accent-light)}
+.lang-btn .native{font-size:16px;font-weight:700;display:block}
+.lang-btn .english{font-size:11px;color:var(--text3);display:block;margin-top:2px}
+
+/* ── Exercise Active Screen ── */
+.exercise-screen{display:none;padding:16px 16px 100px;max-width:600px;margin:0 auto;width:100%}
+.exercise-screen.active{display:block}
+.exercise-progress{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;font-size:13px;color:var(--text2)}
+.progress-bar{height:4px;background:var(--bg2);border-radius:2px;overflow:hidden;margin-bottom:16px}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
+.target-display{text-align:center;margin-bottom:12px}
+.target-char{
+  display:inline-block;padding:10px 24px;border-radius:var(--radius-sm);
+  background:var(--accent-light);border:2px solid var(--accent);
+  font-weight:800;color:var(--text);line-height:1.2;
+}
+.target-hint{font-size:12px;color:var(--text3);margin-top:8px}
+
+/* ── Difficulty Toggle ── */
+.exercise-card-group{margin-bottom:0}
+.difficulty-toggle{display:flex;gap:6px;padding:4px 0 12px 60px}
+.diff-btn{padding:4px 12px;border-radius:14px;font-size:11px;font-weight:600;border:1.5px solid var(--border);background:var(--bg);color:var(--text2);cursor:pointer;transition:all .15s;min-height:28px}
+.diff-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.diff-btn:hover:not(.active){border-color:var(--accent);color:var(--accent)}
+
+/* ── Trend Chart ── */
+.trend-chart-container{position:relative;width:100%;height:180px;margin:8px 0}
+.trend-chart-container canvas{display:block}
+
+/* ── Animations ── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.fade-in{animation:fadeIn .3s ease}
+
+/* ── Accessibility ── */
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+/* ── Print ── */
+@media print{
+  .app-header,.tab-bar,.btn,.canvas-container,.exercise-screen{display:none!important}
+  .panel{display:block!important;padding:0!important;max-width:100%!important}
+  .card{break-inside:avoid;box-shadow:none;border:1px solid #ccc}
+  body{background:#fff;color:#000}
+  .print-header{display:block!important;text-align:center;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #333}
+  .print-header h2{font-size:20px;font-weight:700}
+  .print-header p{font-size:12px;color:#666}
+}
+.print-header{display:none}
+
+/* ── Dark Mode ── */
+[data-theme="dark"]{
+  --bg:#1a1d1a;--bg2:#222622;--card:#252925;--text:#d4ddd5;--text2:#9aaa9c;--text3:#6a7a6c;
+  --accent:#5aaa7a;--accent-light:#1e3a2a;--accent-dark:#7acca0;
+  --success:#5aaa7a;--warning:#daa04a;--danger:#da7a6a;
+  --border:#3a3e3a;--shadow:0 2px 12px rgba(0,0,0,.2);
+}
+[data-theme="dark"] .app-header{background:#2d6147}
+[data-theme="dark"] .tab-bar{background:var(--card);border-color:var(--border)}
+[data-theme="dark"] .disclaimer{background:#2a2a1a;border-color:#4a4a2a;color:#c0b060}
+[data-theme="dark"] .canvas-hint{background:rgba(30,40,30,.85);color:var(--text2)}
+
+/* ── RTL (Arabic) ── */
+[dir="rtl"] .exercise-card{flex-direction:row-reverse;text-align:right}
+[dir="rtl"] .difficulty-toggle{padding:4px 60px 12px 0}
+[dir="rtl"] .tab-bar{direction:ltr}
+[dir="rtl"] .header-right{direction:ltr}
+[dir="rtl"] .btn-row{direction:ltr}
+[dir="rtl"] .exercise-progress{direction:ltr}
+[dir="rtl"] .session-row{direction:ltr}
+[dir="rtl"] .stat-grid{direction:ltr}
+[dir="rtl"] .about-section ul{padding-left:0;padding-right:18px}
