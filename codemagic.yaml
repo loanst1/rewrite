@@ -14,18 +14,15 @@ workflows:
       vars:
         APP_STORE_APPLE_ID: 6765872586
         BUNDLE_ID: "com.ansteyapps.rewrite"
-        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
       node: 22.11.0
       xcode: latest
-      cocoapods: default
     scripts:
       - name: Install npm dependencies
         script: npm install
       - name: Sync Capacitor
         script: npx cap sync ios
-      - name: Install CocoaPods dependencies
-        script: cd ios/App && pod install
       - name: Set up code signing
         script: xcode-project use-profiles
       - name: Set build number from Codemagic build counter
@@ -35,7 +32,7 @@ workflows:
       - name: Build .ipa for App Store
         script: |
           xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
+            --project "$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
