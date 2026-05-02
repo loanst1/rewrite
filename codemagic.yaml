@@ -10,7 +10,7 @@ workflows:
         provisioning_profiles:
           - ReWrite App Store
         certificates:
-          - Ansteyapps Distribution
+          - Ansteyapps Limited distribution
       vars:
         APP_STORE_APPLE_ID: 6765872586
         BUNDLE_ID: "com.ansteyapps.rewrite"
