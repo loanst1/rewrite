@@ -7,8 +7,10 @@ workflows:
       app_store_connect: Ansteyapps Limited Apple
     environment:
       ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.ansteyapps.rewrite
+        provisioning_profiles:
+          - ReWrite App Store
+        certificates:
+          - Ansteyapps Distribution
       vars:
         APP_STORE_APPLE_ID: 6765872586
         BUNDLE_ID: "com.ansteyapps.rewrite"
@@ -24,6 +26,8 @@ workflows:
         script: npx cap sync ios
       - name: Install CocoaPods dependencies
         script: cd ios/App && pod install
+      - name: Set up code signing
+        script: xcode-project use-profiles
       - name: Set build number from Codemagic build counter
         script: |
           cd ios/App
