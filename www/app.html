@@ -478,14 +478,14 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 
 <!-- ── Progress Tab ── -->
 <div class="panel" id="panelProgress">
-  <div class="print-header"><h2>ReWrite — Handwriting Rehabilitation</h2><p>Progress Report</p></div>
+  <div class="print-header"><h2 id="printHeaderTitle">ReWrite — Handwriting Rehabilitation</h2><p id="printHeaderSub">Progress Report</p></div>
   <h2 style="font-size:20px;font-weight:800;margin-bottom:14px" id="progressTitle">Your Progress</h2>
 
   <div class="stat-grid" id="statsGrid">
-    <div class="stat-card"><div class="stat-value" id="statSessions">0</div><div class="stat-label">Sessions</div></div>
-    <div class="stat-card"><div class="stat-value" id="statExercises">0</div><div class="stat-label">Exercises</div></div>
-    <div class="stat-card"><div class="stat-value" id="statAvgScore">0%</div><div class="stat-label">Avg Score</div></div>
-    <div class="stat-card"><div class="stat-value" id="statBestScore">0%</div><div class="stat-label">Best Score</div></div>
+    <div class="stat-card"><div class="stat-value" id="statSessions">0</div><div class="stat-label" id="statSessionsLabel">Sessions</div></div>
+    <div class="stat-card"><div class="stat-value" id="statExercises">0</div><div class="stat-label" id="statExercisesLabel">Exercises</div></div>
+    <div class="stat-card"><div class="stat-value" id="statAvgScore">—</div><div class="stat-label" id="statAvgLabel">Avg Score</div></div>
+    <div class="stat-card"><div class="stat-value" id="statBestScore">—</div><div class="stat-label" id="statBestLabel">Best Score</div></div>
   </div>
 
   <div class="card" id="trendChartCard">
@@ -3437,6 +3437,37 @@ const STRINGS = {
     diffWordsMed: 'Longer',
     diffSentEasy: 'Simple',
     diffSentMed: 'Complex',
+    statSessionsLabel: 'Sessions',
+    statExercisesLabel: 'Exercises',
+    statAvgLabel: 'Avg Score',
+    statBestLabel: 'Best Score',
+    trendChartTitle: 'Your Progress Over Time',
+    perExTitle: 'Per-Exercise Breakdown',
+    sessionLogTitle: 'Session History',
+    trendHelp: 'Average score per session over time',
+    trendEmpty: 'Complete at least two sessions to see your progress trend.',
+    noExercises: 'No exercises recorded yet.',
+    noSessions: 'No sessions yet — start your first one from the Exercises tab.',
+    printHeaderTitle: 'Handwriting Rehabilitation',
+    printHeaderSub: 'Progress Report',
+    aboutDisclaimer: '<strong>Important:</strong> ReWrite is a wellness support tool, not a medical device. It is designed to supplement — not replace — occupational therapy. Always follow the guidance of your therapist or care team.',
+    bandStrong: 'Strong',
+    bandDeveloping: 'Developing',
+    bandEarly: 'Early stage',
+    sumExLabel: 'Exercises',
+    sumBestLabel: 'Best Score',
+    sumBackBtn: '← Exercises',
+    sumNewBtn: 'New Session',
+    exBreakdownTitle: 'Exercise Breakdown',
+    exBreakdownDetail: 'exercises · Avg',
+    exBreakdownBest: 'Best',
+    confirmReset: 'Are you sure you want to reset all progress? This cannot be undone.',
+    exerciseTypeLetters: 'Letters',
+    exerciseTypeNumbers: 'Numbers',
+    exerciseTypeWords: 'Words',
+    exerciseTypeSentences: 'Sentences',
+    sessionLogExercises: 'exercises',
+    canvasHint: 'Draw with your finger or mouse',
   },
   es: {
     headerSubtitle: 'Rehabilitación de escritura',
@@ -3497,6 +3528,37 @@ const STRINGS = {
     diffWordsMed: 'Largas',
     diffSentEasy: 'Simple',
     diffSentMed: 'Complejo',
+    statSessionsLabel: 'Sesiones',
+    statExercisesLabel: 'Ejercicios',
+    statAvgLabel: 'Punt. media',
+    statBestLabel: 'Mejor punt.',
+    trendChartTitle: 'Su progreso a lo largo del tiempo',
+    perExTitle: 'Desglose por ejercicio',
+    sessionLogTitle: 'Historial de sesiones',
+    trendHelp: 'Puntuación media por sesión a lo largo del tiempo',
+    trendEmpty: 'Complete al menos dos sesiones para ver su tendencia de progreso.',
+    noExercises: 'Aún no se han registrado ejercicios.',
+    noSessions: 'Aún no hay sesiones — inicie la primera desde la pestaña Ejercicios.',
+    printHeaderTitle: 'Rehabilitación de la escritura',
+    printHeaderSub: 'Informe de progreso',
+    aboutDisclaimer: '<strong>Importante:</strong> ReWrite es una herramienta de apoyo al bienestar, no un dispositivo médico. Está diseñada para complementar — no sustituir — la terapia ocupacional. Siga siempre las indicaciones de su terapeuta o equipo de atención.',
+    bandStrong: 'Sólido',
+    bandDeveloping: 'En desarrollo',
+    bandEarly: 'Etapa inicial',
+    sumExLabel: 'Ejercicios',
+    sumBestLabel: 'Mejor punt.',
+    sumBackBtn: '← Ejercicios',
+    sumNewBtn: 'Nueva sesión',
+    exBreakdownTitle: 'Desglose de ejercicios',
+    exBreakdownDetail: 'ejercicios · Media',
+    exBreakdownBest: 'Máx.',
+    confirmReset: '¿Está seguro de que desea restablecer todo el progreso? Esta acción no se puede deshacer.',
+    exerciseTypeLetters: 'Letras',
+    exerciseTypeNumbers: 'Números',
+    exerciseTypeWords: 'Palabras',
+    exerciseTypeSentences: 'Frases',
+    sessionLogExercises: 'ejercicios',
+    canvasHint: 'Dibuje con el dedo o el ratón',
   },
   fr: {
     headerSubtitle: 'Rééducation de l\'écriture',
@@ -3557,6 +3619,37 @@ const STRINGS = {
     diffWordsMed: 'Longs',
     diffSentEasy: 'Simple',
     diffSentMed: 'Complexe',
+    statSessionsLabel: 'Séances',
+    statExercisesLabel: 'Exercices',
+    statAvgLabel: 'Score moy.',
+    statBestLabel: 'Meilleur score',
+    trendChartTitle: 'Votre progression dans le temps',
+    perExTitle: 'Détail par exercice',
+    sessionLogTitle: 'Historique des séances',
+    trendHelp: 'Score moyen par séance dans le temps',
+    trendEmpty: 'Effectuez au moins deux séances pour voir votre tendance de progression.',
+    noExercises: 'Aucun exercice enregistré pour l\\\'instant.',
+    noSessions: 'Aucune séance pour l\\\'instant — commencez la première depuis l\\\'onglet Exercices.',
+    printHeaderTitle: 'Rééducation de l’écriture',
+    printHeaderSub: 'Rapport de progression',
+    aboutDisclaimer: '<strong>Important :</strong> ReWrite est un outil de soutien au bien-être, pas un dispositif médical. Il est conçu pour compléter — et non remplacer — l’ergothérapie. Suivez toujours les conseils de votre thérapeute ou de votre équipe soignante.',
+    bandStrong: 'Solide',
+    bandDeveloping: 'En progression',
+    bandEarly: 'Stade initial',
+    sumExLabel: 'Exercices',
+    sumBestLabel: 'Meilleur score',
+    sumBackBtn: '← Exercices',
+    sumNewBtn: 'Nouvelle séance',
+    exBreakdownTitle: 'Détail des exercices',
+    exBreakdownDetail: 'exercices · Moy.',
+    exBreakdownBest: 'Max.',
+    confirmReset: 'Êtes-vous sûr de vouloir réinitialiser tous les progrès ? Cette action est irréversible.',
+    exerciseTypeLetters: 'Lettres',
+    exerciseTypeNumbers: 'Chiffres',
+    exerciseTypeWords: 'Mots',
+    exerciseTypeSentences: 'Phrases',
+    sessionLogExercises: 'exercices',
+    canvasHint: 'Dessinez avec votre doigt ou la souris',
   },
   de: {
     headerSubtitle: 'Schreib-Rehabilitation',
@@ -3617,6 +3710,37 @@ const STRINGS = {
     diffWordsMed: 'Länger',
     diffSentEasy: 'Einfach',
     diffSentMed: 'Komplex',
+    statSessionsLabel: 'Sitzungen',
+    statExercisesLabel: 'Übungen',
+    statAvgLabel: 'Ø-Wertung',
+    statBestLabel: 'Bestwertung',
+    trendChartTitle: 'Ihr Fortschritt im Zeitverlauf',
+    perExTitle: 'Übungsdetails',
+    sessionLogTitle: 'Sitzungsverlauf',
+    trendHelp: 'Durchschnittliche Wertung pro Sitzung im Zeitverlauf',
+    trendEmpty: 'Schließen Sie mindestens zwei Sitzungen ab, um Ihren Fortschrittstrend zu sehen.',
+    noExercises: 'Noch keine Übungen aufgezeichnet.',
+    noSessions: 'Noch keine Sitzungen — starten Sie die erste über die Übungen-Registerkarte.',
+    printHeaderTitle: 'Schreib-Rehabilitation',
+    printHeaderSub: 'Fortschrittsbericht',
+    aboutDisclaimer: '<strong>Wichtiger Hinweis:</strong> ReWrite ist ein Wellness-Tool, kein Medizinprodukt. Es ist als Ergänzung — nicht als Ersatz — der Ergotherapie konzipiert. Befolgen Sie stets die Empfehlungen Ihres Therapeuten oder Behandlungsteams.',
+    bandStrong: 'Stark',
+    bandDeveloping: 'In Entwicklung',
+    bandEarly: 'Frühes Stadium',
+    sumExLabel: 'Übungen',
+    sumBestLabel: 'Bestwertung',
+    sumBackBtn: '← Übungen',
+    sumNewBtn: 'Neue Sitzung',
+    exBreakdownTitle: 'Übungsdetails',
+    exBreakdownDetail: 'Übungen · Ø',
+    exBreakdownBest: 'Best',
+    confirmReset: 'Sind Sie sicher, dass Sie den gesamten Fortschritt zurücksetzen möchten? Dies kann nicht rückgängig gemacht werden.',
+    exerciseTypeLetters: 'Buchstaben',
+    exerciseTypeNumbers: 'Zahlen',
+    exerciseTypeWords: 'Wörter',
+    exerciseTypeSentences: 'Sätze',
+    sessionLogExercises: 'Übungen',
+    canvasHint: 'Zeichnen Sie mit dem Finger oder der Maus',
   },
   it: {
     headerSubtitle: 'Riabilitazione della scrittura',
@@ -3677,6 +3801,37 @@ const STRINGS = {
     diffWordsMed: 'Lunghe',
     diffSentEasy: 'Semplice',
     diffSentMed: 'Complesso',
+    statSessionsLabel: 'Sessioni',
+    statExercisesLabel: 'Esercizi',
+    statAvgLabel: 'Punteggio med.',
+    statBestLabel: 'Punteggio max',
+    trendChartTitle: 'Il tuo progresso nel tempo',
+    perExTitle: 'Dettaglio per esercizio',
+    sessionLogTitle: 'Cronologia sessioni',
+    trendHelp: 'Punteggio medio per sessione nel tempo',
+    trendEmpty: 'Completa almeno due sessioni per vedere la tendenza del tuo progresso.',
+    noExercises: 'Nessun esercizio registrato.',
+    noSessions: 'Nessuna sessione ancora — inizia la prima dalla scheda Esercizi.',
+    printHeaderTitle: 'Riabilitazione della scrittura',
+    printHeaderSub: 'Rapporto di progresso',
+    aboutDisclaimer: '<strong>Importante:</strong> ReWrite è uno strumento di supporto al benessere, non un dispositivo medico. È progettato per integrare — non sostituire — la terapia occupazionale. Segui sempre le indicazioni del tuo terapista o del team di cura.',
+    bandStrong: 'Solido',
+    bandDeveloping: 'In sviluppo',
+    bandEarly: 'Fase iniziale',
+    sumExLabel: 'Esercizi',
+    sumBestLabel: 'Punteggio max',
+    sumBackBtn: '← Esercizi',
+    sumNewBtn: 'Nuova sessione',
+    exBreakdownTitle: 'Dettaglio esercizi',
+    exBreakdownDetail: 'esercizi · Media',
+    exBreakdownBest: 'Max',
+    confirmReset: 'Sei sicuro di voler reimpostare tutti i progressi? Questa azione non può essere annullata.',
+    exerciseTypeLetters: 'Lettere',
+    exerciseTypeNumbers: 'Numeri',
+    exerciseTypeWords: 'Parole',
+    exerciseTypeSentences: 'Frasi',
+    sessionLogExercises: 'esercizi',
+    canvasHint: 'Disegna con il dito o il mouse',
   },
   pt: {
     headerSubtitle: 'Reabilitação da escrita',
@@ -3737,6 +3892,37 @@ const STRINGS = {
     diffWordsMed: 'Longas',
     diffSentEasy: 'Simples',
     diffSentMed: 'Complexo',
+    statSessionsLabel: 'Sessões',
+    statExercisesLabel: 'Exercícios',
+    statAvgLabel: 'Pont. média',
+    statBestLabel: 'Melhor pont.',
+    trendChartTitle: 'O seu progresso ao longo do tempo',
+    perExTitle: 'Detalhe por exercício',
+    sessionLogTitle: 'Histórico de sessões',
+    trendHelp: 'Pontuação média por sessão ao longo do tempo',
+    trendEmpty: 'Complete pelo menos duas sessões para ver a sua tendência de progresso.',
+    noExercises: 'Nenhum exercício registado ainda.',
+    noSessions: 'Ainda não há sessões — inicie a primeira a partir do separador Exercícios.',
+    printHeaderTitle: 'Reabilitação da escrita',
+    printHeaderSub: 'Relatório de progresso',
+    aboutDisclaimer: '<strong>Importante:</strong> O ReWrite é uma ferramenta de apoio ao bem-estar, não um dispositivo médico. Foi concebido para complementar — e não substituir — a terapia ocupacional. Siga sempre as orientações do seu terapeuta ou equipa de saúde.',
+    bandStrong: 'Sólido',
+    bandDeveloping: 'Em desenvolvimento',
+    bandEarly: 'Fase inicial',
+    sumExLabel: 'Exercícios',
+    sumBestLabel: 'Melhor pont.',
+    sumBackBtn: '← Exercícios',
+    sumNewBtn: 'Nova sessão',
+    exBreakdownTitle: 'Detalhe de exercícios',
+    exBreakdownDetail: 'exercícios · Méd.',
+    exBreakdownBest: 'Máx.',
+    confirmReset: 'Tem a certeza de que pretende redefinir todo o progresso? Esta ação não pode ser desfeita.',
+    exerciseTypeLetters: 'Letras',
+    exerciseTypeNumbers: 'Números',
+    exerciseTypeWords: 'Palavras',
+    exerciseTypeSentences: 'Frases',
+    sessionLogExercises: 'exercícios',
+    canvasHint: 'Desenhe com o dedo ou o rato',
   },
   cy: {
     headerSubtitle: 'Ailhyfforddi Ysgrifennu',
@@ -3815,6 +4001,37 @@ const STRINGS = {
     diffWordsMed: '長い',
     diffSentEasy: 'やさしい',
     diffSentMed: '難しい',
+    statSessionsLabel: 'セッション',
+    statExercisesLabel: '問題数',
+    statAvgLabel: '平均スコア',
+    statBestLabel: '最高スコア',
+    trendChartTitle: 'あなたの進捗（時間経過）',
+    perExTitle: '練習別の詳細',
+    sessionLogTitle: 'セッション履歴',
+    trendHelp: 'セッションごとの平均スコアの推移',
+    trendEmpty: '進捗トレンドを見るには、少なくとも2回のセッションを完了してください。',
+    noExercises: 'まだ練習が記録されていません。',
+    noSessions: 'まだセッションがありません — 練習タブから最初のセッションを開始してください。',
+    printHeaderTitle: '書字リハビリ',
+    printHeaderSub: '進捗レポート',
+    aboutDisclaimer: '<strong>重要：</strong>ReWriteは健康支援ツールであり、医療機器ではありません。作業療法の補助として設計されており、代替するものではありません。常に担当の作業療法士またはケアチームの指導に従ってください。',
+    bandStrong: '良好',
+    bandDeveloping: '発展中',
+    bandEarly: '初期段階',
+    sumExLabel: '問題数',
+    sumBestLabel: '最高スコア',
+    sumBackBtn: '← 練習へ',
+    sumNewBtn: '新しいセッション',
+    exBreakdownTitle: '練習の詳細',
+    exBreakdownDetail: '問題 · 平均',
+    exBreakdownBest: '最高',
+    confirmReset: 'すべての進捗をリセットしてもよろしいですか？この操作は元に戻せません。',
+    exerciseTypeLetters: '文字',
+    exerciseTypeNumbers: '数字',
+    exerciseTypeWords: '単語',
+    exerciseTypeSentences: '文章',
+    sessionLogExercises: '問題',
+    canvasHint: '指またはマウスで描いてください',
   },
   ko: {
     headerSubtitle: '손글씨 재활',
@@ -3875,6 +4092,37 @@ const STRINGS = {
     diffWordsMed: '긴',
     diffSentEasy: '쉬운',
     diffSentMed: '복잡한',
+    statSessionsLabel: '세션',
+    statExercisesLabel: '연습 수',
+    statAvgLabel: '평균 점수',
+    statBestLabel: '최고 점수',
+    trendChartTitle: '시간에 따른 나의 진행 상황',
+    perExTitle: '연습별 세부 내역',
+    sessionLogTitle: '세션 기록',
+    trendHelp: '세션별 평균 점수 추이',
+    trendEmpty: '진행 추세를 보려면 최소 두 번의 세션을 완료하세요.',
+    noExercises: '아직 기록된 연습이 없습니다.',
+    noSessions: '아직 세션이 없습니다 — 연습 탭에서 첫 번째 세션을 시작하세요.',
+    printHeaderTitle: '손글씨 재활',
+    printHeaderSub: '진행 보고서',
+    aboutDisclaimer: '<strong>중요:</strong> ReWrite는 건강 지원 도구이며 의료기기가 아닙니다. 작업 치료를 보완하기 위한 것으로, 대체하지 않습니다. 항상 담당 작업치료사 또는 치료팀의 지도를 따르세요.',
+    bandStrong: '우수',
+    bandDeveloping: '발전 중',
+    bandEarly: '초기 단계',
+    sumExLabel: '연습 수',
+    sumBestLabel: '최고 점수',
+    sumBackBtn: '← 연습으로',
+    sumNewBtn: '새 세션',
+    exBreakdownTitle: '연습 세부 내역',
+    exBreakdownDetail: '연습 · 평균',
+    exBreakdownBest: '최고',
+    confirmReset: '모든 진행 상황을 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
+    exerciseTypeLetters: '글자',
+    exerciseTypeNumbers: '숫자',
+    exerciseTypeWords: '단어',
+    exerciseTypeSentences: '문장',
+    sessionLogExercises: '연습',
+    canvasHint: '손가락이나 마우스로 그리세요',
   },
   hi: {
     headerSubtitle: 'लेखन पुनर्वास',
@@ -3935,6 +4183,37 @@ const STRINGS = {
     diffWordsMed: 'लंबे',
     diffSentEasy: 'सरल',
     diffSentMed: 'जटिल',
+    statSessionsLabel: 'सत्र',
+    statExercisesLabel: 'अभ्यास',
+    statAvgLabel: 'औसत स्कोर',
+    statBestLabel: 'सर्वोत्तम स्कोर',
+    trendChartTitle: 'समय के साथ आपकी प्रगति',
+    perExTitle: 'अभ्यास-वार विवरण',
+    sessionLogTitle: 'सत्र इतिहास',
+    trendHelp: 'समय के साथ प्रति सत्र औसत स्कोर',
+    trendEmpty: 'अपनी प्रगति प्रवृत्ति देखने के लिए कम से कम दो सत्र पूरे करें।',
+    noExercises: 'अभी तक कोई अभ्यास दर्ज नहीं हुआ।',
+    noSessions: 'अभी तक कोई सत्र नहीं है — अभ्यास टैब से पहला सत्र शुरू करें।',
+    printHeaderTitle: 'लेखन पुनर्वास',
+    printHeaderSub: 'प्रगति रिपोर्ट',
+    aboutDisclaimer: '<strong>महत्वपूर्ण:</strong> ReWrite एक स्वास्थ्य सहायता उपकरण है, चिकित्सा उपकरण नहीं। यह व्यावसायिक चिकित्सा का पूरक है — प्रतिस्थापन नहीं। हमेशा अपने चिकित्सक या देखभाल दल के मार्गदर्शन का पालन करें।',
+    bandStrong: 'सशक्त',
+    bandDeveloping: 'विकासशील',
+    bandEarly: 'प्रारंभिक चरण',
+    sumExLabel: 'अभ्यास',
+    sumBestLabel: 'सर्वोत्तम स्कोर',
+    sumBackBtn: '← अभ्यास पर जाएं',
+    sumNewBtn: 'नया सत्र',
+    exBreakdownTitle: 'अभ्यास विवरण',
+    exBreakdownDetail: 'अभ्यास · औसत',
+    exBreakdownBest: 'सर्वोत्तम',
+    confirmReset: 'क्या आप वाकई सभी प्रगति रीसेट करना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।',
+    exerciseTypeLetters: 'अक्षर',
+    exerciseTypeNumbers: 'संख्याएँ',
+    exerciseTypeWords: 'शब्द',
+    exerciseTypeSentences: 'वाक्य',
+    sessionLogExercises: 'अभ्यास',
+    canvasHint: 'अपनी उंगली या माउस से लिखें',
   },
   ar: {
     headerSubtitle: 'تأهيل الكتابة',
@@ -3995,6 +4274,37 @@ const STRINGS = {
     diffWordsMed: 'أطول',
     diffSentEasy: 'بسيطة',
     diffSentMed: 'معقدة',
+    statSessionsLabel: 'الجلسات',
+    statExercisesLabel: 'التمارين',
+    statAvgLabel: 'متوسط الدرجة',
+    statBestLabel: 'أفضل درجة',
+    trendChartTitle: 'تقدمك عبر الزمن',
+    perExTitle: 'تفصيل حسب التمرين',
+    sessionLogTitle: 'سجل الجلسات',
+    trendHelp: 'متوسط الدرجة لكل جلسة عبر الزمن',
+    trendEmpty: 'أكمل جلستين على الأقل لرؤية مسار تقدمك.',
+    noExercises: 'لم يُسجَّل أي تمرين بعد.',
+    noSessions: 'لا جلسات حتى الآن — ابدأ جلستك الأولى من تبويب التمارين.',
+    printHeaderTitle: 'تأهيل الكتابة اليدوية',
+    printHeaderSub: 'تقرير التقدم',
+    aboutDisclaimer: '<strong>مهم:</strong> ReWrite أداة صحية داعمة وليست جهازًا طبيًا. صُمِّمت لتكمل العلاج الوظيفي لا لتحلّ محلّه. اتبع دائمًا إرشادات معالجك الوظيفي أو فريق رعايتك.',
+    bandStrong: 'قوي',
+    bandDeveloping: 'في تطوّر',
+    bandEarly: 'مرحلة مبكرة',
+    sumExLabel: 'التمارين',
+    sumBestLabel: 'أفضل درجة',
+    sumBackBtn: '← التمارين',
+    sumNewBtn: 'جلسة جديدة',
+    exBreakdownTitle: 'تفاصيل التمارين',
+    exBreakdownDetail: 'تمارين · متوسط',
+    exBreakdownBest: 'الأفضل',
+    confirmReset: 'هل أنت متأكد من أنك تريد إعادة تعيين كل التقدم؟ لا يمكن التراجع عن هذا الإجراء.',
+    exerciseTypeLetters: 'حروف',
+    exerciseTypeNumbers: 'أرقام',
+    exerciseTypeWords: 'كلمات',
+    exerciseTypeSentences: 'جمل',
+    sessionLogExercises: 'تمارين',
+    canvasHint: 'ارسم بإصبعك أو بالماوس',
   },
   zh: {
     headerSubtitle: '书写康复',
@@ -4055,6 +4365,37 @@ const STRINGS = {
     diffWordsMed: '长词',
     diffSentEasy: '简单',
     diffSentMed: '复杂',
+    statSessionsLabel: '练习次数',
+    statExercisesLabel: '题目数',
+    statAvgLabel: '平均得分',
+    statBestLabel: '最高得分',
+    trendChartTitle: '您的进度变化',
+    perExTitle: '各练习详情',
+    sessionLogTitle: '练习记录',
+    trendHelp: '每次练习的平均得分变化',
+    trendEmpty: '至少完成25次练习，即可查看进度趋势。',
+    noExercises: '尚未记录任何练习。',
+    noSessions: '还没有练习记录——请从练习标签开始第一次练习。',
+    printHeaderTitle: '书写康复',
+    printHeaderSub: '进度报告',
+    aboutDisclaimer: '<strong>重要提示：</strong>ReWrite 是一款健康辅助工具，不是医疗器械。它旨在补充——而非取代——作业治疗。请始终遵循您的治疗师或护理团队的指导。',
+    bandStrong: '良好',
+    bandDeveloping: '进步中',
+    bandEarly: '起步阶段',
+    sumExLabel: '题目数',
+    sumBestLabel: '最高得分',
+    sumBackBtn: '← 返回练习',
+    sumNewBtn: '新练习',
+    exBreakdownTitle: '练习详情',
+    exBreakdownDetail: '题 · 均分',
+    exBreakdownBest: '最高',
+    confirmReset: '确定要重置所有进度吗？此操作无法撤销。',
+    exerciseTypeLetters: '字母',
+    exerciseTypeNumbers: '数字',
+    exerciseTypeWords: '词语',
+    exerciseTypeSentences: '句子',
+    sessionLogExercises: '题',
+    canvasHint: '用手指或鼠标书写',
   },
   pl: {
     headerSubtitle: 'Rehabilitacja pisma',
@@ -4115,6 +4456,37 @@ const STRINGS = {
     diffWordsMed: 'Dłuższe',
     diffSentEasy: 'Proste',
     diffSentMed: 'Złożone',
+    statSessionsLabel: 'Sesje',
+    statExercisesLabel: 'Ćwiczenia',
+    statAvgLabel: 'Śr. wynik',
+    statBestLabel: 'Najlepszy wynik',
+    trendChartTitle: 'Twoje postępy w czasie',
+    perExTitle: 'Szczegóły według ćwiczenia',
+    sessionLogTitle: 'Historia sesji',
+    trendHelp: 'Śrredni wynik na sesję w czasie',
+    trendEmpty: 'Ukończ co najmniej dwie sesje, aby zobaczyć trend swoich postępów.',
+    noExercises: 'Nie zarejestrowano jeszcze żadnégo ćwiczenia.',
+    noSessions: 'Brak sesji — zacznij pierwszą z zakładki Ćwiczenia.',
+    printHeaderTitle: 'Rehabilitacja pisma',
+    printHeaderSub: 'Raport postępów',
+    aboutDisclaimer: '<strong>Ważne:</strong> ReWrite to narzędzie wsparcia zdrowia, a nie urządzenie medyczne. Zostało zaprojektowane jako uzupełnienie — nie zastępstwo — terapii zajęciowej. Zawsze stosuj się do zaleceń swojego terapeuty lub zespołu opiekuńczego.',
+    bandStrong: 'Solidny',
+    bandDeveloping: 'W rozwoju',
+    bandEarly: 'Wczesny etap',
+    sumExLabel: 'Ćwiczenia',
+    sumBestLabel: 'Najlepszy wynik',
+    sumBackBtn: '← Ćwiczenia',
+    sumNewBtn: 'Nowa sesja',
+    exBreakdownTitle: 'Szczegóły ćwiczeń',
+    exBreakdownDetail: 'ćwiczeń · Śr.',
+    exBreakdownBest: 'Najl.',
+    confirmReset: 'Czy na pewno chcesz zresetować wszystkie postępy? Tej czynności nie można cofnąć.',
+    exerciseTypeLetters: 'Litery',
+    exerciseTypeNumbers: 'Cyfry',
+    exerciseTypeWords: 'Słowa',
+    exerciseTypeSentences: 'Zdania',
+    sessionLogExercises: 'ćwiczeń',
+    canvasHint: 'Rysuj palcem lub myszką',
   },
   es_mx: {
     headerSubtitle: 'Rehabilitación de escritura',
@@ -4175,6 +4547,37 @@ const STRINGS = {
     diffWordsMed: 'Largas',
     diffSentEasy: 'Simple',
     diffSentMed: 'Complejo',
+    statSessionsLabel: 'Sesiones',
+    statExercisesLabel: 'Ejercicios',
+    statAvgLabel: 'Punt. promedio',
+    statBestLabel: 'Mejor punt.',
+    trendChartTitle: 'Su progreso a lo largo del tiempo',
+    perExTitle: 'Desglose por ejercicio',
+    sessionLogTitle: 'Historial de sesiones',
+    trendHelp: 'Puntuación promedio por sesión a lo largo del tiempo',
+    trendEmpty: 'Complete al menos dos sesiones para ver su tendencia de progreso.',
+    noExercises: 'Aún no se han registrado ejercicios.',
+    noSessions: 'Aún no hay sesiones — inicie la primera desde la pestaña Ejercicios.',
+    printHeaderTitle: 'Rehabilitación de la escritura',
+    printHeaderSub: 'Informe de progreso',
+    aboutDisclaimer: '<strong>Importante:</strong> ReWrite es una herramienta de apoyo al bienestar, no un dispositivo médico. Está diseñada para complementar — no reemplazar — la terapia ocupacional. Siga siempre las indicaciones de su terapeuta o equipo de atención.',
+    bandStrong: 'Sólido',
+    bandDeveloping: 'En desarrollo',
+    bandEarly: 'Etapa inicial',
+    sumExLabel: 'Ejercicios',
+    sumBestLabel: 'Mejor punt.',
+    sumBackBtn: '← Ejercicios',
+    sumNewBtn: 'Nueva sesión',
+    exBreakdownTitle: 'Desglose de ejercicios',
+    exBreakdownDetail: 'ejercicios · Promedio',
+    exBreakdownBest: 'Máx.',
+    confirmReset: '¿Está seguro de que desea restablecer todo el progreso? Esta acción no se puede deshacer.',
+    exerciseTypeLetters: 'Letras',
+    exerciseTypeNumbers: 'Números',
+    exerciseTypeWords: 'Palabras',
+    exerciseTypeSentences: 'Frases',
+    sessionLogExercises: 'ejercicios',
+    canvasHint: 'Dibuje con el dedo o el ratón',
   },
   pt_br: {
     headerSubtitle: 'Reabilitação da escrita',
@@ -4235,6 +4638,37 @@ const STRINGS = {
     diffWordsMed: 'Longas',
     diffSentEasy: 'Simples',
     diffSentMed: 'Complexo',
+    statSessionsLabel: 'Sessões',
+    statExercisesLabel: 'Exercícios',
+    statAvgLabel: 'Pont. média',
+    statBestLabel: 'Melhor pont.',
+    trendChartTitle: 'Seu progresso ao longo do tempo',
+    perExTitle: 'Detalhe por exercício',
+    sessionLogTitle: 'Histórico de sessões',
+    trendHelp: 'Pontuação média por sessão ao longo do tempo',
+    trendEmpty: 'Conclua pelo menos duas sessões para ver sua tendência de progresso.',
+    noExercises: 'Nenhum exercício registrado ainda.',
+    noSessions: 'Ainda não há sessões — inicie a primeira pela aba Exercícios.',
+    printHeaderTitle: 'Reabilitação da escrita',
+    printHeaderSub: 'Relatório de progresso',
+    aboutDisclaimer: '<strong>Importante:</strong> O ReWrite é uma ferramenta de apoio ao bem-estar, não um dispositivo médico. Foi desenvolvido para complementar — e não substituir — a terapia ocupacional. Siga sempre as orientações do seu terapeuta ou equipe de saúde.',
+    bandStrong: 'Sólido',
+    bandDeveloping: 'Em desenvolvimento',
+    bandEarly: 'Fase inicial',
+    sumExLabel: 'Exercícios',
+    sumBestLabel: 'Melhor pont.',
+    sumBackBtn: '← Exercícios',
+    sumNewBtn: 'Nova sessão',
+    exBreakdownTitle: 'Detalhe de exercícios',
+    exBreakdownDetail: 'exercícios · Méd.',
+    exBreakdownBest: 'Máx.',
+    confirmReset: 'Tem certeza de que deseja redefinir todo o progresso? Esta ação não pode ser desfeita.',
+    exerciseTypeLetters: 'Letras',
+    exerciseTypeNumbers: 'Números',
+    exerciseTypeWords: 'Palavras',
+    exerciseTypeSentences: 'Frases',
+    sessionLogExercises: 'exercícios',
+    canvasHint: 'Desenhe com o dedo ou o mouse',
   },
   fr_ca: {
     headerSubtitle: 'Rééducation de l\'écriture',
@@ -4295,6 +4729,37 @@ const STRINGS = {
     diffWordsMed: 'Longs',
     diffSentEasy: 'Simple',
     diffSentMed: 'Complexe',
+    statSessionsLabel: 'Séances',
+    statExercisesLabel: 'Exercices',
+    statAvgLabel: 'Score moy.',
+    statBestLabel: 'Meilleur score',
+    trendChartTitle: 'Votre progression dans le temps',
+    perExTitle: 'Détail par exercice',
+    sessionLogTitle: 'Historique des séances',
+    trendHelp: 'Score moyen par séance dans le temps',
+    trendEmpty: 'Effectuez au moins deux séances pour voir votre tendance de progression.',
+    noExercises: 'Aucun exercice enregistré pour l\\\'instant.',
+    noSessions: 'Aucune séance pour l\\\'instant — commencez la première depuis l\\\'onglet Exercices.',
+    printHeaderTitle: 'Rééducation de l’écriture',
+    printHeaderSub: 'Rapport de progression',
+    aboutDisclaimer: '<strong>Important :</strong> ReWrite est un outil de soutien au bien-être, pas un dispositif médical. Il est conçu pour compléter — et non remplacer — l’ergothérapie. Suivez toujours les conseils de votre thérapeute ou de votre équipe soignante.',
+    bandStrong: 'Solide',
+    bandDeveloping: 'En progression',
+    bandEarly: 'Stade initial',
+    sumExLabel: 'Exercices',
+    sumBestLabel: 'Meilleur score',
+    sumBackBtn: '← Exercices',
+    sumNewBtn: 'Nouvelle séance',
+    exBreakdownTitle: 'Détail des exercices',
+    exBreakdownDetail: 'exercices · Moy.',
+    exBreakdownBest: 'Max.',
+    confirmReset: 'Êtes-vous sûr de vouloir réinitialiser tous les progrès ? Cette action est irréversible.',
+    exerciseTypeLetters: 'Lettres',
+    exerciseTypeNumbers: 'Chiffres',
+    exerciseTypeWords: 'Mots',
+    exerciseTypeSentences: 'Phrases',
+    sessionLogExercises: 'exercices',
+    canvasHint: 'Dessinez avec votre doigt ou la souris',
   },
 };
 
@@ -4325,9 +4790,11 @@ function applyLanguage() {
     'diffWordsEasy','diffWordsMed',
     'diffSentEasy','diffSentMed',
     // Exercise screen
-    'tracePrompt','clearBtn','submitBtn','exitBtn',
+    'tracePrompt','clearBtn','submitBtn','exitBtn','canvasHint',
     // Progress tab
     'progressTitle','exportBtn',
+    'statSessionsLabel','statExercisesLabel','statAvgLabel','statBestLabel',
+    'trendChartTitle','perExTitle','sessionLogTitle',
     // About tab
     'aboutTitle',
     'whatIsTitle','whatIsText',
@@ -4343,11 +4810,13 @@ function applyLanguage() {
     'setSounds','setSoundsDesc',
     'setDataTitle','setDataDesc','resetBtn',
     // Tab bar
-    'tabExercises','tabProgress','tabAbout','tabSettings'
+    'tabExercises','tabProgress','tabAbout','tabSettings',
+    // Session summary
+    'sumExLabel','sumBestLabel','sumBackBtn','sumNewBtn'
   ];
   ids.forEach(id => {
     const el = document.getElementById(id);
-    if (el && s[id]) el.textContent = s[id];
+    if (el && s[id] !== undefined) el.textContent = s[id];
   });
   // Pen width option labels
   const penOpts = {penOptThin:'penThin', penOptMedium:'penMedium', penOptThick:'penThick'};
@@ -4355,11 +4824,17 @@ function applyLanguage() {
     const el = document.getElementById(elId);
     if (el && s[key]) el.textContent = s[key];
   });
-  // Disclaimer (HTML)
+  // Disclaimer (HTML) — short form on home screen
   const disc = document.getElementById('disclaimer');
   if (disc && s.disclaimer) disc.innerHTML = s.disclaimer;
+  // About disclaimer — longer form
   const aboutDisc = document.getElementById('aboutDisclaimer');
-  if (aboutDisc) aboutDisc.innerHTML = s.disclaimer || STRINGS.en.disclaimer;
+  if (aboutDisc) aboutDisc.innerHTML = s.aboutDisclaimer || STRINGS.en.aboutDisclaimer;
+  // Print header — brand stays English, subtitle translates
+  const pht = document.getElementById('printHeaderTitle');
+  if (pht) pht.textContent = 'ReWrite — ' + (s.printHeaderTitle || STRINGS.en.printHeaderTitle);
+  const phs = document.getElementById('printHeaderSub');
+  if (phs) phs.textContent = s.printHeaderSub || STRINGS.en.printHeaderSub;
 }
 
 // ══════════════ TAB NAVIGATION ══════════════
@@ -4419,7 +4894,14 @@ function loadExercise() {
   const total = sessionExercises.length;
 
   document.getElementById('exerciseCounter').textContent = `${currentIndex + 1} / ${total}`;
-  document.getElementById('exerciseType').textContent = currentType.charAt(0).toUpperCase() + currentType.slice(1);
+  const exTypeLang = STRINGS[currentLang] || STRINGS.en;
+  const exTypeNames = {
+    letters: exTypeLang.exerciseTypeLetters || 'Letters',
+    numbers: exTypeLang.exerciseTypeNumbers || 'Numbers',
+    words: exTypeLang.exerciseTypeWords || 'Words',
+    sentences: exTypeLang.exerciseTypeSentences || 'Sentences'
+  };
+  document.getElementById('exerciseType').textContent = exTypeNames[currentType] || (currentType.charAt(0).toUpperCase() + currentType.slice(1));
   document.getElementById('progressFill').style.width = `${(currentIndex / total) * 100}%`;
 
   // Target display
@@ -4853,7 +5335,7 @@ function showScoreFeedback(score) {
   // Benchmark
   const benchDiv = document.getElementById('benchmarkDisplay');
   const band = score >= SCORE_BANDS.green ? 'green' : score >= SCORE_BANDS.amber ? 'amber' : 'grey';
-  const benchLabel = score >= SCORE_BANDS.green ? 'Strong' : score >= SCORE_BANDS.amber ? 'Developing' : 'Early stage';
+  const benchLabel = score >= SCORE_BANDS.green ? (s.bandStrong || 'Strong') : score >= SCORE_BANDS.amber ? (s.bandDeveloping || 'Developing') : (s.bandEarly || 'Early stage');
   benchDiv.innerHTML = `<div class="benchmark" style="justify-content:center"><div class="benchmark-dot bench-${band}"></div> ${benchLabel}</div>`;
 
   // Next/Finish button
@@ -4903,7 +5385,7 @@ function showSessionSummary(avg, best, total) {
   let summaryBand = avg >= 80 ? '★★★' : avg >= 60 ? '★★' : avg >= 40 ? '★' : '·';
   document.getElementById('summaryScore').textContent = summaryBand;
   document.getElementById('sumExCount').textContent = total;
-  let bestBand = best >= 80 ? 'Strong' : best >= 50 ? 'Developing' : 'Early';
+  let bestBand = best >= 80 ? (s.bandStrong || 'Strong') : best >= 50 ? (s.bandDeveloping || 'Developing') : (s.bandEarly || 'Early');
   document.getElementById('sumBest').textContent = bestBand;
 
   // Ring
@@ -4912,13 +5394,13 @@ function showSessionSummary(avg, best, total) {
 
   // Breakdown
   const bd = document.getElementById('summaryBreakdown');
-  let html = '<p style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Exercise Breakdown</p>';
-  scores.forEach((s, i) => {
-    const color = s.score >= 80 ? 'var(--success)' : s.score >= 50 ? 'var(--warning)' : 'var(--text3)';
+  let html = `<p style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">${s.exBreakdownTitle || 'Exercise Breakdown'}</p>`;
+  scores.forEach((entry, i) => {
+    const color = entry.score >= 80 ? 'var(--success)' : entry.score >= 50 ? 'var(--warning)' : 'var(--text3)';
     html += `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
       <span style="width:22px;height:22px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text3);flex-shrink:0">${i+1}</span>
-      <span style="flex:1;font-size:13px;font-weight:500">${s.exercise}</span>
-      <span style="font-weight:700;font-size:14px;color:${color}">${s.score}%</span>
+      <span style="flex:1;font-size:13px;font-weight:500">${entry.exercise}</span>
+      <span style="font-weight:700;font-size:14px;color:${color}">${entry.score}%</span>
     </div>`;
   });
   bd.innerHTML = html;
@@ -4947,6 +5429,7 @@ function exitExercise() {
 // ══════════════ PROGRESS ══════════════
 async function refreshProgress() {
   const sessions = await getAllSessions();
+  const lang = STRINGS[currentLang] || STRINGS.en;
 
   // Stats
   const total = sessions.length;
@@ -4957,8 +5440,8 @@ async function refreshProgress() {
 
   document.getElementById('statSessions').textContent = total;
   document.getElementById('statExercises').textContent = totalEx;
-  document.getElementById('statAvgScore').textContent = avg >= 80 ? 'Strong' : avg >= 50 ? 'Developing' : 'Early';
-  document.getElementById('statBestScore').textContent = best >= 80 ? 'Strong' : best >= 50 ? 'Developing' : 'Early';
+  document.getElementById('statAvgScore').textContent = total > 0 ? (avg >= 80 ? (lang.bandStrong || 'Strong') : avg >= 50 ? (lang.bandDeveloping || 'Developing') : (lang.bandEarly || 'Early')) : '—';
+  document.getElementById('statBestScore').textContent = total > 0 ? (best >= 80 ? (lang.bandStrong || 'Strong') : best >= 50 ? (lang.bandDeveloping || 'Developing') : (lang.bandEarly || 'Early')) : '—';
 
   // Per-exercise breakdown
   const byType = {};
@@ -4972,21 +5455,30 @@ async function refreshProgress() {
   const colours = { letters: '#3a7a5a', numbers: '#3a5a9a', words: '#8a6a3a', sentences: '#7a3a7a' };
   const icons = { letters: 'Aa', numbers: '12', words: 'cat', sentences: '...' };
   const bgColours = { letters: '#e8f5ec', numbers: '#e8f0fa', words: '#faf0e8', sentences: '#f5e8f5' };
+  const typeNames = {
+    letters: lang.exerciseTypeLetters || 'Letters',
+    numbers: lang.exerciseTypeNumbers || 'Numbers',
+    words: lang.exerciseTypeWords || 'Words',
+    sentences: lang.exerciseTypeSentences || 'Sentences'
+  };
   let peHtml = '';
   for (const [type, data] of Object.entries(byType)) {
     const avgS = Math.round(data.scores.reduce((a, b) => a + b, 0) / data.scores.length);
     const bestS = Math.max(...data.scores);
     const band = avgS >= 80 ? 'var(--success)' : avgS >= 50 ? 'var(--warning)' : 'var(--text3)';
+    const typeName = typeNames[type] || (type.charAt(0).toUpperCase() + type.slice(1));
+    const detailLabel = lang.exBreakdownDetail || 'exercises · Avg';
+    const bestLabel = lang.exBreakdownBest || 'Best';
     peHtml += `<div class="exercise-stat-row">
       <div class="exercise-stat-icon" style="background:${bgColours[type]||'#eee'};color:${colours[type]||'#666'}">${icons[type]||'?'}</div>
       <div class="exercise-stat-info">
-        <div class="exercise-stat-name">${type.charAt(0).toUpperCase()+type.slice(1)}</div>
-        <div class="exercise-stat-detail">${data.count} exercises · Avg ${avgS}% · Best ${bestS}%</div>
+        <div class="exercise-stat-name">${typeName}</div>
+        <div class="exercise-stat-detail">${data.count} ${detailLabel} ${avgS}% · ${bestLabel} ${bestS}%</div>
         <div class="bar-container"><div class="bar-fill" style="width:${avgS}%;background:${band}"></div></div>
       </div>
     </div>`;
   }
-  peDiv.innerHTML = peHtml || '<p style="font-size:12px;color:var(--text3);padding:8px 0">No exercises recorded yet.</p>';
+  peDiv.innerHTML = peHtml || `<p style="font-size:12px;color:var(--text3);padding:8px 0">${lang.noExercises || 'No exercises recorded yet.'}</p>`;
 
   // Trend chart
   renderTrendChart(sessions);
@@ -4994,19 +5486,21 @@ async function refreshProgress() {
   // Session log
   const logDiv = document.getElementById('sessionLog');
   if (sessions.length === 0) {
-    logDiv.innerHTML = '<p style="font-size:12px;color:var(--text3);padding:8px 0">No sessions yet — start your first one from the Exercises tab.</p>';
+    logDiv.innerHTML = `<p style="font-size:12px;color:var(--text3);padding:8px 0">${lang.noSessions || 'No sessions yet — start your first one from the Exercises tab.'}</p>`;
   } else {
     let logHtml = '';
-    [...sessions].reverse().slice(0, 20).forEach(s => {
-      const d = new Date(s.date);
-      const dateStr = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
-      const color = s.averageScore >= 80 ? 'var(--success)' : s.averageScore >= 50 ? 'var(--warning)' : 'var(--text3)';
+    [...sessions].reverse().slice(0, 20).forEach(sess => {
+      const d = new Date(sess.date);
+      const dateStr = d.toLocaleDateString(currentLang === 'en' ? 'en-GB' : currentLang.replace('_','-'), { weekday: 'short', day: 'numeric', month: 'short' });
+      const color = sess.averageScore >= 80 ? 'var(--success)' : sess.averageScore >= 50 ? 'var(--warning)' : 'var(--text3)';
+      const sessTypeName = typeNames[sess.type||'letters'] || (sess.type||'letters').charAt(0).toUpperCase()+(sess.type||'letters').slice(1);
+      const exLabel = lang.sessionLogExercises || 'exercises';
       logHtml += `<div class="session-row">
         <div>
-          <div style="font-weight:600">${(s.type||'letters').charAt(0).toUpperCase()+(s.type||'letters').slice(1)}</div>
-          <div class="session-meta">${dateStr} · ${s.count||0} exercises</div>
+          <div style="font-weight:600">${sessTypeName}</div>
+          <div class="session-meta">${dateStr} · ${sess.count||0} ${exLabel}</div>
         </div>
-        <div class="session-score" style="color:${color}">${s.averageScore||0}%</div>
+        <div class="session-score" style="color:${color}">${sess.averageScore||0}%</div>
       </div>`;
     });
     logDiv.innerHTML = logHtml;
@@ -5021,15 +5515,16 @@ function renderTrendChart(sessions) {
   const canvas = document.getElementById('trendChart');
   const container = canvas.parentElement;
   const chartCard = document.getElementById('trendChartCard');
+  const chartLang = STRINGS[currentLang] || STRINGS.en;
   if (sessions.length < 2) {
     chartCard.style.display = '';
     const ctx2 = canvas.getContext('2d');
     ctx2.clearRect(0, 0, canvas.width, canvas.height);
-    document.getElementById('trendChartHelp').textContent = (STRINGS[currentLang] || {}).trendEmpty || 'Complete at least two sessions to see your progress trend.';
+    document.getElementById('trendChartHelp').textContent = chartLang.trendEmpty || 'Complete at least two sessions to see your progress trend.';
     return;
   }
   chartCard.style.display = '';
-  document.getElementById('trendChartHelp').textContent = (STRINGS[currentLang] || {}).trendHelp || 'Average score per session over time';
+  document.getElementById('trendChartHelp').textContent = chartLang.trendHelp || 'Average score per session over time';
 
   const dpr = window.devicePixelRatio || 1;
   const cssW = container.clientWidth;
@@ -5066,7 +5561,7 @@ function renderTrendChart(sessions) {
   [0, 25, 50, 75, 100].forEach(v => {
     const y = padT + chartH - (v / 100) * chartH;
     ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(cssW - padR, y); ctx.stroke();
-    ctx.fillText(v === 80 ? 'Strong' : v === 50 ? 'Developing' : '', padL - 4, y + 3);
+    ctx.fillText(v === 80 ? (chartLang.bandStrong || 'Strong') : v === 50 ? (chartLang.bandDeveloping || 'Developing') : '', padL - 4, y + 3);
   });
 
   // Benchmark reference lines: 80% (Strong) and 50% (Developing)
@@ -5077,13 +5572,15 @@ function renderTrendChart(sessions) {
   const y80 = padT + chartH - (80 / 100) * chartH;
   ctx.beginPath(); ctx.moveTo(padL, y80); ctx.lineTo(cssW - padR, y80); ctx.stroke();
   ctx.font = '9px sans-serif'; ctx.fillStyle = 'rgba(58,122,90,0.6)'; ctx.textAlign = 'left';
-  ctx.fillText('Strong', cssW - padR - 32, y80 - 4);
+  const strongLbl = chartLang.bandStrong || 'Strong';
+  ctx.fillText(strongLbl, cssW - padR - (strongLbl.length * 5 + 4), y80 - 4);
   // 50% line — amber
   ctx.strokeStyle = 'rgba(180,83,9,0.4)';
   const y50 = padT + chartH - (50 / 100) * chartH;
   ctx.beginPath(); ctx.moveTo(padL, y50); ctx.lineTo(cssW - padR, y50); ctx.stroke();
   ctx.fillStyle = 'rgba(180,83,9,0.55)';
-  ctx.fillText('Developing', cssW - padR - 54, y50 - 4);
+  const devLbl = chartLang.bandDeveloping || 'Developing';
+  ctx.fillText(devLbl, cssW - padR - (devLbl.length * 5 + 4), y50 - 4);
   ctx.setLineDash([]);
 
   // Data line
@@ -5134,7 +5631,9 @@ function renderTrendChart(sessions) {
 }
 
 function confirmReset() {
-  if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+  const lang = STRINGS[currentLang] || STRINGS.en;
+  const msg = lang.confirmReset || 'Are you sure you want to reset all progress? This cannot be undone.';
+  if (confirm(msg)) {
     clearAllSessions().then(() => refreshProgress());
   }
 }
