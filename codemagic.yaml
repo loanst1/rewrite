@@ -78,10 +78,13 @@ workflows:
     artifacts:
       - android/app/build/outputs/**/*.aab
     publishing:
-      google_play:
-        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
-        track: production
-        submit_as_draft: true
+      # google_play auto-publish disabled — Codemagic Google Play service account
+      # credentials are not configured. Download the AAB from the Artifacts tab
+      # and upload to Play Console manually.
+      # google_play:
+      #   credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+      #   track: production
+      #   submit_as_draft: true
       email:
         recipients:
           - support@ansteyapps.com
