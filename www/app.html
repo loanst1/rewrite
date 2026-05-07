@@ -29,7 +29,7 @@
   --serif:'Fraunces',Georgia,serif;
   --min-touch:48px;
 }
-html{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;scroll-behavior:smooth;font-size:16px}
+html{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;scroll-behavior:smooth;font-size:16px;overscroll-behavior:none}
 body{min-height:100dvh;display:flex;flex-direction:column;overflow-x:hidden}
 button{font:inherit;cursor:pointer;border:none;background:none;color:inherit;-webkit-tap-highlight-color:transparent}
 input,select,textarea{font:inherit}
@@ -37,7 +37,7 @@ canvas{display:block;touch-action:none}
 
 /* ── App Shell ── */
 .app-header{
-  position:sticky;top:0;z-index:50;
+  position:sticky;top:0;z-index:100;
   background:var(--accent);color:#fff;
   padding:0 16px;height:56px;
   display:flex;align-items:center;justify-content:space-between;
@@ -3063,6 +3063,12 @@ const EXERCISES_BASE = {
 // Language-specific exercise content
 const EXERCISES_LANG = {
   cy: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: 'Byr',
+    diffWordsMed: 'Hirach',
+    diffSentEasy: 'Syml',
+    diffSentMed: 'Cymhleth',
     words: {
       easy: ['ci','cath','dŵr','tŷ','da','lle','un','dau','tri','nos','haul','glaw','bore','eira','gwynt','llun','hir'],
       medium: ['cartref','ysgol','cymraeg','croeso','diolch','amser','blodyn','mynydd','afon','gwyrdd','cariad','llyfr','geiriau','teulu','ffrind','heddiw','golau','bywyd','cerdded','yfory']
@@ -3073,6 +3079,12 @@ const EXERCISES_LANG = {
     }
   },
   ja: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: '短い',
+    diffWordsMed: '長い',
+    diffSentEasy: '簡単',
+    diffSentMed: '複雑',
     letters: {
       easy: 'あ い う え お か き く け こ さ し す せ そ た ち つ て と な に ぬ ね の は ひ ふ へ ほ ま み む め も や ゆ よ ら り る れ ろ わ を ん'.split(' '),
       medium: 'ア イ ウ エ オ カ キ ク ケ コ サ シ ス セ ソ タ チ ツ テ ト ナ ニ ヌ ネ ノ ハ ヒ フ ヘ ホ マ ミ ム メ モ ヤ ユ ヨ ラ リ ル レ ロ ワ ヲ ン'.split(' ')
@@ -3087,6 +3099,12 @@ const EXERCISES_LANG = {
     }
   },
   ko: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: '짧음',
+    diffWordsMed: '긺',
+    diffSentEasy: '쉬움',
+    diffSentMed: '복잡함',
     letters: {
       easy: 'ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ ㅅ ㅇ ㅈ ㅊ ㅋ ㅌ ㅍ ㅎ ㅏ ㅑ ㅓ ㅕ ㅗ ㅛ ㅜ ㅠ ㅡ ㅣ'.split(' '),
       medium: '가 나 다 라 마 바 사 아 자 차 카 타 파 하 거 너 더 러 머 버 서 어 저 처 커 터 퍼 허'.split(' ')
@@ -3101,6 +3119,12 @@ const EXERCISES_LANG = {
     }
   },
   hi: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: 'छोटे',
+    diffWordsMed: 'लंबे',
+    diffSentEasy: 'सरल',
+    diffSentMed: 'जटिल',
     letters: {
       easy: 'अ आ इ ई उ ऊ ए ऐ ओ औ क ख ग घ च छ ज झ ट ठ ड ढ ण त थ द ध न प फ ब भ म य र ल व श ष स ह'.split(' '),
       medium: 'क्ष त्र ज्ञ श्र कि की कु कू के कै को कौ कं कः'.split(' ')
@@ -3115,6 +3139,12 @@ const EXERCISES_LANG = {
     }
   },
   ar: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: 'قصيرة',
+    diffWordsMed: 'أطول',
+    diffSentEasy: 'بسيطة',
+    diffSentMed: 'معقدة',
     letters: {
       easy: 'ا ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي'.split(' '),
       medium: 'بـ تـ ثـ جـ حـ خـ سـ شـ صـ ضـ طـ ظـ عـ غـ فـ قـ كـ لـ مـ نـ هـ يـ'.split(' ')
@@ -3129,6 +3159,12 @@ const EXERCISES_LANG = {
     }
   },
   zh: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: '短词',
+    diffWordsMed: '长词',
+    diffSentEasy: '简单',
+    diffSentMed: '复杂',
     letters: {
       easy: '一 二 三 四 五 六 七 八 九 十 人 大 小 上 下 中 山 水 火 木 日 月 天 地 口 目 手 足 心 田'.split(' '),
       medium: '学 写 字 读 书 画 花 草 风 云 雨 雪 春 夏 秋 冬 东 南 西 北 好 美 新 老 高 长'.split(' ')
@@ -3143,6 +3179,12 @@ const EXERCISES_LANG = {
     }
   },
   pl: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: 'Krótkie',
+    diffWordsMed: 'Dłuższe',
+    diffSentEasy: 'Proste',
+    diffSentMed: 'Złożone',
     words: {
       easy: ['dom','woda','ręka','oko','serce','dzień','noc','kot','pies','mama','tata','kwiat','drzewo','słońce','niebo','droga','pokój'],
       medium: ['ćwiczenie','zdrowie','poprawa','rodzina','przyjaciel','szczęście','siła','odwaga','cierpliwość','próba','sukces','zaufanie','postęp','leczenie','nadzieja','życie','spokój','uśmiech','wiosna','wolność']
@@ -3153,6 +3195,12 @@ const EXERCISES_LANG = {
     }
   },
   es_mx: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: 'Cortas',
+    diffWordsMed: 'Largas',
+    diffSentEasy: 'Simples',
+    diffSentMed: 'Complejas',
     words: {
       easy: ['casa','agua','mano','ojo','sol','luna','gato','perro','niño','día','luz','flor','vida','pan','amor','bien','hoy'],
       medium: ['hospital','ejercicio','familia','amigo','fuerza','trabajo','corazón','camino','esperanza','progreso','salud','valentía','paciencia','esfuerzo','victoria','confianza','futuro','alegría','montaña','escritura']
@@ -3163,6 +3211,12 @@ const EXERCISES_LANG = {
     }
   },
   pt_br: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: 'Curtas',
+    diffWordsMed: 'Longas',
+    diffSentEasy: 'Simples',
+    diffSentMed: 'Complexas',
     words: {
       easy: ['casa','água','mão','olho','sol','lua','gato','cão','dia','luz','flor','vida','pão','amor','bem','céu','paz'],
       medium: ['exercício','saúde','melhora','família','amigo','alegria','força','coragem','paciência','tentativa','sucesso','confiança','progresso','tratamento','esperança','vida','paz','sorriso','manhã','liberdade']
@@ -3173,6 +3227,12 @@ const EXERCISES_LANG = {
     }
   },
   fr_ca: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: 'Courts',
+    diffWordsMed: 'Longs',
+    diffSentEasy: 'Simples',
+    diffSentMed: 'Complexes',
     words: {
       easy: ['chat','eau','main','jour','nuit','soleil','lune','fleur','coeur','arbre','ciel','pain','amour','paix','bien','vie','ami'],
       medium: ['exercice','santé','progrès','famille','courage','patience','effort','réussite','confiance','espoir','bonheur','pratique','écriture','victoire','force','lumière','sourire','chemin','liberté','avenir']
@@ -3925,6 +3985,12 @@ const STRINGS = {
     canvasHint: 'Desenhe com o dedo ou o rato',
   },
   cy: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: 'Byr',
+    diffWordsMed: 'Hirach',
+    diffSentEasy: 'Syml',
+    diffSentMed: 'Cymhleth',
     headerSubtitle: 'Ailhyfforddi Ysgrifennu',
     exercisesTitle: 'Ymarfer Ysgrifennu', exercisesSubtitle: 'Dewiswch fath o ymarfer i ddechrau',
     disclaimer: '<strong>Offeryn lles yn unig.</strong> Mae ReWrite yn cefnogi ailhyfforddi ysgrifennu ond nid yw\'n ddyfais feddygol. Dilynwch arweiniad eich therapydd galwedigaethol neu eich tîm gofal bob amser.',
@@ -3943,6 +4009,12 @@ const STRINGS = {
     sumEncHigh:'Gwaith rhagorol heddiw.',sumEncMid:'Sesiwn solet.',sumEncLow:'Mae pob sesiwn yn bwysig.',sumEncEarly:'Y cam pwysicaf yw dal ati i geisio.',
   },
   ja: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: '短い',
+    diffWordsMed: '長い',
+    diffSentEasy: '簡単',
+    diffSentMed: '複雑',
     headerSubtitle: '書字リハビリ',
     exercisesTitle: '練習しましょう', exercisesSubtitle: '練習の種類を選びましょう',
     disclaimer: '<strong>健康支援ツールです。</strong>ReWriteは書字リハビリを支援しますが、医療機器ではありません。常に担当の作業療法士またはケアチームの指導に従ってください。',
@@ -4034,6 +4106,12 @@ const STRINGS = {
     canvasHint: '指またはマウスで描いてください',
   },
   ko: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: '짧음',
+    diffWordsMed: '긺',
+    diffSentEasy: '쉬움',
+    diffSentMed: '복잡함',
     headerSubtitle: '손글씨 재활',
     exercisesTitle: '연습하기', exercisesSubtitle: '연습 유형을 선택하세요',
     disclaimer: '<strong>건강 지원 도구입니다.</strong> ReWrite는 손글씨 재활을 지원하지만 의료기기가 아닙니다. 항상 담당 작업치료사 또는 치료팀의 지도를 따르세요.',
@@ -4125,6 +4203,12 @@ const STRINGS = {
     canvasHint: '손가락이나 마우스로 그리세요',
   },
   hi: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: 'छोटे',
+    diffWordsMed: 'लंबे',
+    diffSentEasy: 'सरल',
+    diffSentMed: 'जटिल',
     headerSubtitle: 'लेखन पुनर्वास',
     exercisesTitle: 'लेखन अभ्यास', exercisesSubtitle: 'शुरू करने के लिए एक अभ्यास प्रकार चुनें',
     disclaimer: '<strong>केवल स्वास्थ्य सहायता उपकरण।</strong> ReWrite लेखन पुनर्वास का समर्थन करता है लेकिन यह चिकित्सा उपकरण नहीं है। हमेशा अपने व्यावसायिक चिकित्सक या देखभाल दल के मार्गदर्शन का पालन करें।',
@@ -4216,6 +4300,12 @@ const STRINGS = {
     canvasHint: 'अपनी उंगली या माउस से लिखें',
   },
   ar: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: 'قصيرة',
+    diffWordsMed: 'أطول',
+    diffSentEasy: 'بسيطة',
+    diffSentMed: 'معقدة',
     headerSubtitle: 'تأهيل الكتابة',
     exercisesTitle: 'تمرين الكتابة', exercisesSubtitle: 'اختر نوع التمرين للبدء',
     disclaimer: '<strong>أداة صحية فقط.</strong> يدعم ReWrite تأهيل الكتابة اليدوية ولكنه ليس جهازاً طبياً. اتبع دائماً إرشادات معالجك الوظيفي أو فريق رعايتك.',
@@ -4307,6 +4397,12 @@ const STRINGS = {
     canvasHint: 'ارسم بإصبعك أو بالماوس',
   },
   zh: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: '短词',
+    diffWordsMed: '长词',
+    diffSentEasy: '简单',
+    diffSentMed: '复杂',
     headerSubtitle: '书写康复',
     exercisesTitle: '练习书写', exercisesSubtitle: '选择练习类型开始',
     disclaimer: '<strong>仅为健康辅助工具。</strong>ReWrite支持书写康复训练，但不是医疗器械。请始终遵循您的作业治疗师或护理团队的指导。',
@@ -4398,6 +4494,12 @@ const STRINGS = {
     canvasHint: '用手指或鼠标书写',
   },
   pl: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: 'Krótkie',
+    diffWordsMed: 'Dłuższe',
+    diffSentEasy: 'Proste',
+    diffSentMed: 'Złożone',
     headerSubtitle: 'Rehabilitacja pisma',
     exercisesTitle: 'Ćwicz pisanie', exercisesSubtitle: 'Wybierz rodzaj ćwiczenia, aby rozpocząć',
     disclaimer: '<strong>Tylko narzędzie wsparcia zdrowia.</strong> ReWrite wspiera rehabilitację pisma, ale nie jest urządzeniem medycznym. Zawsze stosuj się do zaleceń swojego terapeuty zajęciowego lub zespołu opiekuńczego.',
@@ -4489,6 +4591,12 @@ const STRINGS = {
     canvasHint: 'Rysuj palcem lub myszką',
   },
   es_mx: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: 'Cortas',
+    diffWordsMed: 'Largas',
+    diffSentEasy: 'Simples',
+    diffSentMed: 'Complejas',
     headerSubtitle: 'Rehabilitación de escritura',
     exercisesTitle: 'Practicar escritura', exercisesSubtitle: 'Elija un tipo de ejercicio para comenzar',
     disclaimer: '<strong>Solo herramienta de bienestar.</strong> ReWrite apoya la rehabilitación de la escritura pero no es un dispositivo médico. Siga siempre las indicaciones de su terapeuta ocupacional.',
@@ -4580,6 +4688,12 @@ const STRINGS = {
     canvasHint: 'Dibuje con el dedo o el ratón',
   },
   pt_br: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: 'Curtas',
+    diffWordsMed: 'Longas',
+    diffSentEasy: 'Simples',
+    diffSentMed: 'Complexas',
     headerSubtitle: 'Reabilitação da escrita',
     exercisesTitle: 'Praticar escrita', exercisesSubtitle: 'Escolha um tipo de exercício para começar',
     disclaimer: '<strong>Apenas ferramenta de bem-estar.</strong> O ReWrite apoia a reabilitação da escrita mas não é um dispositivo médico. Siga sempre as orientações do seu terapeuta ocupacional.',
@@ -4671,6 +4785,12 @@ const STRINGS = {
     canvasHint: 'Desenhe com o dedo ou o mouse',
   },
   fr_ca: {
+    diffLettersEasy: 'a-z',
+    diffLettersMed: 'A-Z',
+    diffWordsEasy: 'Courts',
+    diffWordsMed: 'Longs',
+    diffSentEasy: 'Simples',
+    diffSentMed: 'Complexes',
     headerSubtitle: 'Rééducation de l\'écriture',
     exercisesTitle: 'Pratiquer l\'écriture', exercisesSubtitle: 'Choisissez un type d\'exercice',
     disclaimer: '<strong>Outil de bien-être uniquement.</strong> ReWrite soutient la rééducation de l\'écriture mais n\'est pas un dispositif médical. Suivez toujours les conseils de votre ergothérapeute.',

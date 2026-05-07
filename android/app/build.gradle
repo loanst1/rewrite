@@ -1,11 +1,17 @@
 apply plugin: 'com.android.application'
 
-// Load signing credentials from keystore.properties (gitignored)
+// Load signing credentials.
+// Priority: Codemagic environment variables (CM_KEYSTORE_PATH etc.) for CI builds,
+// then fall back to local keystore.properties (gitignored) for developer machines.
 def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
+def cmKeystorePath = System.getenv('CM_KEYSTORE_PATH')
+def cmKeystorePassword = System.getenv('CM_KEYSTORE_PASSWORD')
+def cmKeyAlias = System.getenv('CM_KEY_ALIAS')
+def cmKeyPassword = System.getenv('CM_KEY_PASSWORD')
 
 
 android {
@@ -16,7 +22,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 4
-        versionName "1.0.1"
+        versionName "1.0.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -26,7 +32,14 @@ android {
     }
     signingConfigs {
         release {
-            if (keystoreProperties['storeFile']) {
+            if (cmKeystorePath) {
+                // Codemagic CI build
+                storeFile file(cmKeystorePath)
+                storePassword cmKeystorePassword
+                keyAlias cmKeyAlias
+                keyPassword cmKeyPassword
+            } else if (keystoreProperties['storeFile']) {
+                // Local developer build
                 storeFile file(keystoreProperties['storeFile'])
                 storePassword keystoreProperties['storePassword']
                 keyAlias keystoreProperties['keyAlias']
