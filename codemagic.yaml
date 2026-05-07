@@ -61,6 +61,7 @@ workflows:
       vars:
         PACKAGE_NAME: "com.ansteyapps.rewrite"
       node: 22.11.0
+      java: 21
     scripts:
       - name: Install npm dependencies
         script: npm install
