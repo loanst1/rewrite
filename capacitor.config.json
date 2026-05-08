@@ -18,7 +18,7 @@
   },
   "ios": {
     "contentInset": "never",
-    "scrollEnabled": false
+    "scrollEnabled": true
   },
   "android": {
     "allowMixedContent": false
