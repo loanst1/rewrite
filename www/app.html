@@ -284,9 +284,102 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 .canvas-container{position:relative}
 .canvas-container #guideCanvas{position:relative;pointer-events:none;z-index:1}
 .canvas-container #drawCanvas{position:absolute;top:0;left:0;z-index:2}
+
+
+/* ── ROTATION GATE (v1.0.7) ── */
+#rotate-gate {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #b85c38;
+  color: #f5f1e8;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  -webkit-user-select: none;
+  user-select: none;
+}
+#rotate-gate.is-visible {
+  display: flex;
+  animation: rotate-fade 0.25s ease-out;
+}
+#rotate-gate .rotate-inner {
+  max-width: 360px;
+}
+#rotate-gate .rotate-icon {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 1.5rem;
+  display: block;
+  color: #f5f1e8;
+  animation: rotate-pulse 2s ease-in-out infinite;
+}
+#rotate-gate .rotate-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.01em;
+  color: #f5f1e8;
+}
+#rotate-gate .rotate-sub {
+  font-size: 0.95rem;
+  margin: 0;
+  opacity: 0.85;
+  font-weight: 400;
+}
+@keyframes rotate-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes rotate-pulse {
+  0%, 100% { transform: rotate(-15deg); opacity: 0.85; }
+  50% { transform: rotate(15deg); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #rotate-gate .rotate-icon { animation: none; }
+}
+
+/* ── LANGUAGE PICKER FIX (v1.0.7) ── *
+   Bigger tap target — meets iOS 44x44pt minimum in both orientations.
+   Targets both #lang-select (Stroke Sight) and #langSelect (ReWrite). */
+.lang-select,
+#langSelect,
+#lang-select {
+  min-height: 44px !important;
+  min-width: 64px !important;
+  padding: 0.55rem 0.85rem !important;
+  font-size: 0.95rem !important;
+  font-weight: 600;
+  cursor: pointer;
+  /* Ensure native iOS picker opens on tap, not just on focus */
+  -webkit-appearance: menulist;
+  appearance: menulist;
+  /* z-index above any overlapping header content */
+  position: relative;
+  z-index: 110;
+}
+
 </style>
 </head>
 <body>
+
+<!-- Rotation gate — shown only on native iOS/Android in portrait orientation -->
+<div id="rotate-gate" aria-hidden="true">
+  <div class="rotate-inner">
+    <svg class="rotate-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="14" y="6" width="22" height="38" rx="3"/>
+      <line x1="20" y1="38" x2="30" y2="38"/>
+      <path d="M40 22 Q50 22 50 32 L58 32 L52 26 M58 32 L52 38" />
+    </svg>
+    <h1 class="rotate-title" id="rotate-title">Please rotate your device</h1>
+    <p class="rotate-sub" id="rotate-sub">Works best in landscape</p>
+  </div>
+  <script>window.__ROTATE_STRINGS__={"en":["Please rotate your device","Works best in landscape"],"es":["Por favor, gira tu dispositivo","Funciona mejor en horizontal"],"es_mx":["Por favor, gira tu dispositivo","Funciona mejor en horizontal"],"fr":["Veuillez tourner votre appareil","Fonctionne mieux en mode paysage"],"fr_ca":["Veuillez tourner votre appareil","Fonctionne mieux en mode paysage"],"de":["Bitte drehen Sie Ihr Gerät","Funktioniert am besten im Querformat"],"it":["Ruota il dispositivo","Funziona meglio in orizzontale"],"pt":["Por favor, rode o seu dispositivo","Funciona melhor em modo paisagem"],"pt_br":["Por favor, gire seu dispositivo","Funciona melhor no modo paisagem"],"cy":["Trowch eich dyfais","Yn gweithio orau yn llorweddol"],"ja":["デバイスを横向きにしてください","横向きで最適に動作します"],"ko":["기기를 가로로 돌려주세요","가로 모드에서 가장 잘 작동합니다"],"zh":["请旋转您的设备","横屏使用效果最佳"],"hi":["कृपया अपना डिवाइस घुमाएं","लैंडस्केप में सबसे अच्छा काम करता है"],"ar":["يرجى تدوير جهازك","يعمل بشكل أفضل في الوضع الأفقي"],"pl":["Obróć urządzenie","Działa najlepiej w poziomie"]};</script>
+</div>
+
 
 <!-- ══════════════ Language Picker ══════════════ -->
 <div class="lang-overlay" id="langOverlay">
@@ -5837,5 +5930,85 @@ async function init() {
 
 init();
 </script>
+
+<!-- Rotation gate logic (v1.0.7) — native only, always-on -->
+<script>
+(function() {
+  var gate = document.getElementById('rotate-gate');
+  if (!gate) return;
+
+  // Detect Capacitor native runtime — gate ONLY runs on native iOS/Android
+  function isNative() {
+    return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  }
+
+  function isPortrait() {
+    if (window.matchMedia) {
+      return window.matchMedia('(orientation: portrait)').matches;
+    }
+    return window.innerHeight > window.innerWidth;
+  }
+
+  // Localise the strings based on the user's current language
+  function localiseGate() {
+    var titleEl = document.getElementById('rotate-title');
+    var subEl = document.getElementById('rotate-sub');
+    if (!titleEl || !subEl || !window.__ROTATE_STRINGS__) return;
+    // Try to find the active language from the page's existing lang state
+    var lang = (function() {
+      try {
+        var stored = localStorage.getItem('strokesight_lang') || localStorage.getItem('rewrite_lang') || localStorage.getItem('lang');
+        if (stored && window.__ROTATE_STRINGS__[stored]) return stored;
+        var picker = document.getElementById('lang-select');
+        if (picker && picker.value && window.__ROTATE_STRINGS__[picker.value]) return picker.value;
+        var navLang = (navigator.language || 'en').toLowerCase().split('-')[0];
+        if (window.__ROTATE_STRINGS__[navLang]) return navLang;
+      } catch (e) {}
+      return 'en';
+    })();
+    var pair = window.__ROTATE_STRINGS__[lang] || window.__ROTATE_STRINGS__.en;
+    titleEl.textContent = pair[0];
+    subEl.textContent = pair[1];
+  }
+
+  function update() {
+    if (!isNative()) {
+      // Web/PWA — never show the gate
+      gate.classList.remove('is-visible');
+      gate.setAttribute('aria-hidden', 'true');
+      return;
+    }
+    if (isPortrait()) {
+      localiseGate();
+      gate.classList.add('is-visible');
+      gate.setAttribute('aria-hidden', 'false');
+    } else {
+      gate.classList.remove('is-visible');
+      gate.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  // React to orientation changes via multiple signals (iOS quirks)
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(orientation: portrait)');
+    if (mq.addEventListener) mq.addEventListener('change', update);
+    else if (mq.addListener) mq.addListener(update);
+  }
+  window.addEventListener('orientationchange', function() { setTimeout(update, 50); });
+  window.addEventListener('resize', update);
+
+  // Re-localise if the user picks a different language while gate is up (rare)
+  var picker = document.getElementById('lang-select') || document.getElementById('langSelect');
+  if (picker) picker.addEventListener('change', function() { setTimeout(localiseGate, 0); });
+
+  // Initial check (deferred so Capacitor has time to attach)
+  setTimeout(update, 0);
+  setTimeout(update, 200);
+
+  // Expose for debugging
+  window.__updateRotateGate = update;
+})();
+</script>
+
 </body>
 </html>
