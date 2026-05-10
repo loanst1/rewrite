@@ -5347,6 +5347,21 @@ function endDraw() {
   currentStroke = [];
 }
 
+// === Exercise pause/resume (v1.0.7) — used by rotation gate ===
+// ReWrite is user-paced (canvas drawing only), so no timers to stop. We only
+// need to cancel any in-progress stroke when the gate appears so a half-drawn
+// stroke doesn't get committed to the trace on resume.
+window.pauseExercise = function(){
+  try {
+    if (typeof isDrawing !== 'undefined' && isDrawing) {
+      isDrawing = false;
+      if (typeof currentStroke !== 'undefined') currentStroke = [];
+    }
+  } catch(e){}
+};
+window.resumeExercise = function(){ /* no-op for ReWrite */ };
+
+
 function clearCanvas() {
   const canvas = document.getElementById('drawCanvas');
   const dpr = canvas._dpr || 1;
@@ -5982,13 +5997,20 @@ init();
       gate.setAttribute('aria-hidden', 'true');
       return;
     }
+    var wasVisible = gate.classList.contains('is-visible');
     if (isPortrait()) {
       localiseGate();
       gate.classList.add('is-visible');
       gate.setAttribute('aria-hidden', 'false');
+      if (!wasVisible && typeof window.pauseExercise === 'function') {
+        try { window.pauseExercise(); } catch(e){}
+      }
     } else {
       gate.classList.remove('is-visible');
       gate.setAttribute('aria-hidden', 'true');
+      if (wasVisible && typeof window.resumeExercise === 'function') {
+        try { window.resumeExercise(); } catch(e){}
+      }
     }
   }
 
