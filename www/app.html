@@ -366,6 +366,72 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   z-index: 110;
 }
 
+
+
+/* ── RESET PROGRESS MODAL (v1.0.7) ── */
+.reset-modal-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 8000;
+  background: rgba(20, 20, 20, 0.55);
+  align-items: center; justify-content: center;
+  padding: 1.5rem;
+  animation: reset-fade .2s ease-out;
+}
+.reset-modal-overlay.is-visible { display: flex; }
+.reset-modal {
+  background: #fff;
+  color: #28251D;
+  border-radius: 14px;
+  max-width: 380px;
+  width: 100%;
+  padding: 1.5rem 1.5rem 1.25rem;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.25);
+  font-family: inherit;
+}
+.reset-modal-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.25rem; font-weight: 600;
+  color: #8b3e22;
+  margin: 0 0 0.5rem;
+}
+.reset-modal-body {
+  font-size: 0.95rem; line-height: 1.5;
+  color: #4a4845;
+  margin: 0 0 1.25rem;
+}
+.reset-modal-body.warning {
+  background: rgba(184, 92, 56, 0.08);
+  border-left: 3px solid #b85c38;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0 6px 6px 0;
+  font-weight: 500;
+  color: #28251D;
+}
+.reset-modal-actions {
+  display: flex; gap: 0.5rem;
+  justify-content: flex-end;
+}
+.reset-modal-btn {
+  font: inherit; font-size: 0.95rem; font-weight: 600;
+  padding: 0.65rem 1.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  min-height: 44px;
+  border: 1.5px solid #d4d1ca;
+  background: #fff; color: #28251D;
+  -webkit-tap-highlight-color: transparent;
+}
+.reset-modal-btn.cancel { /* default style */ }
+.reset-modal-btn.proceed {
+  background: #b85c38; color: #fff; border-color: #b85c38;
+}
+.reset-modal-btn.danger {
+  background: #b85c38; color: #fff; border-color: #b85c38;
+}
+@keyframes reset-fade {
+  from { opacity: 0; } to { opacity: 1; }
+}
+
 </style>
 </head>
 <body>
@@ -5865,6 +5931,12 @@ function renderTrendChart(sessions) {
 }
 
 function confirmReset() {
+  // v1.0.7: upgraded to a 2-step branded modal (see #reset-modal). Falls back
+  // to confirm() if the modal isn't mounted for any reason.
+  if (typeof window.showResetProgressModal === 'function') {
+    window.showResetProgressModal();
+    return;
+  }
   const lang = STRINGS[currentLang] || STRINGS.en;
   const msg = lang.confirmReset || 'Are you sure you want to reset all progress? This cannot be undone.';
   if (confirm(msg)) {
@@ -6033,6 +6105,140 @@ init();
 
   // Expose for debugging
   window.__updateRotateGate = update;
+})();
+</script>
+
+
+<!-- Reset progress modal (v1.0.7) -->
+<div class="reset-modal-overlay" id="reset-modal" role="dialog" aria-modal="true" aria-labelledby="reset-modal-title" aria-hidden="true">
+  <div class="reset-modal">
+    <h2 class="reset-modal-title" id="reset-modal-title">Reset progress?</h2>
+    <p class="reset-modal-body" id="reset-modal-body">This will delete all your exercise sessions, scores and history from this device. It cannot be undone.</p>
+    <div class="reset-modal-actions">
+      <button class="reset-modal-btn cancel" id="reset-modal-cancel" type="button">Cancel</button>
+      <button class="reset-modal-btn proceed" id="reset-modal-proceed" type="button">Continue</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Reset Progress modal logic (v1.0.7) -->
+<script>
+(function() {
+  var STRINGS = {"en": ["Reset progress?", "This will delete all your exercise sessions, scores and history from this device. It cannot be undone.", "This action is permanent. Are you absolutely sure?", "Cancel", "Continue", "Yes, reset everything", "Reset Progress", "All progress has been reset."], "es": ["¿Restablecer progreso?", "Esto eliminará todas tus sesiones, puntuaciones e historial de este dispositivo. No se puede deshacer.", "Esta acción es permanente. ¿Estás absolutamente seguro?", "Cancelar", "Continuar", "Sí, restablecer todo", "Restablecer progreso", "Todo el progreso se ha restablecido."], "es_mx": ["¿Restablecer progreso?", "Esto eliminará todas tus sesiones, puntajes e historial de este dispositivo. No se puede deshacer.", "Esta acción es permanente. ¿Estás absolutamente seguro?", "Cancelar", "Continuar", "Sí, restablecer todo", "Restablecer progreso", "Todo el progreso se ha restablecido."], "fr": ["Réinitialiser la progression ?", "Cela supprimera toutes vos sessions, scores et historique de cet appareil. Action irréversible.", "Cette action est définitive. Êtes-vous absolument sûr ?", "Annuler", "Continuer", "Oui, tout réinitialiser", "Réinitialiser la progression", "Toute la progression a été réinitialisée."], "fr_ca": ["Réinitialiser la progression ?", "Cela supprimera toutes vos sessions, scores et historique de cet appareil. Action irréversible.", "Cette action est définitive. Êtes-vous absolument certain ?", "Annuler", "Continuer", "Oui, tout réinitialiser", "Réinitialiser la progression", "Toute la progression a été réinitialisée."], "de": ["Fortschritt zurücksetzen?", "Alle Übungssitzungen, Punktzahlen und der Verlauf werden von diesem Gerät gelöscht. Nicht rückgängig zu machen.", "Diese Aktion ist endgültig. Sind Sie absolut sicher?", "Abbrechen", "Weiter", "Ja, alles zurücksetzen", "Fortschritt zurücksetzen", "Der gesamte Fortschritt wurde zurückgesetzt."], "it": ["Reimpostare i progressi?", "Questo eliminerà tutte le sessioni, i punteggi e la cronologia da questo dispositivo. Non è reversibile.", "Questa azione è permanente. Sei assolutamente sicuro?", "Annulla", "Continua", "Sì, reimposta tutto", "Reimposta progressi", "Tutti i progressi sono stati reimpostati."], "pt": ["Repor progresso?", "Isto irá eliminar todas as suas sessões, pontuações e histórico deste dispositivo. Não pode ser anulado.", "Esta ação é permanente. Tem a certeza absoluta?", "Cancelar", "Continuar", "Sim, repor tudo", "Repor progresso", "Todo o progresso foi reposto."], "pt_br": ["Redefinir progresso?", "Isso vai excluir todas as suas sessões, pontuações e histórico deste dispositivo. Não pode ser desfeito.", "Esta ação é permanente. Você tem certeza absoluta?", "Cancelar", "Continuar", "Sim, redefinir tudo", "Redefinir progresso", "Todo o progresso foi redefinido."], "cy": ["Ailosod cynnydd?", "Bydd hyn yn dileu pob un o'ch sesiynau, sgorau a hanes o'r ddyfais hon. Ni ellir ei dadwneud.", "Mae'r weithred hon yn barhaol. Ydych chi'n hollol sicr?", "Canslo", "Parhau", "Iawn, ailosod popeth", "Ailosod cynnydd", "Mae'r holl gynnydd wedi'i ailosod."], "ja": ["進行状況をリセット？", "このデバイスからすべてのセッション、スコア、履歴が削除されます。元に戻せません。", "この操作は取り消せません。本当によろしいですか？", "キャンセル", "続行", "はい、すべてリセット", "進行状況をリセット", "すべての進行状況がリセットされました。"], "ko": ["진행 상황 재설정?", "이 기기의 모든 운동 세션, 점수, 기록이 삭제됩니다. 되돌릴 수 없습니다.", "이 작업은 영구적입니다. 정말 확실하신가요?", "취소", "계속", "예, 모두 재설정", "진행 상황 재설정", "모든 진행 상황이 재설정되었습니다."], "zh": ["重置进度？", "这将从此设备删除您所有的练习会话、分数和历史记录。无法撤销。", "此操作不可逆。您完全确定吗？", "取消", "继续", "是的，全部重置", "重置进度", "所有进度已重置。"], "hi": ["प्रगति रीसेट करें?", "इससे इस डिवाइस के सभी अभ्यास सत्र, स्कोर और इतिहास हट जाएंगे। इसे पूर्ववत नहीं किया जा सकता।", "यह क्रिया स्थायी है। क्या आप पूरी तरह से निश्चित हैं?", "रद्द करें", "जारी रखें", "हाँ, सब कुछ रीसेट करें", "प्रगति रीसेट करें", "सभी प्रगति रीसेट कर दी गई है।"], "ar": ["إعادة ضبط التقدم؟", "سيؤدي هذا إلى حذف جميع جلسات التمرين والنتائج والسجل من هذا الجهاز. لا يمكن التراجع عن هذا.", "هذا الإجراء دائم. هل أنت متأكد تمامًا؟", "إلغاء", "متابعة", "نعم، أعد ضبط كل شيء", "إعادة ضبط التقدم", "تم إعادة ضبط جميع التقدم."], "pl": ["Zresetować postępy?", "Spowoduje to usunięcie wszystkich sesji, wyników i historii z tego urządzenia. Nie można tego cofnąć.", "Ta czynność jest nieodwracalna. Czy na pewno chcesz kontynuować?", "Anuluj", "Kontynuuj", "Tak, zresetuj wszystko", "Zresetuj postępy", "Wszystkie postępy zostały zresetowane."]};
+
+  function getLang() {
+    try {
+      var p = document.getElementById('lang-select') || document.getElementById('langSelect');
+      if (p && p.value && STRINGS[p.value]) return p.value;
+      var stored = localStorage.getItem('strokesight_lang') || localStorage.getItem('rewrite_lang') || localStorage.getItem('lang');
+      if (stored && STRINGS[stored]) return stored;
+    } catch(e) {}
+    return 'en';
+  }
+
+  function getStrings() { return STRINGS[getLang()] || STRINGS.en; }
+
+  function show(state) {
+    var modal = document.getElementById('reset-modal');
+    if (!modal) return;
+    var s = getStrings();
+    var titleEl = document.getElementById('reset-modal-title');
+    var bodyEl = document.getElementById('reset-modal-body');
+    var cancelEl = document.getElementById('reset-modal-cancel');
+    var proceedEl = document.getElementById('reset-modal-proceed');
+
+    if (state === 'step1') {
+      titleEl.textContent = s[0];
+      bodyEl.textContent = s[1];
+      bodyEl.classList.remove('warning');
+      cancelEl.textContent = s[3];
+      proceedEl.textContent = s[4];
+      proceedEl.classList.remove('danger');
+      proceedEl.classList.add('proceed');
+      proceedEl.onclick = function() { show('step2'); };
+    } else if (state === 'step2') {
+      titleEl.textContent = s[0];
+      bodyEl.textContent = s[2];
+      bodyEl.classList.add('warning');
+      cancelEl.textContent = s[3];
+      proceedEl.textContent = s[5];
+      proceedEl.classList.remove('proceed');
+      proceedEl.classList.add('danger');
+      proceedEl.onclick = function() { hide(); doReset(s[7]); };
+    }
+
+    cancelEl.onclick = hide;
+    modal.classList.add('is-visible');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+
+  function hide() {
+    var modal = document.getElementById('reset-modal');
+    if (modal) {
+      modal.classList.remove('is-visible');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  function doReset(successMsg) {
+    try {
+      // Stroke Sight uses localStorage prefix 'strokesight_*'
+      // ReWrite uses IndexedDB (clearAllSessions) + localStorage 'rewrite_*'
+      if (typeof clearAllSessions === 'function') {
+        clearAllSessions().then(function() {
+          if (typeof refreshProgress === 'function') refreshProgress();
+          // Wipe rewrite_* keys but keep activation + language + dark mode
+          var keep = ['rewrite_activated', 'rewrite_licence_key', 'rewrite_lang', 'rewrite_ls_instance', 'rewrite_instance_id'];
+          for (var i = localStorage.length - 1; i >= 0; i--) {
+            var k = localStorage.key(i);
+            if (k && k.indexOf('rewrite_') === 0 && keep.indexOf(k) === -1) {
+              localStorage.removeItem(k);
+            }
+          }
+          alert(successMsg);
+        });
+      } else {
+        // Stroke Sight: clear all strokesight_* keys EXCEPT activation + language
+        var keep2 = ['strokesight_activated', 'strokesight_licence_key', 'strokesight_lang', 'strokesight_ls_instance', 'strokesight_instance_id'];
+        for (var j = localStorage.length - 1; j >= 0; j--) {
+          var k2 = localStorage.key(j);
+          if (k2 && k2.indexOf('strokesight_') === 0 && keep2.indexOf(k2) === -1) {
+            localStorage.removeItem(k2);
+          }
+        }
+        // If Stroke Sight uses IndexedDB or other stores, also clear those
+        if (typeof refreshProgress === 'function') refreshProgress();
+        if (typeof loadProgress === 'function') loadProgress();
+        alert(successMsg);
+        // Reload to ensure clean state
+        setTimeout(function() { location.reload(); }, 300);
+      }
+    } catch(e) {
+      console.error('Reset failed:', e);
+      alert('Reset failed: ' + (e.message || 'unknown error'));
+    }
+  }
+
+  // Expose entry point
+  window.showResetProgressModal = function() { show('step1'); };
+
+  // Re-label the visible Reset button (if any) on language change
+  function relabelButton() {
+    var btn = document.getElementById('reset-progress-btn') || document.getElementById('resetBtn');
+    if (btn) {
+      var s = getStrings();
+      btn.textContent = s[6];
+    }
+    var lblTitle = document.getElementById('reset-section-title');
+    var lblDesc = document.getElementById('reset-section-desc');
+    if (lblTitle) lblTitle.textContent = (getLang() === 'en' ? 'Data' : (getStrings()[7] ? 'Data' : 'Data'));
+    if (lblDesc) lblDesc.textContent = (getLang() === 'en' ? 'All progress data is stored locally on this device.' : (getStrings()[1].split('.')[0] + '.'));
+  }
+
+  var langPicker = document.getElementById('lang-select') || document.getElementById('langSelect');
+  if (langPicker) langPicker.addEventListener('change', function() { setTimeout(relabelButton, 0); });
+  relabelButton();
 })();
 </script>
 
