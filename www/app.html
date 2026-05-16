@@ -5302,6 +5302,14 @@ function applyLanguage() {
   if (pht) pht.textContent = 'ReWrite — ' + (s.printHeaderTitle || STRINGS.en.printHeaderTitle);
   const phs = document.getElementById('printHeaderSub');
   if (phs) phs.textContent = s.printHeaderSub || STRINGS.en.printHeaderSub;
+  // Re-render My Practice list (suggestion chips + item rows) so they pick up the new language
+  if (typeof mpRenderList === 'function') {
+    var mpScreen = document.getElementById('myPracticeScreen');
+    if (mpScreen && mpScreen.style.display !== 'none') mpRenderList();
+  }
+  // Update placeholder on the add input (not just label)
+  var mpInp = document.getElementById('mpAddInput');
+  if (mpInp && s.mpAddPlaceholder) mpInp.placeholder = s.mpAddPlaceholder;
 }
 
 // ══════════════ TAB NAVIGATION ══════════════
