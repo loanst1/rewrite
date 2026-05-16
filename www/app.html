@@ -559,6 +559,15 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
         <button class="diff-btn" data-diff="functional" onclick="setDifficulty('sentences','functional',this)" id="diffSentFunc">Real-world</button>
       </div>
     </div>
+    <div class="exercise-card-group">
+      <button class="exercise-card" onclick="openMyPractice()">
+        <div class="exercise-icon" style="background:#e8f5ec;color:#2a6a4a">✍</div>
+        <div>
+          <h3 id="exMyPracticeTitle">My Practice</h3>
+          <p id="exMyPracticeDesc">Practice your own name, address, or anything that matters to you.</p>
+        </div>
+      </button>
+    </div>
   </div>
 
   <div class="card" style="text-align:center;padding:14px">
@@ -612,6 +621,83 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   </div>
 
   <button class="btn btn-outline btn-sm" style="margin-top:12px" onclick="exitExercise()" id="exitBtn">← Back to exercises</button>
+</div>
+
+<!-- ══════════════ My Practice ══════════════ -->
+<div class="exercise-screen" id="myPracticeScreen" style="display:none">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+    <button class="btn btn-outline btn-sm" onclick="exitMyPractice()" id="mpBackBtn">←</button>
+    <h2 style="font-size:18px;font-weight:800;flex:1" id="mpTitle">My Practice</h2>
+  </div>
+
+  <div style="display:flex;gap:6px;margin-bottom:14px;background:var(--bg2);padding:4px;border-radius:10px">
+    <button class="diff-btn active" id="mpTabList" onclick="switchMpTab('list')" style="flex:1">My List</button>
+    <button class="diff-btn" id="mpTabFree" onclick="switchMpTab('free')" style="flex:1">Free Practice</button>
+  </div>
+
+  <!-- Tab: My List -->
+  <div id="mpListTab">
+    <div class="card" id="mpAddCard" style="padding:14px;margin-bottom:12px">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px" id="mpAddLabel">Add something to practice</label>
+      <input id="mpAddInput" maxlength="250" placeholder="Your name, address, phone number…" style="width:100%;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;box-sizing:border-box"/>
+      <div id="mpAddCounter" style="font-size:11px;color:var(--text3);text-align:right;margin-top:4px">0 / 250</div>
+      <div class="btn-row" style="margin-top:8px">
+        <button class="btn btn-outline btn-sm" onclick="clearMpAdd()" id="mpAddClearBtn">Clear</button>
+        <button class="btn btn-primary btn-sm" onclick="saveMpItem()" id="mpAddSaveBtn">Save</button>
+      </div>
+    </div>
+
+    <div id="mpSuggestionsBlock" style="margin-bottom:12px;display:none">
+      <p style="font-size:12px;color:var(--text3);margin-bottom:6px" id="mpSuggestionsLabel">Suggestions to get started:</p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px" id="mpSuggestionsRow"></div>
+    </div>
+
+    <div id="mpItemsList"></div>
+    <p id="mpEmptyMsg" style="text-align:center;font-size:13px;color:var(--text3);padding:20px;display:none">Your saved items will appear here. Add your name, address, or anything else you want to practice writing.</p>
+  </div>
+
+  <!-- Tab: Free Practice -->
+  <div id="mpFreeTab" style="display:none">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:10px" id="mpFreeIntro">A blank canvas to write anything you like. Nothing is scored or saved.</p>
+    <div class="canvas-container" id="mpFreeContainer" style="margin-bottom:10px">
+      <canvas id="mpFreeCanvas"></canvas>
+    </div>
+    <div class="btn-row" style="margin-bottom:8px">
+      <button class="btn btn-outline btn-sm" onclick="mpFreeClear()" id="mpFreeClearBtn">↻ Clear</button>
+      <button class="btn btn-outline btn-sm" onclick="mpFreeUndo()" id="mpFreeUndoBtn">↶ Undo</button>
+      <button class="btn btn-primary btn-sm" onclick="mpFreeSave()" id="mpFreeSaveBtn">↓ Save</button>
+    </div>
+    <div class="btn-row">
+      <button class="diff-btn active" onclick="mpFreeSetLines('single',this)" id="mpFreeLinesSingle">Single line</button>
+      <button class="diff-btn" onclick="mpFreeSetLines('double',this)" id="mpFreeLinesDouble">Double line</button>
+      <button class="diff-btn" onclick="mpFreeSetLines('blank',this)" id="mpFreeLinesBlank">Blank</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ My Practice trace screen ══════════════ -->
+<div class="exercise-screen" id="mpTraceScreen" style="display:none">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+    <button class="btn btn-outline btn-sm" onclick="exitMpTrace()" id="mpTraceBackBtn">←</button>
+    <h2 style="font-size:16px;font-weight:700;flex:1" id="mpTraceHeader">Trace your item</h2>
+    <span id="mpTraceMode" style="font-size:11px;color:var(--text3)"></span>
+  </div>
+
+  <div class="target-display">
+    <p style="font-size:12px;color:var(--text3);margin-bottom:6px" id="mpTracePrompt">Trace this:</p>
+    <div class="target-char" id="mpTraceTarget" style="font-size:20px;word-break:break-word;line-height:1.4"></div>
+  </div>
+
+  <div class="canvas-container" id="mpTraceCanvasContainer">
+    <canvas id="mpTraceGuide"></canvas>
+    <canvas id="mpTraceDraw" style="position:absolute;top:0;left:0"></canvas>
+  </div>
+
+  <div class="btn-row" style="margin-top:10px">
+    <button class="btn btn-outline btn-sm" onclick="mpTraceClear()" id="mpTraceClearBtn">↻ Clear</button>
+    <button class="btn btn-outline btn-sm" onclick="mpTraceUndo()" id="mpTraceUndoBtn">↶ Undo</button>
+    <button class="btn btn-primary btn-sm" onclick="mpTraceDone()" id="mpTraceDoneBtn">✓ Done</button>
+  </div>
 </div>
 
 <!-- ── Session Summary (shown after completing all exercises) ── -->
@@ -3660,6 +3746,7 @@ const STRINGS = {
     exWordsTitle: 'Common Words', exWordsDesc: 'Trace short everyday words. Connect letters smoothly.',
     exSentencesTitle: 'Sentences', exSentencesDesc: 'Write full sentences. Builds endurance and flow.',
     tipText: 'Tip: Short daily sessions (10–15 minutes) are more effective than long infrequent ones.',
+    exMyPracticeTitle: "My Practice", exMyPracticeDesc: "Practice your own name, address, or anything that matters to you.", mpTitle: "My Practice", mpTabList: "My List", mpTabFree: "Free Practice", mpAddLabel: "Add something to practice", mpAddPlaceholder: "Your name, address, phone number…", mpAddSaveBtn: "Save", mpAddClearBtn: "Clear", mpEmptyMsg: "Your saved items will appear here. Add your name, address, or anything you want to practice writing.", mpSuggestionsLabel: "Suggestions to get started:", mpSuggestions: ["Your name", "Your address", "Your phone number", "A short message", "Today's date"], mpTraceBtn: "Trace", mpDeleteBtn: "Delete", mpDeleteConfirm: "Delete this item?", mpAddEmpty: "Please type something to save.", mpAddTooLong: "Too long. Maximum length is ", mpTracesLabel: "Traces", mpNeverUsed: "Not yet practiced", mpTraceHeader: "Trace your item", mpTraceGuided: "Guided", mpTraceFreestyle: "Trace only", mpFreeIntro: "A blank canvas to write anything you like. Nothing is scored or saved.", mpFreeClearBtn: "↻ Clear", mpFreeUndoBtn: "↶ Undo", mpFreeSaveBtn: "↓ Save", mpFreeLinesSingle: "Single line", mpFreeLinesDouble: "Double line", mpFreeLinesBlank: "Blank",
     diffWordsHard: "Advanced", diffWordsFunc: "Functional", diffSentHard: "Endurance", diffSentFunc: "Real-world",
     tracePrompt: 'Trace this carefully:', clearBtn: '↻ Clear', submitBtn: '✓ Submit',
     nextBtn: 'Next Exercise →', finishBtn: 'Finish Session ✓',
@@ -3762,6 +3849,7 @@ const STRINGS = {
     exWordsTitle: 'Palabras comunes', exWordsDesc: 'Trace palabras cortas del día a día.',
     exSentencesTitle: 'Frases', exSentencesDesc: 'Escriba frases completas para ganar resistencia.',
     tipText: 'Consejo: Las sesiones cortas diarias (10–15 min) son más efectivas.',
+    exMyPracticeTitle: "Mi práctica", exMyPracticeDesc: "Practica tu propio nombre, dirección o lo que sea importante para ti.", mpTitle: "Mi práctica", mpTabList: "Mi lista", mpTabFree: "Práctica libre", mpAddLabel: "Añadir algo para practicar", mpAddPlaceholder: "Tu nombre, dirección, teléfono…", mpAddSaveBtn: "Guardar", mpAddClearBtn: "Borrar", mpEmptyMsg: "Aquí aparecerán tus elementos guardados. Añade tu nombre, dirección o cualquier cosa que quieras practicar.", mpSuggestionsLabel: "Sugerencias para empezar:", mpSuggestions: ["Tu nombre", "Tu dirección", "Tu teléfono", "Un mensaje corto", "La fecha de hoy"], mpTraceBtn: "Trazar", mpDeleteBtn: "Eliminar", mpDeleteConfirm: "¿Eliminar este elemento?", mpAddEmpty: "Escribe algo para guardar.", mpAddTooLong: "Demasiado largo. Máximo ", mpTracesLabel: "Trazos", mpNeverUsed: "Aún no practicado", mpTraceHeader: "Traza tu elemento", mpTraceGuided: "Guiado", mpTraceFreestyle: "Solo trazo", mpFreeIntro: "Un lienzo en blanco para escribir lo que quieras. No se puntúa ni se guarda.", mpFreeClearBtn: "↻ Borrar", mpFreeUndoBtn: "↶ Deshacer", mpFreeSaveBtn: "↓ Guardar", mpFreeLinesSingle: "Una línea", mpFreeLinesDouble: "Doble línea", mpFreeLinesBlank: "En blanco",
     diffWordsHard: "Avanzado", diffWordsFunc: "Funcional", diffSentHard: "Resistencia", diffSentFunc: "Vida real",
     tracePrompt: 'Trace esto con cuidado:', clearBtn: '↻ Borrar', submitBtn: '✓ Enviar',
     nextBtn: 'Siguiente →', finishBtn: 'Finalizar ✓', exitBtn: '← Volver',
@@ -3854,6 +3942,7 @@ const STRINGS = {
     exWordsTitle: 'Mots courants', exWordsDesc: 'Tracez des mots courts du quotidien.',
     exSentencesTitle: 'Phrases', exSentencesDesc: 'Écrivez des phrases complètes.',
     tipText: 'Conseil : Des sessions courtes quotidiennes (10–15 min) sont plus efficaces.',
+    exMyPracticeTitle: "Ma pratique", exMyPracticeDesc: "Pratiquez votre nom, votre adresse ou tout ce qui compte pour vous.", mpTitle: "Ma pratique", mpTabList: "Ma liste", mpTabFree: "Pratique libre", mpAddLabel: "Ajouter quelque chose à pratiquer", mpAddPlaceholder: "Votre nom, adresse, téléphone…", mpAddSaveBtn: "Enregistrer", mpAddClearBtn: "Effacer", mpEmptyMsg: "Vos éléments enregistrés apparaîtront ici. Ajoutez votre nom, adresse ou tout ce que vous voulez pratiquer.", mpSuggestionsLabel: "Suggestions pour commencer :", mpSuggestions: ["Votre nom", "Votre adresse", "Votre téléphone", "Un court message", "La date d'aujourd'hui"], mpTraceBtn: "Tracer", mpDeleteBtn: "Supprimer", mpDeleteConfirm: "Supprimer cet élément ?", mpAddEmpty: "Veuillez écrire quelque chose à enregistrer.", mpAddTooLong: "Trop long. Maximum ", mpTracesLabel: "Tracés", mpNeverUsed: "Pas encore pratiqué", mpTraceHeader: "Tracez votre élément", mpTraceGuided: "Guidé", mpTraceFreestyle: "Tracé seul", mpFreeIntro: "Une toile vierge pour écrire ce que vous voulez. Rien n'est noté ni enregistré.", mpFreeClearBtn: "↻ Effacer", mpFreeUndoBtn: "↶ Annuler", mpFreeSaveBtn: "↓ Enregistrer", mpFreeLinesSingle: "Ligne simple", mpFreeLinesDouble: "Double ligne", mpFreeLinesBlank: "Vierge",
     diffWordsHard: "Avancé", diffWordsFunc: "Pratique", diffSentHard: "Endurance", diffSentFunc: "Vie réelle",
     tracePrompt: 'Tracez soigneusement :', clearBtn: '↻ Effacer', submitBtn: '✓ Soumettre',
     nextBtn: 'Suivant →', finishBtn: 'Terminer ✓', exitBtn: '← Retour',
@@ -3946,6 +4035,7 @@ const STRINGS = {
     exWordsTitle: 'Häufige Wörter', exWordsDesc: 'Kurze Alltagswörter nachzeichnen.',
     exSentencesTitle: 'Sätze', exSentencesDesc: 'Ganze Sätze schreiben.',
     tipText: 'Tipp: Kurze tägliche Übungen (10–15 Min.) sind effektiver.',
+    exMyPracticeTitle: "Meine Übung", exMyPracticeDesc: "Üben Sie Ihren Namen, Ihre Adresse oder alles, was Ihnen wichtig ist.", mpTitle: "Meine Übung", mpTabList: "Meine Liste", mpTabFree: "Freies Üben", mpAddLabel: "Etwas zum Üben hinzufügen", mpAddPlaceholder: "Ihr Name, Adresse, Telefon…", mpAddSaveBtn: "Speichern", mpAddClearBtn: "Löschen", mpEmptyMsg: "Hier erscheinen Ihre gespeicherten Einträge. Fügen Sie Ihren Namen, Adresse oder alles hinzu, was Sie üben möchten.", mpSuggestionsLabel: "Vorschläge zum Einstieg:", mpSuggestions: ["Ihr Name", "Ihre Adresse", "Ihre Telefonnummer", "Eine kurze Nachricht", "Heutiges Datum"], mpTraceBtn: "Nachzeichnen", mpDeleteBtn: "Löschen", mpDeleteConfirm: "Eintrag löschen?", mpAddEmpty: "Bitte etwas zum Speichern eingeben.", mpAddTooLong: "Zu lang. Maximum ", mpTracesLabel: "Übungen", mpNeverUsed: "Noch nicht geübt", mpTraceHeader: "Zeichnen Sie nach", mpTraceGuided: "Mit Hilfe", mpTraceFreestyle: "Nur nachzeichnen", mpFreeIntro: "Eine leere Fläche zum Schreiben. Wird nicht bewertet oder gespeichert.", mpFreeClearBtn: "↻ Löschen", mpFreeUndoBtn: "↶ Rückgängig", mpFreeSaveBtn: "↓ Speichern", mpFreeLinesSingle: "Einfache Linie", mpFreeLinesDouble: "Doppelte Linie", mpFreeLinesBlank: "Leer",
     diffWordsHard: "Fortgeschritten", diffWordsFunc: "Funktional", diffSentHard: "Ausdauer", diffSentFunc: "Alltag",
     tracePrompt: 'Sorgfältig nachzeichnen:', clearBtn: '↻ Löschen', submitBtn: '✓ Absenden',
     nextBtn: 'Weiter →', finishBtn: 'Beenden ✓', exitBtn: '← Zurück',
@@ -4038,6 +4128,7 @@ const STRINGS = {
     exWordsTitle: 'Parole comuni', exWordsDesc: 'Traccia brevi parole quotidiane.',
     exSentencesTitle: 'Frasi', exSentencesDesc: 'Scrivi frasi complete.',
     tipText: 'Consiglio: sessioni brevi quotidiane (10–15 min) sono più efficaci.',
+    exMyPracticeTitle: "La mia pratica", exMyPracticeDesc: "Esercitati con il tuo nome, indirizzo o qualsiasi cosa ti stia a cuore.", mpTitle: "La mia pratica", mpTabList: "La mia lista", mpTabFree: "Pratica libera", mpAddLabel: "Aggiungi qualcosa da praticare", mpAddPlaceholder: "Il tuo nome, indirizzo, telefono…", mpAddSaveBtn: "Salva", mpAddClearBtn: "Cancella", mpEmptyMsg: "I tuoi elementi salvati appariranno qui. Aggiungi nome, indirizzo o ciò che vuoi praticare.", mpSuggestionsLabel: "Suggerimenti per iniziare:", mpSuggestions: ["Il tuo nome", "Il tuo indirizzo", "Il tuo telefono", "Un breve messaggio", "La data di oggi"], mpTraceBtn: "Traccia", mpDeleteBtn: "Elimina", mpDeleteConfirm: "Eliminare questo elemento?", mpAddEmpty: "Scrivi qualcosa da salvare.", mpAddTooLong: "Troppo lungo. Massimo ", mpTracesLabel: "Tracce", mpNeverUsed: "Non ancora praticato", mpTraceHeader: "Traccia il tuo elemento", mpTraceGuided: "Guidato", mpTraceFreestyle: "Solo traccia", mpFreeIntro: "Un foglio bianco per scrivere ciò che vuoi. Nessun punteggio o salvataggio.", mpFreeClearBtn: "↻ Cancella", mpFreeUndoBtn: "↶ Annulla", mpFreeSaveBtn: "↓ Salva", mpFreeLinesSingle: "Riga singola", mpFreeLinesDouble: "Doppia riga", mpFreeLinesBlank: "Vuoto",
     diffWordsHard: "Avanzato", diffWordsFunc: "Funzionale", diffSentHard: "Resistenza", diffSentFunc: "Vita reale",
     tracePrompt: 'Traccia con attenzione:', clearBtn: '↻ Cancella', submitBtn: '✓ Invia',
     nextBtn: 'Avanti →', finishBtn: 'Termina ✓', exitBtn: '← Indietro',
@@ -4130,6 +4221,7 @@ const STRINGS = {
     exWordsTitle: 'Palavras comuns', exWordsDesc: 'Trace palavras curtas do dia a dia.',
     exSentencesTitle: 'Frases', exSentencesDesc: 'Escreva frases completas.',
     tipText: 'Dica: Sessões curtas diárias (10–15 min) são mais eficazes.',
+    exMyPracticeTitle: "A minha prática", exMyPracticeDesc: "Pratique o seu nome, morada ou qualquer coisa importante para si.", mpTitle: "A minha prática", mpTabList: "A minha lista", mpTabFree: "Prática livre", mpAddLabel: "Adicionar algo para praticar", mpAddPlaceholder: "Seu nome, morada, telefone…", mpAddSaveBtn: "Guardar", mpAddClearBtn: "Limpar", mpEmptyMsg: "Os seus itens guardados aparecerão aqui. Adicione o seu nome, morada ou o que quiser praticar.", mpSuggestionsLabel: "Sugestões para começar:", mpSuggestions: ["Seu nome", "Sua morada", "Seu telefone", "Uma mensagem curta", "Data de hoje"], mpTraceBtn: "Traçar", mpDeleteBtn: "Eliminar", mpDeleteConfirm: "Eliminar este item?", mpAddEmpty: "Escreva algo para guardar.", mpAddTooLong: "Demasiado longo. Máximo ", mpTracesLabel: "Traçados", mpNeverUsed: "Ainda não praticado", mpTraceHeader: "Trace o seu item", mpTraceGuided: "Guiado", mpTraceFreestyle: "Apenas traço", mpFreeIntro: "Uma tela em branco para escrever o que quiser. Nada é pontuado ou guardado.", mpFreeClearBtn: "↻ Limpar", mpFreeUndoBtn: "↶ Desfazer", mpFreeSaveBtn: "↓ Guardar", mpFreeLinesSingle: "Linha única", mpFreeLinesDouble: "Linha dupla", mpFreeLinesBlank: "Em branco",
     diffWordsHard: "Avançado", diffWordsFunc: "Funcional", diffSentHard: "Resistência", diffSentFunc: "Vida real",
     tracePrompt: 'Trace com cuidado:', clearBtn: '↻ Limpar', submitBtn: '✓ Enviar',
     nextBtn: 'Próximo →', finishBtn: 'Finalizar ✓', exitBtn: '← Voltar',
@@ -4228,6 +4320,7 @@ const STRINGS = {
     exWordsTitle: 'Geiriau Cyffredin', exWordsDesc: 'Olrheiniwch eiriau byr o ddydd i ddydd.',
     exSentencesTitle: 'Brawddegau', exSentencesDesc: 'Ysgrifennwch frawddegau llawn.',
     tipText: 'Awgrym: Mae sesiynau byr dyddiol (10–15 mun) yn fwy effeithiol.',
+    exMyPracticeTitle: "Fy Ymarfer", exMyPracticeDesc: "Ymarferwch eich enw, cyfeiriad neu unrhyw beth sy'n bwysig i chi.", mpTitle: "Fy Ymarfer", mpTabList: "Fy Rhestr", mpTabFree: "Ymarfer Rhydd", mpAddLabel: "Ychwanegu rhywbeth i'w ymarfer", mpAddPlaceholder: "Eich enw, cyfeiriad, rhif ffôn…", mpAddSaveBtn: "Cadw", mpAddClearBtn: "Clirio", mpEmptyMsg: "Bydd eich eitemau wedi'u cadw'n ymddangos yma. Ychwanegwch eich enw, cyfeiriad neu unrhyw beth rydych am ei ymarfer.", mpSuggestionsLabel: "Awgrymiadau i ddechrau:", mpSuggestions: ["Eich enw", "Eich cyfeiriad", "Eich rhif ffôn", "Neges fer", "Dyddiad heddiw"], mpTraceBtn: "Olrhain", mpDeleteBtn: "Dileu", mpDeleteConfirm: "Dileu'r eitem hon?", mpAddEmpty: "Teipiwch rywbeth i'w gadw.", mpAddTooLong: "Rhy hir. Uchafswm ", mpTracesLabel: "Olrhaeon", mpNeverUsed: "Heb ymarfer eto", mpTraceHeader: "Olrhain eich eitem", mpTraceGuided: "Gyda chymorth", mpTraceFreestyle: "Olrhain yn unig", mpFreeIntro: "Cynfas gwag i ysgrifennu unrhyw beth. Dim sgorio na chadw.", mpFreeClearBtn: "↻ Clirio", mpFreeUndoBtn: "↶ Dadwneud", mpFreeSaveBtn: "↓ Cadw", mpFreeLinesSingle: "Llinell sengl", mpFreeLinesDouble: "Llinell ddwbl", mpFreeLinesBlank: "Gwag",
     diffWordsHard: "Uwch", diffWordsFunc: "Ymarferol", diffSentHard: "Dyfalbarhad", diffSentFunc: "Bywyd Bob Dydd",
     tracePrompt: 'Olrheiniwch yn ofalus:', clearBtn: '↻ Clirio', submitBtn: '✓ Cyflwyno',
     nextBtn: 'Nesaf →', finishBtn: 'Gorffen ✓', exitBtn: '← Yn ôl',
@@ -4253,6 +4346,7 @@ const STRINGS = {
     exWordsTitle: 'よく使う言葉', exWordsDesc: '日常的な言葉をなぞりましょう。',
     exSentencesTitle: '文章', exSentencesDesc: '文章を書いて持久力を高めましょう。',
     tipText: 'ヒント：毎日短い練習（10〜15分）が効果的です。',
+    exMyPracticeTitle: "マイ練習", exMyPracticeDesc: "自分の名前、住所、大切なものを練習しましょう。", mpTitle: "マイ練習", mpTabList: "マイリスト", mpTabFree: "自由練習", mpAddLabel: "練習する内容を追加", mpAddPlaceholder: "名前、住所、電話番号…", mpAddSaveBtn: "保存", mpAddClearBtn: "クリア", mpEmptyMsg: "保存した項目がここに表示されます。名前、住所、練習したいものを追加してください。", mpSuggestionsLabel: "始めるための提案:", mpSuggestions: ["お名前", "ご住所", "電話番号", "短いメッセージ", "今日の日付"], mpTraceBtn: "なぞる", mpDeleteBtn: "削除", mpDeleteConfirm: "この項目を削除しますか?", mpAddEmpty: "保存する内容を入力してください。", mpAddTooLong: "長すぎます。最大 ", mpTracesLabel: "練習回数", mpNeverUsed: "まだ練習していません", mpTraceHeader: "項目をなぞる", mpTraceGuided: "ガイドあり", mpTraceFreestyle: "なぞるのみ", mpFreeIntro: "好きなことを書ける白紙のキャンバスです。採点も保存もされません。", mpFreeClearBtn: "↻ クリア", mpFreeUndoBtn: "↶ 元に戻す", mpFreeSaveBtn: "↓ 保存", mpFreeLinesSingle: "一本線", mpFreeLinesDouble: "二本線", mpFreeLinesBlank: "白紙",
     diffWordsHard: "上級", diffWordsFunc: "実用", diffSentHard: "持久練習", diffSentFunc: "実生活",
     tracePrompt: '丁寧になぞりましょう：', clearBtn: '↻ 消去', submitBtn: '✓ 提出',
     nextBtn: '次へ →', finishBtn: '終了 ✓', exitBtn: '← 戻る',
@@ -4351,6 +4445,7 @@ const STRINGS = {
     exWordsTitle: '일상 단어', exWordsDesc: '일상적인 단어를 따라 쓰세요.',
     exSentencesTitle: '문장', exSentencesDesc: '완전한 문장을 써서 지구력을 키우세요.',
     tipText: '팁: 매일 짧은 연습(10–15분)이 더 효과적입니다.',
+    exMyPracticeTitle: "나의 연습", exMyPracticeDesc: "이름, 주소, 중요한 것을 연습하세요.", mpTitle: "나의 연습", mpTabList: "내 목록", mpTabFree: "자유 연습", mpAddLabel: "연습할 내용 추가", mpAddPlaceholder: "이름, 주소, 전화번호…", mpAddSaveBtn: "저장", mpAddClearBtn: "지우기", mpEmptyMsg: "저장한 항목이 여기에 표시됩니다. 이름, 주소 또는 연습하고 싶은 것을 추가하세요.", mpSuggestionsLabel: "시작하기 위한 제안:", mpSuggestions: ["이름", "주소", "전화번호", "짧은 메시지", "오늘 날짜"], mpTraceBtn: "따라쓰기", mpDeleteBtn: "삭제", mpDeleteConfirm: "이 항목을 삭제하시겠습니까?", mpAddEmpty: "저장할 내용을 입력하세요.", mpAddTooLong: "너무 깁니다. 최대 ", mpTracesLabel: "연습 횟수", mpNeverUsed: "아직 연습하지 않음", mpTraceHeader: "항목 따라쓰기", mpTraceGuided: "안내", mpTraceFreestyle: "따라쓰기만", mpFreeIntro: "원하는 것을 쓸 수 있는 빈 캔버스. 채점하거나 저장하지 않습니다.", mpFreeClearBtn: "↻ 지우기", mpFreeUndoBtn: "↶ 실행 취소", mpFreeSaveBtn: "↓ 저장", mpFreeLinesSingle: "한 줄", mpFreeLinesDouble: "두 줄", mpFreeLinesBlank: "빈 칸",
     diffWordsHard: "고급", diffWordsFunc: "실용", diffSentHard: "지구력", diffSentFunc: "실생활",
     tracePrompt: '정성껏 따라 쓰세요:', clearBtn: '↻ 지우기', submitBtn: '✓ 제출',
     nextBtn: '다음 →', finishBtn: '종료 ✓', exitBtn: '← 돌아가기',
@@ -4449,6 +4544,7 @@ const STRINGS = {
     exWordsTitle: 'सामान्य शब्द', exWordsDesc: 'रोज़मर्रा के छोटे शब्दों को लिखें।',
     exSentencesTitle: 'वाक्य', exSentencesDesc: 'पूरे वाक्य लिखें। सहनशक्ति बनाएँ।',
     tipText: 'सुझाव: छोटे दैनिक सत्र (10-15 मिनट) लंबे अनियमित सत्रों से अधिक प्रभावी हैं।',
+    exMyPracticeTitle: "मेरा अभ्यास", exMyPracticeDesc: "अपना नाम, पता या जो आपके लिए महत्वपूर्ण है, उसका अभ्यास करें।", mpTitle: "मेरा अभ्यास", mpTabList: "मेरी सूची", mpTabFree: "मुक्त अभ्यास", mpAddLabel: "अभ्यास के लिए कुछ जोड़ें", mpAddPlaceholder: "आपका नाम, पता, फ़ोन…", mpAddSaveBtn: "सहेजें", mpAddClearBtn: "साफ़ करें", mpEmptyMsg: "आपकी सहेजी गई वस्तुएं यहाँ दिखाई देंगी। अपना नाम, पता या जो भी आप अभ्यास करना चाहते हैं, जोड़ें।", mpSuggestionsLabel: "शुरू करने के सुझाव:", mpSuggestions: ["आपका नाम", "आपका पता", "आपका फ़ोन नंबर", "एक छोटा संदेश", "आज की तारीख"], mpTraceBtn: "ट्रेस करें", mpDeleteBtn: "हटाएं", mpDeleteConfirm: "इस वस्तु को हटाएं?", mpAddEmpty: "सहेजने के लिए कुछ लिखें।", mpAddTooLong: "बहुत लंबा। अधिकतम ", mpTracesLabel: "ट्रेस", mpNeverUsed: "अभी तक अभ्यास नहीं", mpTraceHeader: "अपनी वस्तु ट्रेस करें", mpTraceGuided: "निर्देशित", mpTraceFreestyle: "केवल ट्रेस", mpFreeIntro: "जो चाहें लिखने के लिए खाली कैनवास। कोई स्कोरिंग या सहेजना नहीं।", mpFreeClearBtn: "↻ साफ़ करें", mpFreeUndoBtn: "↶ पूर्ववत करें", mpFreeSaveBtn: "↓ सहेजें", mpFreeLinesSingle: "एक रेखा", mpFreeLinesDouble: "दोहरी रेखा", mpFreeLinesBlank: "खाली",
     diffWordsHard: "उन्नत", diffWordsFunc: "व्यावहारिक", diffSentHard: "धैर्य", diffSentFunc: "दैनिक जीवन",
     tracePrompt: 'ध्यान से लिखें:', clearBtn: '↻ मिटाएँ', submitBtn: '✓ जमा करें',
     nextBtn: 'अगला →', finishBtn: 'समाप्त ✓', exitBtn: '← वापस',
@@ -4547,6 +4643,7 @@ const STRINGS = {
     exWordsTitle: 'كلمات شائعة', exWordsDesc: 'اكتب كلمات يومية قصيرة.',
     exSentencesTitle: 'جمل', exSentencesDesc: 'اكتب جملاً كاملة لبناء القدرة على التحمل.',
     tipText: 'نصيحة: الجلسات اليومية القصيرة (10-15 دقيقة) أكثر فعالية.',
+    exMyPracticeTitle: "تدريبي", exMyPracticeDesc: "تدرب على اسمك أو عنوانك أو أي شيء يهمك.", mpTitle: "تدريبي", mpTabList: "قائمتي", mpTabFree: "تدريب حر", mpAddLabel: "أضف شيئًا للتدرب عليه", mpAddPlaceholder: "اسمك، عنوانك، رقم هاتفك…", mpAddSaveBtn: "حفظ", mpAddClearBtn: "مسح", mpEmptyMsg: "ستظهر العناصر المحفوظة هنا. أضف اسمك أو عنوانك أو أي شيء تريد التدرب على كتابته.", mpSuggestionsLabel: "اقتراحات للبدء:", mpSuggestions: ["اسمك", "عنوانك", "رقم هاتفك", "رسالة قصيرة", "تاريخ اليوم"], mpTraceBtn: "تتبع", mpDeleteBtn: "حذف", mpDeleteConfirm: "حذف هذا العنصر؟", mpAddEmpty: "يرجى كتابة شيء للحفظ.", mpAddTooLong: "طويل جدًا. الحد الأقصى ", mpTracesLabel: "مرات التتبع", mpNeverUsed: "لم يتم التدرب بعد", mpTraceHeader: "تتبع العنصر", mpTraceGuided: "موجه", mpTraceFreestyle: "تتبع فقط", mpFreeIntro: "لوحة فارغة للكتابة بما تشاء. لا يتم التقييم أو الحفظ.", mpFreeClearBtn: "↻ مسح", mpFreeUndoBtn: "↶ تراجع", mpFreeSaveBtn: "↓ حفظ", mpFreeLinesSingle: "سطر واحد", mpFreeLinesDouble: "سطران", mpFreeLinesBlank: "فارغ",
     diffWordsHard: "متقدم", diffWordsFunc: "عملي", diffSentHard: "تحمل", diffSentFunc: "حياة يومية",
     tracePrompt: 'اكتب بعناية:', clearBtn: '↻ مسح', submitBtn: '✓ إرسال',
     nextBtn: 'التالي →', finishBtn: 'إنهاء ✓', exitBtn: '← رجوع',
@@ -4645,6 +4742,7 @@ const STRINGS = {
     exWordsTitle: '常用词语', exWordsDesc: '书写日常短词。',
     exSentencesTitle: '句子', exSentencesDesc: '书写完整句子，锻炼耐力。',
     tipText: '提示：每天短时练习（10-15分钟）比长时间偶尔练习更有效。',
+    exMyPracticeTitle: "我的练习", exMyPracticeDesc: "练习您的姓名、地址或对您重要的任何内容。", mpTitle: "我的练习", mpTabList: "我的列表", mpTabFree: "自由练习", mpAddLabel: "添加要练习的内容", mpAddPlaceholder: "您的姓名、地址、电话…", mpAddSaveBtn: "保存", mpAddClearBtn: "清除", mpEmptyMsg: "您保存的项目将显示在此处。添加您的姓名、地址或要练习的任何内容。", mpSuggestionsLabel: "开始建议:", mpSuggestions: ["您的姓名", "您的地址", "您的电话", "简短消息", "今天的日期"], mpTraceBtn: "描摹", mpDeleteBtn: "删除", mpDeleteConfirm: "删除此项目?", mpAddEmpty: "请输入要保存的内容。", mpAddTooLong: "太长。最大 ", mpTracesLabel: "练习次数", mpNeverUsed: "尚未练习", mpTraceHeader: "描摹您的项目", mpTraceGuided: "引导", mpTraceFreestyle: "仅描摹", mpFreeIntro: "一张空白画布,随心所欲地写。不评分,不保存。", mpFreeClearBtn: "↻ 清除", mpFreeUndoBtn: "↶ 撤销", mpFreeSaveBtn: "↓ 保存", mpFreeLinesSingle: "单线", mpFreeLinesDouble: "双线", mpFreeLinesBlank: "空白",
     diffWordsHard: "进阶", diffWordsFunc: "实用", diffSentHard: "耐力", diffSentFunc: "日常生活",
     tracePrompt: '请仔细临摹：', clearBtn: '↻ 清除', submitBtn: '✓ 提交',
     nextBtn: '下一个 →', finishBtn: '完成 ✓', exitBtn: '← 返回',
@@ -4743,6 +4841,7 @@ const STRINGS = {
     exWordsTitle: 'Popularne słowa', exWordsDesc: 'Pisz krótkie codzienne słowa.',
     exSentencesTitle: 'Zdania', exSentencesDesc: 'Pisz pełne zdania dla wytrzymałości.',
     tipText: 'Wskazówka: Krótkie codzienne sesje (10-15 min) są bardziej skuteczne.',
+    exMyPracticeTitle: "Moje ćwiczenia", exMyPracticeDesc: "Ćwicz swoje imię, adres lub cokolwiek, co jest dla Ciebie ważne.", mpTitle: "Moje ćwiczenia", mpTabList: "Moja lista", mpTabFree: "Swobodne ćwiczenia", mpAddLabel: "Dodaj coś do ćwiczeń", mpAddPlaceholder: "Twoje imię, adres, telefon…", mpAddSaveBtn: "Zapisz", mpAddClearBtn: "Wyczyść", mpEmptyMsg: "Tutaj pojawią się zapisane elementy. Dodaj swoje imię, adres lub cokolwiek chcesz ćwiczyć.", mpSuggestionsLabel: "Sugestie na start:", mpSuggestions: ["Twoje imię", "Twój adres", "Twój numer telefonu", "Krótka wiadomość", "Dzisiejsza data"], mpTraceBtn: "Obrysuj", mpDeleteBtn: "Usuń", mpDeleteConfirm: "Usunąć ten element?", mpAddEmpty: "Wpisz coś do zapisania.", mpAddTooLong: "Za długie. Maksimum ", mpTracesLabel: "Obrysy", mpNeverUsed: "Jeszcze nie ćwiczone", mpTraceHeader: "Obrysuj swój element", mpTraceGuided: "Z pomocą", mpTraceFreestyle: "Tylko obrys", mpFreeIntro: "Pusta kartka do pisania czego chcesz. Bez oceniania ani zapisywania.", mpFreeClearBtn: "↻ Wyczyść", mpFreeUndoBtn: "↶ Cofnij", mpFreeSaveBtn: "↓ Zapisz", mpFreeLinesSingle: "Pojedyncza linia", mpFreeLinesDouble: "Podwójna linia", mpFreeLinesBlank: "Pusta",
     diffWordsHard: "Zaawansowane", diffWordsFunc: "Praktyczne", diffSentHard: "Wytrzymałość", diffSentFunc: "Życie codzienne",
     tracePrompt: 'Odwzoruj starannie:', clearBtn: '↻ Wyczyść', submitBtn: '✓ Zatwierdź',
     nextBtn: 'Dalej →', finishBtn: 'Zakończ ✓', exitBtn: '← Powrót',
@@ -4841,6 +4940,7 @@ const STRINGS = {
     exWordsTitle: 'Palabras comunes', exWordsDesc: 'Trace palabras cortas del día a día.',
     exSentencesTitle: 'Frases', exSentencesDesc: 'Escriba frases completas para ganar resistencia.',
     tipText: 'Consejo: Las sesiones cortas diarias (10–15 min) son más efectivas.',
+    exMyPracticeTitle: "Mi práctica", exMyPracticeDesc: "Practica tu nombre, dirección o lo que sea importante para ti.", mpTitle: "Mi práctica", mpTabList: "Mi lista", mpTabFree: "Práctica libre", mpAddLabel: "Agregar algo para practicar", mpAddPlaceholder: "Tu nombre, dirección, teléfono…", mpAddSaveBtn: "Guardar", mpAddClearBtn: "Borrar", mpEmptyMsg: "Aquí aparecerán tus elementos guardados. Agrega tu nombre, dirección o lo que quieras practicar.", mpSuggestionsLabel: "Sugerencias para empezar:", mpSuggestions: ["Tu nombre", "Tu dirección", "Tu teléfono", "Un mensaje corto", "La fecha de hoy"], mpTraceBtn: "Trazar", mpDeleteBtn: "Eliminar", mpDeleteConfirm: "¿Eliminar este elemento?", mpAddEmpty: "Escribe algo para guardar.", mpAddTooLong: "Demasiado largo. Máximo ", mpTracesLabel: "Trazos", mpNeverUsed: "Aún no practicado", mpTraceHeader: "Traza tu elemento", mpTraceGuided: "Guiado", mpTraceFreestyle: "Solo trazo", mpFreeIntro: "Un lienzo en blanco para escribir lo que quieras. No se califica ni se guarda.", mpFreeClearBtn: "↻ Borrar", mpFreeUndoBtn: "↶ Deshacer", mpFreeSaveBtn: "↓ Guardar", mpFreeLinesSingle: "Una línea", mpFreeLinesDouble: "Doble línea", mpFreeLinesBlank: "En blanco",
     diffWordsHard: "Avanzado", diffWordsFunc: "Funcional", diffSentHard: "Resistencia", diffSentFunc: "Vida real",
     tracePrompt: 'Trace esto con cuidado:', clearBtn: '↻ Borrar', submitBtn: '✓ Enviar',
     nextBtn: 'Siguiente →', finishBtn: 'Finalizar ✓', exitBtn: '← Volver',
@@ -4939,6 +5039,7 @@ const STRINGS = {
     exWordsTitle: 'Palavras comuns', exWordsDesc: 'Trace palavras curtas do dia a dia.',
     exSentencesTitle: 'Frases', exSentencesDesc: 'Escreva frases completas para ganhar resistência.',
     tipText: 'Dica: Sessões curtas diárias (10–15 min) são mais eficazes.',
+    exMyPracticeTitle: "Minha prática", exMyPracticeDesc: "Pratique seu nome, endereço ou qualquer coisa importante para você.", mpTitle: "Minha prática", mpTabList: "Minha lista", mpTabFree: "Prática livre", mpAddLabel: "Adicionar algo para praticar", mpAddPlaceholder: "Seu nome, endereço, telefone…", mpAddSaveBtn: "Salvar", mpAddClearBtn: "Limpar", mpEmptyMsg: "Seus itens salvos aparecerão aqui. Adicione seu nome, endereço ou o que quiser praticar.", mpSuggestionsLabel: "Sugestões para começar:", mpSuggestions: ["Seu nome", "Seu endereço", "Seu telefone", "Uma mensagem curta", "Data de hoje"], mpTraceBtn: "Traçar", mpDeleteBtn: "Excluir", mpDeleteConfirm: "Excluir este item?", mpAddEmpty: "Escreva algo para salvar.", mpAddTooLong: "Muito longo. Máximo ", mpTracesLabel: "Traços", mpNeverUsed: "Ainda não praticado", mpTraceHeader: "Trace seu item", mpTraceGuided: "Guiado", mpTraceFreestyle: "Apenas traço", mpFreeIntro: "Uma tela em branco para escrever o que quiser. Nada é pontuado ou salvo.", mpFreeClearBtn: "↻ Limpar", mpFreeUndoBtn: "↶ Desfazer", mpFreeSaveBtn: "↓ Salvar", mpFreeLinesSingle: "Linha única", mpFreeLinesDouble: "Linha dupla", mpFreeLinesBlank: "Em branco",
     diffWordsHard: "Avançado", diffWordsFunc: "Funcional", diffSentHard: "Resistência", diffSentFunc: "Vida real",
     tracePrompt: 'Trace com cuidado:', clearBtn: '↻ Limpar', submitBtn: '✓ Enviar',
     nextBtn: 'Próximo →', finishBtn: 'Finalizar ✓', exitBtn: '← Voltar',
@@ -5037,6 +5138,7 @@ const STRINGS = {
     exWordsTitle: 'Mots courants', exWordsDesc: 'Tracez des mots courts du quotidien.',
     exSentencesTitle: 'Phrases', exSentencesDesc: 'Écrivez des phrases complètes pour gagner en endurance.',
     tipText: 'Conseil : Des séances courtes quotidiennes (10–15 min) sont plus efficaces.',
+    exMyPracticeTitle: "Ma pratique", exMyPracticeDesc: "Pratiquez votre nom, votre adresse ou tout ce qui compte pour vous.", mpTitle: "Ma pratique", mpTabList: "Ma liste", mpTabFree: "Pratique libre", mpAddLabel: "Ajouter quelque chose à pratiquer", mpAddPlaceholder: "Votre nom, adresse, téléphone…", mpAddSaveBtn: "Enregistrer", mpAddClearBtn: "Effacer", mpEmptyMsg: "Vos éléments enregistrés apparaîtront ici. Ajoutez votre nom, adresse ou ce que vous voulez pratiquer.", mpSuggestionsLabel: "Suggestions pour commencer :", mpSuggestions: ["Votre nom", "Votre adresse", "Votre téléphone", "Un court message", "La date d'aujourd'hui"], mpTraceBtn: "Tracer", mpDeleteBtn: "Supprimer", mpDeleteConfirm: "Supprimer cet élément?", mpAddEmpty: "Veuillez écrire quelque chose à enregistrer.", mpAddTooLong: "Trop long. Maximum ", mpTracesLabel: "Tracés", mpNeverUsed: "Pas encore pratiqué", mpTraceHeader: "Tracez votre élément", mpTraceGuided: "Guidé", mpTraceFreestyle: "Tracé seulement", mpFreeIntro: "Une toile vierge pour écrire ce que vous voulez. Aucun pointage ni enregistrement.", mpFreeClearBtn: "↻ Effacer", mpFreeUndoBtn: "↶ Annuler", mpFreeSaveBtn: "↓ Enregistrer", mpFreeLinesSingle: "Ligne simple", mpFreeLinesDouble: "Ligne double", mpFreeLinesBlank: "Vierge",
     diffWordsHard: "Avancé", diffWordsFunc: "Pratique", diffSentHard: "Endurance", diffSentFunc: "Vie réelle",
     tracePrompt: 'Tracez soigneusement :', clearBtn: '↻ Effacer', submitBtn: '✓ Soumettre',
     nextBtn: 'Suivant →', finishBtn: 'Terminer ✓', exitBtn: '← Retour',
@@ -5143,11 +5245,17 @@ function applyLanguage() {
     'exNumbersTitle','exNumbersDesc',
     'exWordsTitle','exWordsDesc',
     'exSentencesTitle','exSentencesDesc',
+    'exMyPracticeTitle','exMyPracticeDesc',
     'tipText',
     // Difficulty chips
     'diffLettersEasy','diffLettersMed',
     'diffWordsEasy','diffWordsMed','diffWordsHard','diffWordsFunc',
     'diffSentEasy','diffSentMed','diffSentHard','diffSentFunc',
+    // My Practice screen
+    'mpTitle','mpTabList','mpTabFree','mpAddLabel','mpAddSaveBtn','mpAddClearBtn',
+    'mpFreeIntro','mpFreeClearBtn','mpFreeUndoBtn','mpFreeSaveBtn',
+    'mpFreeLinesSingle','mpFreeLinesDouble','mpFreeLinesBlank',
+
     // Exercise screen
     'tracePrompt','clearBtn','submitBtn','exitBtn','canvasHint',
     // Progress tab
@@ -6094,6 +6202,392 @@ async function init() {
 }
 
 init();
+
+// ══════════ My Practice — personalised content (v1.0.9) ══════════
+// Privacy: all items stored locally in localStorage. Never uploaded.
+const MP_STORAGE_KEY = 'rewrite_personal_items_v1';
+const MP_BOLD_TRACES = 3; // First N traces show bold reference; after that, faded
+const MP_MAX_LEN = 250;
+let mpCurrentItem = null;
+let mpFreeMode = 'single';
+let mpFreeStrokes = [];
+let mpTraceStrokes = [];
+let mpFreeCtx = null;
+let mpTraceDrawCtx = null;
+let mpTraceGuideCtx = null;
+
+function mpLoadItems() {
+  try { return JSON.parse(localStorage.getItem(MP_STORAGE_KEY) || '[]'); }
+  catch (e) { return []; }
+}
+function mpSaveItems(items) {
+  try { localStorage.setItem(MP_STORAGE_KEY, JSON.stringify(items)); } catch (e) {}
+}
+
+function openMyPractice() {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('exerciseActive').style.display = 'none';
+  document.getElementById('sessionSummary').style.display = 'none';
+  document.getElementById('mpTraceScreen').style.display = 'none';
+  var s = document.getElementById('myPracticeScreen');
+  s.style.display = 'block';
+  s.classList.add('active');
+  switchMpTab('list');
+  mpRenderList();
+}
+
+function exitMyPractice() {
+  document.getElementById('myPracticeScreen').style.display = 'none';
+  document.querySelector('#panelExercises').classList.add('active');
+}
+
+function switchMpTab(tab) {
+  document.getElementById('mpTabList').classList.toggle('active', tab === 'list');
+  document.getElementById('mpTabFree').classList.toggle('active', tab === 'free');
+  document.getElementById('mpListTab').style.display = tab === 'list' ? 'block' : 'none';
+  document.getElementById('mpFreeTab').style.display = tab === 'free' ? 'block' : 'none';
+  if (tab === 'free') setTimeout(mpFreeSetupCanvas, 50);
+}
+
+function mpRenderList() {
+  var items = mpLoadItems();
+  var listEl = document.getElementById('mpItemsList');
+  var empty = document.getElementById('mpEmptyMsg');
+  var sugBlock = document.getElementById('mpSuggestionsBlock');
+  var s = STRINGS[currentLang] || STRINGS.en;
+  listEl.innerHTML = '';
+  if (!items.length) {
+    empty.style.display = 'block';
+    empty.textContent = s.mpEmptyMsg || 'Your saved items will appear here.';
+    // Suggestions
+    sugBlock.style.display = 'block';
+    document.getElementById('mpSuggestionsLabel').textContent = s.mpSuggestionsLabel || 'Suggestions:';
+    var row = document.getElementById('mpSuggestionsRow');
+    row.innerHTML = '';
+    var sug = s.mpSuggestions || ['Your name', 'Your address', 'Your phone number', 'A short message', 'Today\'s date'];
+    sug.forEach(function(label) {
+      var b = document.createElement('button');
+      b.className = 'diff-btn';
+      b.textContent = label;
+      b.onclick = function() {
+        document.getElementById('mpAddInput').focus();
+        document.getElementById('mpAddInput').placeholder = label;
+      };
+      row.appendChild(b);
+    });
+    return;
+  }
+  empty.style.display = 'none';
+  sugBlock.style.display = 'none';
+  items.forEach(function(item, idx) {
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.style.padding = '12px';
+    card.style.marginBottom = '8px';
+    var lastUsedStr = item.lastUsed ? new Date(item.lastUsed).toLocaleDateString() : (s.mpNeverUsed || 'Not yet practiced');
+    var preview = item.text.length > 60 ? item.text.substring(0, 60) + '…' : item.text;
+    card.innerHTML = '<div style="font-weight:600;font-size:14px;margin-bottom:4px;word-break:break-word"></div>' +
+      '<div style="font-size:11px;color:var(--text3);margin-bottom:8px"></div>' +
+      '<div class="btn-row"></div>';
+    card.children[0].textContent = preview;
+    card.children[1].textContent = (s.mpTracesLabel || 'Traces') + ': ' + (item.traces || 0) + ' · ' + lastUsedStr;
+    var btnRow = card.children[2];
+    var traceBtn = document.createElement('button');
+    traceBtn.className = 'btn btn-primary btn-sm';
+    traceBtn.textContent = s.mpTraceBtn || 'Trace';
+    traceBtn.onclick = function() { startMpTrace(idx); };
+    var delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-outline btn-sm';
+    delBtn.textContent = s.mpDeleteBtn || 'Delete';
+    delBtn.onclick = function() {
+      if (confirm((s.mpDeleteConfirm || 'Delete this item?'))) {
+        var arr = mpLoadItems();
+        arr.splice(idx, 1);
+        mpSaveItems(arr);
+        mpRenderList();
+      }
+    };
+    btnRow.appendChild(traceBtn);
+    btnRow.appendChild(delBtn);
+    listEl.appendChild(card);
+  });
+}
+
+function clearMpAdd() {
+  document.getElementById('mpAddInput').value = '';
+  document.getElementById('mpAddCounter').textContent = '0 / ' + MP_MAX_LEN;
+}
+
+function saveMpItem() {
+  var inp = document.getElementById('mpAddInput');
+  var txt = (inp.value || '').trim();
+  var s = STRINGS[currentLang] || STRINGS.en;
+  if (!txt) {
+    alert(s.mpAddEmpty || 'Please type something to save.');
+    return;
+  }
+  if (txt.length > MP_MAX_LEN) {
+    alert((s.mpAddTooLong || 'Too long. Max ') + MP_MAX_LEN);
+    return;
+  }
+  var items = mpLoadItems();
+  items.unshift({ text: txt, traces: 0, lastUsed: null, created: Date.now() });
+  mpSaveItems(items);
+  inp.value = '';
+  document.getElementById('mpAddCounter').textContent = '0 / ' + MP_MAX_LEN;
+  mpRenderList();
+}
+
+// Live char counter
+document.addEventListener('DOMContentLoaded', function() {
+  var inp = document.getElementById('mpAddInput');
+  if (inp) {
+    inp.addEventListener('input', function() {
+      var len = inp.value.length;
+      document.getElementById('mpAddCounter').textContent = len + ' / ' + MP_MAX_LEN;
+    });
+  }
+});
+
+// ── Trace mode ──
+function startMpTrace(idx) {
+  var items = mpLoadItems();
+  if (!items[idx]) return;
+  mpCurrentItem = { item: items[idx], idx: idx };
+  document.getElementById('myPracticeScreen').style.display = 'none';
+  var screen = document.getElementById('mpTraceScreen');
+  screen.style.display = 'block';
+  screen.classList.add('active');
+  var s = STRINGS[currentLang] || STRINGS.en;
+  document.getElementById('mpTraceHeader').textContent = s.mpTraceHeader || 'Trace your item';
+  document.getElementById('mpTracePrompt').textContent = s.tracePrompt || 'Trace this carefully:';
+  document.getElementById('mpTraceClearBtn').textContent = s.mpFreeClearBtn || '↻ Clear';
+  document.getElementById('mpTraceUndoBtn').textContent = s.mpFreeUndoBtn || '↶ Undo';
+  document.getElementById('mpTraceDoneBtn').textContent = (s.mpDoneBtn || '✓ Done');
+  document.getElementById('mpTraceTarget').textContent = items[idx].text;
+  // Mode label
+  var bold = (items[idx].traces || 0) < MP_BOLD_TRACES;
+  document.getElementById('mpTraceMode').textContent = bold
+    ? ((s.mpTraceGuided || 'Guided') + ' · ' + ((items[idx].traces || 0) + 1) + '/' + MP_BOLD_TRACES)
+    : (s.mpTraceFreestyle || 'Trace only');
+  setTimeout(function() { mpTraceSetupCanvas(items[idx].text, bold); }, 50);
+  mpTraceStrokes = [];
+}
+
+function exitMpTrace() {
+  document.getElementById('mpTraceScreen').style.display = 'none';
+  openMyPractice();
+}
+
+function mpTraceSetupCanvas(text, boldGuide) {
+  var container = document.getElementById('mpTraceCanvasContainer');
+  var guideC = document.getElementById('mpTraceGuide');
+  var drawC = document.getElementById('mpTraceDraw');
+  var dpr = window.devicePixelRatio || 1;
+  var rect = container.getBoundingClientRect();
+  var cssW = rect.width || 360;
+  var cssH = Math.max(180, Math.round(cssW * 0.55));
+  var w = Math.round(cssW * dpr), h = Math.round(cssH * dpr);
+  guideC.width = w; guideC.height = h; drawC.width = w; drawC.height = h;
+  guideC.style.width = cssW + 'px'; guideC.style.height = cssH + 'px';
+  drawC.style.width = cssW + 'px'; drawC.style.height = cssH + 'px';
+  var gctx = guideC.getContext('2d');
+  gctx.clearRect(0, 0, w, h);
+  gctx.scale(dpr, dpr);
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (isDark) { gctx.fillStyle = '#2a2e2a'; gctx.fillRect(0, 0, cssW, cssH); }
+  // Ruled lines
+  gctx.strokeStyle = isDark ? 'rgba(90,170,122,.25)' : 'rgba(58,122,90,.18)';
+  gctx.lineWidth = 1;
+  var lineY1 = cssH * 0.40, lineY2 = cssH * 0.80;
+  gctx.beginPath(); gctx.moveTo(0, lineY1); gctx.lineTo(cssW, lineY1); gctx.stroke();
+  gctx.beginPath(); gctx.moveTo(0, lineY2); gctx.lineTo(cssW, lineY2); gctx.stroke();
+  // Reference text — size to fit width
+  var isCJK = currentLang === 'ja' || currentLang === 'ko' || currentLang === 'zh';
+  var isArabic = currentLang === 'ar';
+  var isDevanagari = currentLang === 'hi';
+  var maxFont = Math.min(cssH * 0.45, cssW / Math.max(text.length * (isCJK ? 0.95 : 0.55), 1));
+  var fontPx = Math.max(14, Math.round(maxFont));
+  var fontStack = isCJK
+    ? fontPx + "px 'Hiragino Sans','Noto Sans CJK','Noto Sans JP','Noto Sans KR','Noto Sans SC','PingFang SC','Microsoft YaHei','Malgun Gothic','Yu Gothic',sans-serif"
+    : isArabic
+    ? fontPx + "px 'Geeza Pro','Noto Sans Arabic','Tahoma',sans-serif"
+    : isDevanagari
+    ? fontPx + "px 'Noto Sans Devanagari','Mangal','Nirmala UI',sans-serif"
+    : fontPx + "px 'Segoe UI','SF Pro Display',-apple-system,sans-serif";
+  gctx.font = fontStack;
+  gctx.textAlign = 'center';
+  gctx.direction = isArabic ? 'rtl' : 'ltr';
+  gctx.textBaseline = 'alphabetic';
+  var refColor = boldGuide
+    ? (isDark ? 'rgba(120,200,150,.55)' : 'rgba(58,122,90,.50)')
+    : (isDark ? 'rgba(120,200,150,.18)' : 'rgba(58,122,90,.15)');
+  gctx.fillStyle = refColor;
+  gctx.fillText(text, cssW / 2, lineY2);
+  // Draw canvas
+  mpTraceDrawCtx = drawC.getContext('2d');
+  mpTraceDrawCtx.clearRect(0, 0, w, h);
+  mpTraceDrawCtx.scale(dpr, dpr);
+  mpTraceDrawCtx.lineCap = 'round';
+  mpTraceDrawCtx.lineJoin = 'round';
+  mpTraceDrawCtx.lineWidth = (settings && settings.penWidth) || 5;
+  mpTraceDrawCtx.strokeStyle = isDark ? '#6abf8a' : '#2a6a4a';
+  drawC._cssW = cssW; drawC._cssH = cssH;
+  // Pointer events
+  var drawing = false, current = null;
+  function pos(e) {
+    var r = drawC.getBoundingClientRect();
+    if (e.touches) return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+  drawC.onmousedown = drawC.ontouchstart = function(e) {
+    e.preventDefault(); drawing = true;
+    var p = pos(e); current = [p];
+    mpTraceDrawCtx.beginPath(); mpTraceDrawCtx.moveTo(p.x, p.y);
+  };
+  drawC.onmousemove = drawC.ontouchmove = function(e) {
+    if (!drawing) return; e.preventDefault();
+    var p = pos(e); current.push(p);
+    mpTraceDrawCtx.lineTo(p.x, p.y); mpTraceDrawCtx.stroke();
+  };
+  drawC.onmouseup = drawC.onmouseleave = drawC.ontouchend = function(e) {
+    if (!drawing) return; drawing = false;
+    if (current && current.length > 1) mpTraceStrokes.push(current);
+    current = null;
+  };
+}
+
+function mpTraceClear() {
+  if (!mpTraceDrawCtx) return;
+  var c = document.getElementById('mpTraceDraw');
+  mpTraceDrawCtx.clearRect(0, 0, c.width, c.height);
+  mpTraceStrokes = [];
+}
+
+function mpTraceUndo() {
+  if (!mpTraceDrawCtx || !mpTraceStrokes.length) return;
+  mpTraceStrokes.pop();
+  var c = document.getElementById('mpTraceDraw');
+  var dpr = window.devicePixelRatio || 1;
+  mpTraceDrawCtx.clearRect(0, 0, c.width, c.height);
+  mpTraceDrawCtx.beginPath();
+  mpTraceStrokes.forEach(function(stroke) {
+    if (!stroke.length) return;
+    mpTraceDrawCtx.moveTo(stroke[0].x, stroke[0].y);
+    for (var i = 1; i < stroke.length; i++) mpTraceDrawCtx.lineTo(stroke[i].x, stroke[i].y);
+  });
+  mpTraceDrawCtx.stroke();
+}
+
+function mpTraceDone() {
+  if (!mpCurrentItem) return;
+  var items = mpLoadItems();
+  if (items[mpCurrentItem.idx]) {
+    items[mpCurrentItem.idx].traces = (items[mpCurrentItem.idx].traces || 0) + 1;
+    items[mpCurrentItem.idx].lastUsed = Date.now();
+    mpSaveItems(items);
+  }
+  exitMpTrace();
+}
+
+// ── Free Practice canvas ──
+function mpFreeSetupCanvas() {
+  var container = document.getElementById('mpFreeContainer');
+  var c = document.getElementById('mpFreeCanvas');
+  if (!c) return;
+  var dpr = window.devicePixelRatio || 1;
+  var rect = container.getBoundingClientRect();
+  var cssW = rect.width || 360;
+  var cssH = Math.max(220, Math.round(cssW * 0.6));
+  c.width = Math.round(cssW * dpr);
+  c.height = Math.round(cssH * dpr);
+  c.style.width = cssW + 'px';
+  c.style.height = cssH + 'px';
+  mpFreeCtx = c.getContext('2d');
+  mpFreeCtx.scale(dpr, dpr);
+  c._cssW = cssW; c._cssH = cssH;
+  mpFreeRedraw();
+  var drawing = false, current = null;
+  function pos(e) {
+    var r = c.getBoundingClientRect();
+    if (e.touches) return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  c.onmousedown = c.ontouchstart = function(e) {
+    e.preventDefault(); drawing = true;
+    var p = pos(e); current = [p];
+    mpFreeCtx.beginPath(); mpFreeCtx.lineWidth = (settings && settings.penWidth) || 5;
+    mpFreeCtx.lineCap = 'round'; mpFreeCtx.lineJoin = 'round';
+    mpFreeCtx.strokeStyle = isDark ? '#6abf8a' : '#2a6a4a';
+    mpFreeCtx.moveTo(p.x, p.y);
+  };
+  c.onmousemove = c.ontouchmove = function(e) {
+    if (!drawing) return; e.preventDefault();
+    var p = pos(e); current.push(p);
+    mpFreeCtx.lineTo(p.x, p.y); mpFreeCtx.stroke();
+  };
+  c.onmouseup = c.onmouseleave = c.ontouchend = function(e) {
+    if (!drawing) return; drawing = false;
+    if (current && current.length > 1) mpFreeStrokes.push(current);
+    current = null;
+  };
+}
+
+function mpFreeRedraw() {
+  if (!mpFreeCtx) return;
+  var c = document.getElementById('mpFreeCanvas');
+  var cssW = c._cssW, cssH = c._cssH;
+  mpFreeCtx.clearRect(0, 0, c.width, c.height);
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (isDark) { mpFreeCtx.fillStyle = '#2a2e2a'; mpFreeCtx.fillRect(0, 0, cssW, cssH); }
+  // Lines
+  if (mpFreeMode !== 'blank') {
+    mpFreeCtx.strokeStyle = isDark ? 'rgba(90,170,122,.25)' : 'rgba(58,122,90,.18)';
+    mpFreeCtx.lineWidth = 1;
+    var ys = mpFreeMode === 'double' ? [cssH * 0.30, cssH * 0.55, cssH * 0.75] : [cssH * 0.70];
+    ys.forEach(function(y) {
+      mpFreeCtx.beginPath(); mpFreeCtx.moveTo(0, y); mpFreeCtx.lineTo(cssW, y); mpFreeCtx.stroke();
+    });
+  }
+  // Redraw strokes
+  mpFreeCtx.lineCap = 'round'; mpFreeCtx.lineJoin = 'round';
+  mpFreeCtx.lineWidth = (settings && settings.penWidth) || 5;
+  mpFreeCtx.strokeStyle = isDark ? '#6abf8a' : '#2a6a4a';
+  mpFreeStrokes.forEach(function(stroke) {
+    if (!stroke.length) return;
+    mpFreeCtx.beginPath();
+    mpFreeCtx.moveTo(stroke[0].x, stroke[0].y);
+    for (var i = 1; i < stroke.length; i++) mpFreeCtx.lineTo(stroke[i].x, stroke[i].y);
+    mpFreeCtx.stroke();
+  });
+}
+
+function mpFreeClear() {
+  mpFreeStrokes = [];
+  mpFreeRedraw();
+}
+function mpFreeUndo() {
+  mpFreeStrokes.pop();
+  mpFreeRedraw();
+}
+function mpFreeSetLines(mode, btn) {
+  mpFreeMode = mode;
+  ['mpFreeLinesSingle','mpFreeLinesDouble','mpFreeLinesBlank'].forEach(function(id) {
+    var b = document.getElementById(id);
+    if (b) b.classList.toggle('active', b === btn);
+  });
+  mpFreeRedraw();
+}
+function mpFreeSave() {
+  var c = document.getElementById('mpFreeCanvas');
+  try {
+    var url = c.toDataURL('image/png');
+    var a = document.createElement('a');
+    a.href = url; a.download = 'rewrite-practice-' + Date.now() + '.png';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  } catch (e) { alert('Save failed: ' + e.message); }
+}
 </script>
 
 <!-- Rotation gate logic (v1.0.7) — native only, always-on -->
