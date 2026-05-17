@@ -5310,6 +5310,25 @@ function applyLanguage() {
   // Update placeholder on the add input (not just label)
   var mpInp = document.getElementById('mpAddInput');
   if (mpInp && s.mpAddPlaceholder) mpInp.placeholder = s.mpAddPlaceholder;
+  // If an exercise session is active, regenerate it from the new language's pool
+  // (the session snapshot was taken in the previous language)
+  var activeExerciseScreen = document.getElementById('exerciseActive');
+  if (activeExerciseScreen && activeExerciseScreen.style.display === 'block' &&
+      typeof currentType !== 'undefined' && currentType &&
+      typeof sessionExercises !== 'undefined' && sessionExercises.length) {
+    try {
+      var newEx = getExercises();
+      var pool = (newEx[currentType] && (newEx[currentType][currentDifficulty] || newEx[currentType].easy)) || [];
+      if (pool.length) {
+        var len = (settings && settings.sessionLength) || 8;
+        // Preserve the user's progress: keep already-completed indices, replace the rest
+        var preserved = sessionExercises.slice(0, currentIndex);
+        var fresh = shuffle([].concat(pool)).slice(0, Math.max(0, Math.min(len, pool.length) - preserved.length));
+        sessionExercises = preserved.concat(fresh);
+        if (typeof loadExercise === 'function') loadExercise();
+      }
+    } catch (e) { /* fail soft */ }
+  }
 }
 
 // ══════════════ TAB NAVIGATION ══════════════
