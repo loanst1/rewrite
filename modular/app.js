@@ -53,7 +53,7 @@ function openDB() {
 function showStorageWarning() {
   const banner = document.createElement('div');
   banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#b45309;color:#fff;padding:10px 16px;font-size:13px;text-align:center';
-  banner.textContent = 'Storage unavailable (private browsing?). Progress will not be saved between sessions.';
+  banner.textContent = (STRINGS[currentLang] || STRINGS.en).storageUnavailable || 'Storage unavailable (private browsing?). Progress will not be saved between sessions.';
   document.body.appendChild(banner);
   setTimeout(() => banner.remove(), 8000);
 }
@@ -248,7 +248,9 @@ function loadExercise() {
   const total = sessionExercises.length;
 
   document.getElementById('exerciseCounter').textContent = `${currentIndex + 1} / ${total}`;
-  document.getElementById('exerciseType').textContent = currentType.charAt(0).toUpperCase() + currentType.slice(1);
+  const s2 = STRINGS[currentLang] || STRINGS.en;
+  const typeKey = 'exerciseType' + currentType.charAt(0).toUpperCase() + currentType.slice(1);
+  document.getElementById('exerciseType').textContent = s2[typeKey] || currentType.charAt(0).toUpperCase() + currentType.slice(1);
   document.getElementById('progressFill').style.width = `${(currentIndex / total) * 100}%`;
 
   // Target display
@@ -570,7 +572,7 @@ function showScoreFeedback(score) {
   // Benchmark
   const benchDiv = document.getElementById('benchmarkDisplay');
   const band = score >= SCORE_BANDS.green ? 'green' : score >= SCORE_BANDS.amber ? 'amber' : 'grey';
-  const bandLabel = score >= SCORE_BANDS.green ? 'Strong' : score >= SCORE_BANDS.amber ? 'Developing' : 'Early stage';
+  const bandLabel = score >= SCORE_BANDS.green ? (s.bandStrong || 'Strong') : score >= SCORE_BANDS.amber ? (s.bandDeveloping || 'Developing') : (s.bandEarly || 'Early stage');
   benchDiv.innerHTML = `<div class="benchmark" style="justify-content:center"><div class="benchmark-dot bench-${band}"></div> ${bandLabel} (${score}%)</div>`;
 
   // Next/Finish button
@@ -627,7 +629,7 @@ function showSessionSummary(avg, best, total) {
 
   // Breakdown
   const bd = document.getElementById('summaryBreakdown');
-  let html = '<p style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Exercise Breakdown</p>';
+  let html = '<p style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">' + (s.exBreakdownTitle || 'Exercise Breakdown') + '</p>';
   scores.forEach((s, i) => {
     const color = s.score >= 80 ? 'var(--success)' : s.score >= 50 ? 'var(--warning)' : 'var(--text3)';
     html += `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
@@ -661,6 +663,7 @@ function exitExercise() {
 
 // ══════════════ PROGRESS ══════════════
 async function refreshProgress() {
+  const str = STRINGS[currentLang] || STRINGS.en;
   const sessions = await getAllSessions();
 
   // Stats
@@ -695,13 +698,13 @@ async function refreshProgress() {
     peHtml += `<div class="exercise-stat-row">
       <div class="exercise-stat-icon" style="background:${bgColours[type]||'#eee'};color:${colours[type]||'#666'}">${icons[type]||'?'}</div>
       <div class="exercise-stat-info">
-        <div class="exercise-stat-name">${type.charAt(0).toUpperCase()+type.slice(1)}</div>
-        <div class="exercise-stat-detail">${data.count} exercises · Avg ${avgS}% · Best ${bestS}%</div>
+        <div class="exercise-stat-name">${str['exerciseType'+type.charAt(0).toUpperCase()+type.slice(1)] || type.charAt(0).toUpperCase()+type.slice(1)}</div>
+        <div class="exercise-stat-detail">${data.count} ${str.exBreakdownDetail || 'exercises · Avg'} ${avgS}% · ${str.exBreakdownBest || 'Best'} ${bestS}%</div>
         <div class="bar-container"><div class="bar-fill" style="width:${avgS}%;background:${band}"></div></div>
       </div>
     </div>`;
   }
-  peDiv.innerHTML = peHtml || '<p style="font-size:12px;color:var(--text3);padding:8px 0">No exercises recorded yet.</p>';
+  peDiv.innerHTML = peHtml || '<p style="font-size:12px;color:var(--text3);padding:8px 0">' + (str.noExercises || 'No exercises recorded yet.') + '</p>';
 
   // Trend chart
   renderTrendChart(sessions);
@@ -709,7 +712,7 @@ async function refreshProgress() {
   // Session log
   const logDiv = document.getElementById('sessionLog');
   if (sessions.length === 0) {
-    logDiv.innerHTML = '<p style="font-size:12px;color:var(--text3);padding:8px 0">No sessions yet — start your first one from the Exercises tab.</p>';
+    logDiv.innerHTML = '<p style="font-size:12px;color:var(--text3);padding:8px 0">' + (str.noSessions || 'No sessions yet — start your first one from the Exercises tab.') + '</p>';
   } else {
     let logHtml = '';
     [...sessions].reverse().slice(0, 20).forEach(s => {
@@ -718,8 +721,8 @@ async function refreshProgress() {
       const color = s.averageScore >= 80 ? 'var(--success)' : s.averageScore >= 50 ? 'var(--warning)' : 'var(--text3)';
       logHtml += `<div class="session-row">
         <div>
-          <div style="font-weight:600">${(s.type||'letters').charAt(0).toUpperCase()+(s.type||'letters').slice(1)}</div>
-          <div class="session-meta">${dateStr} · ${s.count||0} exercises</div>
+          <div style="font-weight:600">${str['exerciseType'+(s.type||'letters').charAt(0).toUpperCase()+(s.type||'letters').slice(1)] || (s.type||'letters').charAt(0).toUpperCase()+(s.type||'letters').slice(1)}</div>
+          <div class="session-meta">${dateStr} · ${s.count||0} ${str.sessionLogExercises || 'exercises'}</div>
         </div>
         <div class="session-score" style="color:${color}">${s.averageScore||0}%</div>
       </div>`;
@@ -792,13 +795,14 @@ function renderTrendChart(sessions) {
   const y80 = padT + chartH - (80 / 100) * chartH;
   ctx.beginPath(); ctx.moveTo(padL, y80); ctx.lineTo(cssW - padR, y80); ctx.stroke();
   ctx.font = '9px sans-serif'; ctx.fillStyle = 'rgba(58,122,90,0.6)'; ctx.textAlign = 'left';
-  ctx.fillText('Strong', cssW - padR - 32, y80 - 4);
+  const _s = STRINGS[currentLang] || STRINGS.en;
+  ctx.fillText(_s.bandStrong || 'Strong', cssW - padR - 32, y80 - 4);
   // 50% line — amber
   ctx.strokeStyle = 'rgba(180,83,9,0.4)';
   const y50 = padT + chartH - (50 / 100) * chartH;
   ctx.beginPath(); ctx.moveTo(padL, y50); ctx.lineTo(cssW - padR, y50); ctx.stroke();
   ctx.fillStyle = 'rgba(180,83,9,0.55)';
-  ctx.fillText('Developing', cssW - padR - 54, y50 - 4);
+  ctx.fillText(_s.bandDeveloping || 'Developing', cssW - padR - 54, y50 - 4);
   ctx.setLineDash([]);
 
   // Data line
@@ -849,7 +853,8 @@ function renderTrendChart(sessions) {
 }
 
 function confirmReset() {
-  if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+  const _rs = STRINGS[currentLang] || STRINGS.en;
+  if (confirm(_rs.confirmReset || 'Are you sure you want to reset all progress? This cannot be undone.')) {
     clearAllSessions().then(() => refreshProgress());
   }
 }
