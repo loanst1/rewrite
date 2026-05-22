@@ -143,6 +143,56 @@ const EXERCISES_LANG = {
       easy: ['Je suis capable.','Un pas à la fois.','Chaque jour est meilleur.','Essaie encore.','Je suis fort.','Pratique chaque jour.','Bravo!'],
       medium: ['Chaque jour, je m\'améliore un peu.','La pratique mène au progrès.','Chaque lettre est une petite victoire.','Doucement, mais sûrement.','N\'abandonne jamais l\'espoir.']
     }
+  },
+  es: {
+    words: {
+      easy: ['casa','agua','mano','ojo','sol','luna','gato','perro','niño','día','luz','flor','vida','pan','amor','bien','hoy'],
+      medium: ['hospital','ejercicio','familia','amigo','fuerza','trabajo','corazón','camino','esperanza','progreso','salud','valentía','paciencia','esfuerzo','victoria','confianza','futuro','alegría','montaña','escritura']
+    },
+    sentences: {
+      easy: ['Yo puedo.','Paso a paso.','Cada día mejor.','Inténtalo.','Soy fuerte.','Practica hoy.','¡Bien hecho!'],
+      medium: ['Cada día estoy un poco mejor.','La práctica hace el progreso.','Cada letra es una pequeña victoria.','Despacio pero hacia adelante.','Nunca pierdas la esperanza.']
+    }
+  },
+  fr: {
+    words: {
+      easy: ['chat','eau','main','jour','nuit','soleil','lune','fleur','cœur','arbre','ciel','pain','amour','paix','bien','vie','ami'],
+      medium: ['exercice','santé','progrès','famille','courage','patience','effort','réussite','confiance','espoir','bonheur','pratique','écriture','victoire','force','lumière','sourire','chemin','liberté','avenir']
+    },
+    sentences: {
+      easy: ['Je peux le faire.','Un pas à la fois.','Chaque jour est meilleur.','Essayez encore.','Je suis fort.','Pratiquez chaque jour.','Bravo !'],
+      medium: ['Chaque jour, je m\'améliore un peu.','La pratique mène au progrès.','Chaque lettre est une petite victoire.','Doucement, mais sûrement.','N\'abandonnez jamais l\'espoir.']
+    }
+  },
+  de: {
+    words: {
+      easy: ['Haus','Wasser','Hand','Auge','Herz','Tag','Nacht','Katze','Hund','Mama','Papa','Blume','Baum','Sonne','Himmel','Weg','Ruhe'],
+      medium: ['Übung','Gesundheit','Fortschritt','Familie','Freund','Glück','Kraft','Mut','Geduld','Versuch','Erfolg','Vertrauen','Therapie','Hoffnung','Leben','Frieden','Lächeln','Morgen','Freiheit','Zukunft']
+    },
+    sentences: {
+      easy: ['Ich schaffe das.','Schritt für Schritt.','Jeden Tag besser.','Versuch es nochmal.','Ich bin stark.','Übe täglich.','Gut gemacht.'],
+      medium: ['Jeden Tag werde ich ein bisschen besser.','Übung bringt Fortschritt.','Jeder Buchstabe ist ein kleiner Sieg.','Langsam, aber vorwärts.','Gib die Hoffnung nie auf.']
+    }
+  },
+  it: {
+    words: {
+      easy: ['casa','acqua','mano','occhio','cuore','giorno','notte','gatto','cane','sole','luna','fiore','vita','pane','amore','bene','oggi'],
+      medium: ['esercizio','salute','miglioramento','famiglia','amico','felicità','forza','coraggio','pazienza','tentativo','successo','fiducia','progresso','cura','speranza','vita','pace','sorriso','mattina','libertà']
+    },
+    sentences: {
+      easy: ['Ce la faccio.','Un passo alla volta.','Ogni giorno meglio.','Riprova.','Sono forte.','Esercitati ogni giorno.','Ben fatto!'],
+      medium: ['Ogni giorno miglioro un po\'.','La pratica porta al progresso.','Ogni lettera è una piccola vittoria.','Piano ma avanti.','Non perdere mai la speranza.']
+    }
+  },
+  pt: {
+    words: {
+      easy: ['casa','água','mão','olho','sol','lua','gato','cão','dia','luz','flor','vida','pão','amor','bem','céu','paz'],
+      medium: ['exercício','saúde','melhoria','família','amigo','alegria','força','coragem','paciência','tentativa','sucesso','confiança','progresso','tratamento','esperança','vida','paz','sorriso','manhã','liberdade']
+    },
+    sentences: {
+      easy: ['Eu consigo.','Passo a passo.','Cada dia melhor.','Tente outra vez.','Eu sou forte.','Pratique todos os dias.','Muito bem!'],
+      medium: ['Cada dia estou um pouco melhor.','A prática traz progresso.','Cada letra é uma pequena vitória.','Devagar, mas em frente.','Nunca perca a esperança.']
+    }
   }
 };
 
@@ -162,7 +212,12 @@ const HINTS_LANG = {
   pl: { letters: 'Skup się na kształcie i proporcjach', words: 'Łącz litery płynnie', sentences: 'Nie spiesz się — liczy się dokładność' },
   es_mx: { letters: 'Concéntrate en la forma y las proporciones', words: 'Conecta cada letra con fluidez', sentences: 'Tómate tu tiempo — la precisión es lo que cuenta' },
   pt_br: { letters: 'Foque na forma e nas proporções', words: 'Conecte cada letra com suavidade', sentences: 'Vá com calma — precisão importa mais que velocidade' },
-  fr_ca: { letters: 'Concentre-toi sur la forme et les proportions', words: 'Relie chaque lettre en douceur', sentences: 'Prends ton temps — la précision compte plus que la vitesse' }
+  fr_ca: { letters: 'Concentre-toi sur la forme et les proportions', words: 'Relie chaque lettre en douceur', sentences: 'Prends ton temps — la précision compte plus que la vitesse' },
+  es: { letters: 'Concéntrese en la forma y las proporciones', words: 'Conecte cada letra con fluidez', sentences: 'Tómese su tiempo — la precisión importa más que la velocidad' },
+  fr: { letters: 'Concentrez-vous sur la forme et les proportions', words: 'Reliez chaque lettre en douceur', sentences: 'Prenez votre temps — la précision compte plus que la vitesse' },
+  de: { letters: 'Achten Sie auf Form und Proportionen', words: 'Verbinden Sie jeden Buchstaben fließend', sentences: 'Lassen Sie sich Zeit — Genauigkeit ist wichtiger als Geschwindigkeit' },
+  it: { letters: 'Concentrati sulla forma e le proporzioni', words: 'Collega ogni lettera fluidamente', sentences: 'Prenditi il tuo tempo — la precisione conta più della velocità' },
+  pt: { letters: 'Concentre-se na forma e nas proporções', words: 'Ligue cada letra suavemente', sentences: 'Não tenha pressa — a precisão importa mais que a velocidade' }
 };
 
 const EXERCISES = EXERCISES_BASE; // fallback reference
