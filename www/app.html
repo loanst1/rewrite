@@ -736,6 +736,11 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   <div class="print-header"><h2 id="printHeaderTitle">ReWrite — Handwriting Rehabilitation</h2><p id="printHeaderSub">Progress Report</p></div>
   <h2 style="font-size:20px;font-weight:800;margin-bottom:14px" id="progressTitle">Your Progress</h2>
 
+  <div class="progress-empty-state" id="progressEmptyState" style="display:none; text-align:center; padding:48px 20px; color:var(--text2)">
+    <div style="font-size:16px; font-weight:700; color:var(--text); margin-bottom:8px" id="progressEmptyTitle">No sessions yet</div>
+    <div style="font-size:13px; line-height:1.5; max-width:30rem; margin:0 auto" id="progressEmptyBody">Start an exercise from the Exercises tab to begin tracking your progress.</div>
+  </div>
+
   <div class="stat-grid" id="statsGrid">
     <div class="stat-card"><div class="stat-value" id="statSessions">0</div><div class="stat-label" id="statSessionsLabel">Sessions</div></div>
     <div class="stat-card"><div class="stat-value" id="statExercises">0</div><div class="stat-label" id="statExercisesLabel">Exercises</div></div>
@@ -854,6 +859,22 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
     <div class="card-title" id="setDataTitle">Data</div>
     <p style="font-size:12px;color:var(--text2);margin-bottom:12px" id="setDataDesc">All progress data is stored locally on this device.</p>
     <button class="btn btn-outline btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="confirmReset()" id="resetBtn">Reset All Progress</button>
+  </div>
+
+  <div class="card" id="settings-card-about">
+    <div class="card-title" id="settingsAboutSection">ABOUT</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:8px">
+      <span id="settingsAppVersion">App version</span>: <strong id="app-version-display" style="cursor:pointer;user-select:none;-webkit-user-select:none">1.0.11</strong>
+    </p>
+    <p style="font-size:13px;margin-top:6px">
+      <a id="contact-support-link" href="#" style="color:var(--primary,#3a7a5a);text-decoration:underline;font-weight:500" id="settingsContactSupport">Contact support</a>
+    </p>
+  </div>
+
+  <div class="card" id="settings-errors" style="display:none">
+    <h3 id="settingsDiagnosticLog" style="font-size:14px;font-weight:700;margin-bottom:6px">Diagnostic log</h3>
+    <p style="font-size:12px;color:var(--text3)" id="settingsDiagnosticHint">Tap Contact support above to send this with your email.</p>
+    <div id="error-log-list" style="font-size:11px;color:var(--text2);max-height:120px;overflow-y:auto;margin-top:8px"></div>
   </div>
 </div>
 
@@ -4072,6 +4093,16 @@ const STRINGS = {
     exerciseTypeSentences: 'Sentences',
     sessionLogExercises: 'exercises',
     canvasHint: 'Draw with your finger or mouse',
+    settingsAboutSection: "ABOUT",
+    settingsAppVersion: "App version",
+    settingsContactSupport: "Contact support",
+    settingsDiagnosticLog: "Diagnostic log",
+    settingsDiagnosticHint: "Tap Contact support above to send this with your email.",
+    settingsNoErrors: "No errors recorded",
+    progressEmptyTitle: "No sessions yet",
+    progressEmptyBody: "Start an exercise from the Exercises tab to begin tracking your progress.",
+    progressMoreOne: "1 more exercise available — try it on the Exercises tab",
+    progressMoreOther: "{count} more exercises available — try them on the Exercises tab",
   },
   es: {
     headerSubtitle: 'Rehabilitación de escritura',
@@ -4165,6 +4196,16 @@ const STRINGS = {
     exerciseTypeSentences: 'Frases',
     sessionLogExercises: 'ejercicios',
     canvasHint: 'Dibuje con el dedo o el ratón',
+    settingsAboutSection: "ACERCA DE",
+    settingsAppVersion: "Versión de la aplicación",
+    settingsContactSupport: "Contactar con soporte",
+    settingsDiagnosticLog: "Registro de diagnóstico",
+    settingsDiagnosticHint: "Pulsa \"Contactar con soporte\" arriba para enviarlo con tu correo.",
+    settingsNoErrors: "No se han registrado errores",
+    progressEmptyTitle: "Aún no hay sesiones",
+    progressEmptyBody: "Comienza un ejercicio desde la pestaña Ejercicios para empezar a registrar tu progreso.",
+    progressMoreOne: "1 ejercicio más disponible: pruébalo en la pestaña Ejercicios",
+    progressMoreOther: "{count} ejercicios más disponibles: pruébalos en la pestaña Ejercicios",
   },
   fr: {
     headerSubtitle: 'Rééducation de l\'écriture',
@@ -4258,6 +4299,16 @@ const STRINGS = {
     exerciseTypeSentences: 'Phrases',
     sessionLogExercises: 'exercices',
     canvasHint: 'Dessinez avec votre doigt ou la souris',
+    settingsAboutSection: "À PROPOS",
+    settingsAppVersion: "Version de l'application",
+    settingsContactSupport: "Contacter le support",
+    settingsDiagnosticLog: "Journal de diagnostic",
+    settingsDiagnosticHint: "Appuyez sur \"Contacter le support\" ci-dessus pour l'envoyer avec votre e-mail.",
+    settingsNoErrors: "Aucune erreur enregistrée",
+    progressEmptyTitle: "Aucune séance pour l'instant",
+    progressEmptyBody: "Commencez un exercice depuis l'onglet Exercices pour suivre votre progression.",
+    progressMoreOne: "1 exercice supplémentaire disponible — essayez-le dans l'onglet Exercices",
+    progressMoreOther: "{count} exercices supplémentaires disponibles — essayez-les dans l'onglet Exercices",
   },
   de: {
     headerSubtitle: 'Schreib-Rehabilitation',
@@ -4351,6 +4402,16 @@ const STRINGS = {
     exerciseTypeSentences: 'Sätze',
     sessionLogExercises: 'Übungen',
     canvasHint: 'Zeichnen Sie mit dem Finger oder der Maus',
+    settingsAboutSection: "ÜBER",
+    settingsAppVersion: "App-Version",
+    settingsContactSupport: "Support kontaktieren",
+    settingsDiagnosticLog: "Diagnoseprotokoll",
+    settingsDiagnosticHint: "Tippen Sie oben auf „Support kontaktieren\", um dies mit Ihrer E-Mail zu senden.",
+    settingsNoErrors: "Keine Fehler aufgezeichnet",
+    progressEmptyTitle: "Noch keine Sitzungen",
+    progressEmptyBody: "Starten Sie eine Übung im Tab Übungen, um Ihren Fortschritt zu verfolgen.",
+    progressMoreOne: "1 weitere Übung verfügbar — probieren Sie sie im Tab Übungen aus",
+    progressMoreOther: "{count} weitere Übungen verfügbar — probieren Sie sie im Tab Übungen aus",
   },
   it: {
     headerSubtitle: 'Riabilitazione della scrittura',
@@ -4444,6 +4505,16 @@ const STRINGS = {
     exerciseTypeSentences: 'Frasi',
     sessionLogExercises: 'esercizi',
     canvasHint: 'Disegna con il dito o il mouse',
+    settingsAboutSection: "INFORMAZIONI",
+    settingsAppVersion: "Versione app",
+    settingsContactSupport: "Contatta l'assistenza",
+    settingsDiagnosticLog: "Registro diagnostico",
+    settingsDiagnosticHint: "Tocca \"Contatta l'assistenza\" sopra per inviarlo con la tua email.",
+    settingsNoErrors: "Nessun errore registrato",
+    progressEmptyTitle: "Nessuna sessione ancora",
+    progressEmptyBody: "Inizia un esercizio dalla scheda Esercizi per iniziare a monitorare i tuoi progressi.",
+    progressMoreOne: "1 altro esercizio disponibile — provalo nella scheda Esercizi",
+    progressMoreOther: "{count} altri esercizi disponibili — provali nella scheda Esercizi",
   },
   pt: {
     headerSubtitle: 'Reabilitação da escrita',
@@ -4537,6 +4608,16 @@ const STRINGS = {
     exerciseTypeSentences: 'Frases',
     sessionLogExercises: 'exercícios',
     canvasHint: 'Desenhe com o dedo ou o rato',
+    settingsAboutSection: "SOBRE",
+    settingsAppVersion: "Versão da aplicação",
+    settingsContactSupport: "Contactar a equipa de apoio",
+    settingsDiagnosticLog: "Registo de diagnóstico",
+    settingsDiagnosticHint: "Toque em \"Contactar a equipa de apoio\" acima para enviar com o seu e-mail.",
+    settingsNoErrors: "Nenhum erro registado",
+    progressEmptyTitle: "Ainda não há sessões",
+    progressEmptyBody: "Inicie um exercício no separador Exercícios para começar a registar o seu progresso.",
+    progressMoreOne: "Mais 1 exercício disponível — experimente-o no separador Exercícios",
+    progressMoreOther: "Mais {count} exercícios disponíveis — experimente-os no separador Exercícios",
   },
   cy: {
     diffLettersEasy: 'a-z',
@@ -4630,6 +4711,16 @@ const STRINGS = {
     exerciseTypeSentences: 'Brawddegau',
     sessionLogExercises: 'ymarferion',
     canvasHint: 'Tynnwch â\'ch bys neu\'r llygoden',
+    settingsAboutSection: "AMDANOM",
+    settingsAppVersion: "Fersiwn yr ap",
+    settingsContactSupport: "Cysylltu â chefnogaeth",
+    settingsDiagnosticLog: "Log diagnostig",
+    settingsDiagnosticHint: "Tapiwch 'Cysylltu â chefnogaeth' uchod i'w anfon gyda'ch e-bost.",
+    settingsNoErrors: "Dim gwallau wedi'u cofnodi",
+    progressEmptyTitle: "Dim sesiynau eto",
+    progressEmptyBody: "Dechreuwch ymarfer o'r tab Ymarferion i ddechrau olrhain eich cynnydd.",
+    progressMoreOne: "1 ymarfer arall ar gael — rhowch gynnig arno yn y tab Ymarferion",
+    progressMoreOther: "{count} ymarfer arall ar gael — rhowch gynnig arnyn nhw yn y tab Ymarferion",
   },
   ja: {
     diffLettersEasy: 'a-z',
@@ -4729,6 +4820,16 @@ const STRINGS = {
     exerciseTypeSentences: '文章',
     sessionLogExercises: '問題',
     canvasHint: '指またはマウスで描いてください',
+    settingsAboutSection: "情報",
+    settingsAppVersion: "アプリのバージョン",
+    settingsContactSupport: "サポートに連絡",
+    settingsDiagnosticLog: "診断ログ",
+    settingsDiagnosticHint: "上の「サポートに連絡」をタップしてメールに添えて送信してください。",
+    settingsNoErrors: "エラーは記録されていません",
+    progressEmptyTitle: "セッションはまだありません",
+    progressEmptyBody: "進行状況の記録を始めるには、エクササイズタブから練習を開始してください。",
+    progressMoreOne: "他に1つの練習があります — エクササイズタブからお試しください",
+    progressMoreOther: "他に{count}つの練習があります — エクササイズタブからお試しください",
   },
   ko: {
     diffLettersEasy: 'a-z',
@@ -4828,6 +4929,16 @@ const STRINGS = {
     exerciseTypeSentences: '문장',
     sessionLogExercises: '연습',
     canvasHint: '손가락이나 마우스로 그리세요',
+    settingsAboutSection: "정보",
+    settingsAppVersion: "앱 버전",
+    settingsContactSupport: "지원팀에 문의",
+    settingsDiagnosticLog: "진단 로그",
+    settingsDiagnosticHint: "위의 \"지원팀에 문의\"를 탭하여 이메일과 함께 보내십시오.",
+    settingsNoErrors: "기록된 오류 없음",
+    progressEmptyTitle: "아직 세션이 없습니다",
+    progressEmptyBody: "운동 탭에서 운동을 시작하여 진행 상황 추적을 시작하세요.",
+    progressMoreOne: "1개의 운동을 더 사용할 수 있습니다 — 운동 탭에서 시도해 보세요",
+    progressMoreOther: "{count}개의 운동을 더 사용할 수 있습니다 — 운동 탭에서 시도해 보세요",
   },
   hi: {
     diffLettersEasy: 'a-z',
@@ -4927,6 +5038,16 @@ const STRINGS = {
     exerciseTypeSentences: 'वाक्य',
     sessionLogExercises: 'अभ्यास',
     canvasHint: 'अपनी उंगली या माउस से लिखें',
+    settingsAboutSection: "के बारे में",
+    settingsAppVersion: "ऐप संस्करण",
+    settingsContactSupport: "सहायता से संपर्क करें",
+    settingsDiagnosticLog: "डायग्नोस्टिक लॉग",
+    settingsDiagnosticHint: "इसे अपने ईमेल के साथ भेजने के लिए ऊपर \"सहायता से संपर्क करें\" पर टैप करें।",
+    settingsNoErrors: "कोई त्रुटि दर्ज नहीं",
+    progressEmptyTitle: "अभी तक कोई सत्र नहीं",
+    progressEmptyBody: "अपनी प्रगति को ट्रैक करना शुरू करने के लिए व्यायाम टैब से एक व्यायाम शुरू करें।",
+    progressMoreOne: "1 और व्यायाम उपलब्ध है — इसे व्यायाम टैब में आज़माएं",
+    progressMoreOther: "{count} और व्यायाम उपलब्ध हैं — इन्हें व्यायाम टैब में आज़माएं",
   },
   ar: {
     diffLettersEasy: 'a-z',
@@ -5026,6 +5147,16 @@ const STRINGS = {
     exerciseTypeSentences: 'جمل',
     sessionLogExercises: 'تمارين',
     canvasHint: 'ارسم بإصبعك أو بالماوس',
+    settingsAboutSection: "حول",
+    settingsAppVersion: "إصدار التطبيق",
+    settingsContactSupport: "الاتصال بالدعم",
+    settingsDiagnosticLog: "سجل التشخيص",
+    settingsDiagnosticHint: "انقر على \"الاتصال بالدعم\" أعلاه لإرساله مع بريدك الإلكتروني.",
+    settingsNoErrors: "لم يتم تسجيل أخطاء",
+    progressEmptyTitle: "لا توجد جلسات بعد",
+    progressEmptyBody: "ابدأ تمرينًا من علامة تبويب التمارين لبدء تتبع تقدمك.",
+    progressMoreOne: "يتوفر تمرين واحد آخر — جربه من علامة تبويب التمارين",
+    progressMoreOther: "يتوفر {count} تمارين أخرى — جربها من علامة تبويب التمارين",
   },
   zh: {
     diffLettersEasy: 'a-z',
@@ -5125,6 +5256,16 @@ const STRINGS = {
     exerciseTypeSentences: '句子',
     sessionLogExercises: '题',
     canvasHint: '用手指或鼠标书写',
+    settingsAboutSection: "关于",
+    settingsAppVersion: "应用版本",
+    settingsContactSupport: "联系支持",
+    settingsDiagnosticLog: "诊断日志",
+    settingsDiagnosticHint: "点击上方\"联系支持\"以连同您的邮件一起发送。",
+    settingsNoErrors: "未记录错误",
+    progressEmptyTitle: "尚无练习记录",
+    progressEmptyBody: "在练习选项卡中开始一项练习以开始追踪您的进度。",
+    progressMoreOne: "还有 1 项练习可用 — 在练习选项卡中尝试",
+    progressMoreOther: "还有 {count} 项练习可用 — 在练习选项卡中尝试",
   },
   pl: {
     diffLettersEasy: 'a-z',
@@ -5224,6 +5365,16 @@ const STRINGS = {
     exerciseTypeSentences: 'Zdania',
     sessionLogExercises: 'ćwiczeń',
     canvasHint: 'Rysuj palcem lub myszką',
+    settingsAboutSection: "O APLIKACJI",
+    settingsAppVersion: "Wersja aplikacji",
+    settingsContactSupport: "Skontaktuj się z pomocą",
+    settingsDiagnosticLog: "Dziennik diagnostyczny",
+    settingsDiagnosticHint: "Stuknij \"Skontaktuj się z pomocą\" powyżej, aby wysłać to z e-mailem.",
+    settingsNoErrors: "Brak zarejestrowanych błędów",
+    progressEmptyTitle: "Brak sesji",
+    progressEmptyBody: "Rozpocznij ćwiczenie z zakładki Ćwiczenia, aby śledzić swoje postępy.",
+    progressMoreOne: "Dostępne jeszcze 1 ćwiczenie — wypróbuj je w zakładce Ćwiczenia",
+    progressMoreOther: "Dostępnych jeszcze {count} ćwiczeń — wypróbuj je w zakładce Ćwiczenia",
   },
   es_mx: {
     diffLettersEasy: 'a-z',
@@ -5323,6 +5474,16 @@ const STRINGS = {
     exerciseTypeSentences: 'Frases',
     sessionLogExercises: 'ejercicios',
     canvasHint: 'Dibuje con el dedo o el ratón',
+    settingsAboutSection: "ACERCA DE",
+    settingsAppVersion: "Versión de la aplicación",
+    settingsContactSupport: "Contactar con soporte",
+    settingsDiagnosticLog: "Registro de diagnóstico",
+    settingsDiagnosticHint: "Toca \"Contactar con soporte\" arriba para enviarlo con tu correo.",
+    settingsNoErrors: "No se han registrado errores",
+    progressEmptyTitle: "Aún no hay sesiones",
+    progressEmptyBody: "Inicia un ejercicio desde la pestaña Ejercicios para comenzar a registrar tu progreso.",
+    progressMoreOne: "1 ejercicio más disponible: pruébalo en la pestaña Ejercicios",
+    progressMoreOther: "{count} ejercicios más disponibles: pruébalos en la pestaña Ejercicios",
   },
   pt_br: {
     diffLettersEasy: 'a-z',
@@ -5422,6 +5583,16 @@ const STRINGS = {
     exerciseTypeSentences: 'Frases',
     sessionLogExercises: 'exercícios',
     canvasHint: 'Desenhe com o dedo ou o mouse',
+    settingsAboutSection: "SOBRE",
+    settingsAppVersion: "Versão do aplicativo",
+    settingsContactSupport: "Contatar o suporte",
+    settingsDiagnosticLog: "Registro de diagnóstico",
+    settingsDiagnosticHint: "Toque em \"Contatar o suporte\" acima para enviar com seu e-mail.",
+    settingsNoErrors: "Nenhum erro registrado",
+    progressEmptyTitle: "Ainda não há sessões",
+    progressEmptyBody: "Inicie um exercício na aba Exercícios para começar a registrar seu progresso.",
+    progressMoreOne: "Mais 1 exercício disponível — experimente na aba Exercícios",
+    progressMoreOther: "Mais {count} exercícios disponíveis — experimente na aba Exercícios",
   },
   fr_ca: {
     diffLettersEasy: 'a-z',
@@ -5521,6 +5692,16 @@ const STRINGS = {
     exerciseTypeSentences: 'Phrases',
     sessionLogExercises: 'exercices',
     canvasHint: 'Dessinez avec votre doigt ou la souris',
+    settingsAboutSection: "À PROPOS",
+    settingsAppVersion: "Version de l'application",
+    settingsContactSupport: "Contacter le soutien",
+    settingsDiagnosticLog: "Journal de diagnostic",
+    settingsDiagnosticHint: "Appuyez sur \"Contacter le soutien\" ci-dessus pour l'envoyer avec votre courriel.",
+    settingsNoErrors: "Aucune erreur enregistrée",
+    progressEmptyTitle: "Aucune séance pour l'instant",
+    progressEmptyBody: "Commencez un exercice depuis l'onglet Exercices pour suivre votre progression.",
+    progressMoreOne: "1 exercice supplémentaire disponible — essayez-le dans l'onglet Exercices",
+    progressMoreOther: "{count} exercices supplémentaires disponibles — essayez-les dans l'onglet Exercices",
   },
 
   "ga": {
@@ -5675,7 +5856,17 @@ const STRINGS = {
     "exerciseTypeWords": "Focail",
     "exerciseTypeSentences": "Abairtí",
     "sessionLogExercises": "cleachtaí",
-    "canvasHint": "Tarraing le do mhéar nó luch"
+    "canvasHint": "Tarraing le do mhéar nó luch",
+    "settingsAboutSection": "MAIDIR LE",
+    "settingsAppVersion": "Leagan na haipe",
+    "settingsContactSupport": "Téigh i dteagmháil le tacaíocht",
+    "settingsDiagnosticLog": "Loga diagnóisice",
+    "settingsDiagnosticHint": "Tapáil Téigh i dteagmháil le tacaíocht thuas chun é seo a sheoladh le do ríomhphost.",
+    "settingsNoErrors": "Gan earráidí taifeadta",
+    "progressEmptyTitle": "Gan seisiúin go fóill",
+    "progressEmptyBody": "Tosaigh cleachtadh ón gcluaisín Cleachtaí chun do dhul chun cinn a leanúint.",
+    "progressMoreOne": "Tá 1 chleachtadh eile ar fáil — bain triail as ar an gcluaisín Cleachtaí",
+    "progressMoreOther": "Tá {count} cleachtadh eile ar fáil — bain triail astu ar an gcluaisín Cleachtaí"
 }
 };
 
@@ -5789,7 +5980,7 @@ function applyLanguage() {
 // ══════════════ TAB NAVIGATION ══════════════
 function switchTab(btn) {
   // Hide exercise screen if showing
-  document.getElementById('exerciseActive').style.display = 'none';
+  document.getElementById('exerciseActive').style.display = 'none'; if (typeof window.__updateRotationGate__ === 'function') window.__updateRotationGate__();
   document.getElementById('sessionSummary').style.display = 'none';
 
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -5798,6 +5989,9 @@ function switchTab(btn) {
   document.getElementById(target).classList.add('active');
   btn.classList.add('active');
   if (target === 'panelProgress') refreshProgress();
+
+  // v1.0.11: re-evaluate rotation gate after panel switch
+  if (typeof window.__updateRotationGate__ === 'function') window.__updateRotationGate__();
 }
 
 // ══════════════ EXERCISE ENGINE ══════════════
@@ -6340,7 +6534,7 @@ async function endSession() {
 
 function showSessionSummary(avg, best, total) {
   const s = STRINGS[currentLang] || STRINGS.en;
-  document.getElementById('exerciseActive').style.display = 'none';
+  document.getElementById('exerciseActive').style.display = 'none'; if (typeof window.__updateRotationGate__ === 'function') window.__updateRotationGate__();
   const summary = document.getElementById('sessionSummary');
   summary.style.display = 'block';
 
@@ -6378,7 +6572,7 @@ function showSessionSummary(avg, best, total) {
 }
 
 function exitExercise() {
-  document.getElementById('exerciseActive').style.display = 'none';
+  document.getElementById('exerciseActive').style.display = 'none'; if (typeof window.__updateRotationGate__ === 'function') window.__updateRotationGate__();
   document.getElementById('sessionSummary').style.display = 'none';
   // Reset ring offsets
   document.getElementById('scoreRing').style.strokeDashoffset = '314.16';
@@ -6397,6 +6591,41 @@ async function refreshProgress() {
 
   // Stats
   const total = sessions.length;
+
+  // ── v1.0.11: empty state ──
+  // When no sessions exist, show a friendly empty card and hide all data sections
+  const emptyEl = document.getElementById('progressEmptyState');
+  const statCards = document.querySelectorAll('#panelProgress .stat-row, #panelProgress .stats-grid');
+  const trendCard = document.getElementById('trendChartCard');
+  const perExCard = document.getElementById('perExerciseBreakdown');
+  const perExHeader = document.getElementById('perExTitle');
+  const sessionLogEl = document.getElementById('sessionLog');
+  const sessionLogHeader = document.getElementById('sessionLogTitle');
+  const exportEl = document.querySelector('#panelProgress .export-btn, #panelProgress button[onclick*="exportForTherapist"]');
+  // Toggle empty state
+  if (emptyEl) {
+    if (total === 0) {
+      emptyEl.style.display = '';
+      // Hide everything else inside the panel
+      document.querySelectorAll('#panelProgress .card, #panelProgress .stats-card, #panelProgress .stat-block').forEach(function(el){ el.style.display = 'none'; });
+      if (perExCard) perExCard.style.display = 'none';
+      if (perExHeader) perExHeader.style.display = 'none';
+      if (sessionLogEl) sessionLogEl.style.display = 'none';
+      if (sessionLogHeader) sessionLogHeader.style.display = 'none';
+      if (trendCard) trendCard.style.display = 'none';
+      if (exportEl) exportEl.style.display = 'none';
+      return;
+    } else {
+      emptyEl.style.display = 'none';
+      document.querySelectorAll('#panelProgress .card, #panelProgress .stats-card, #panelProgress .stat-block').forEach(function(el){ el.style.display = ''; });
+      if (perExCard) perExCard.style.display = '';
+      if (perExHeader) perExHeader.style.display = '';
+      if (sessionLogEl) sessionLogEl.style.display = '';
+      if (sessionLogHeader) sessionLogHeader.style.display = '';
+      if (exportEl) exportEl.style.display = '';
+    }
+  }
+
   const totalEx = sessions.reduce((a, s) => a + (s.count || 0), 0);
   const allScores = sessions.map(s => s.averageScore || 0);
   const avg = allScores.length > 0 ? Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length) : 0;
@@ -6441,6 +6670,17 @@ async function refreshProgress() {
         <div class="bar-container"><div class="bar-fill" style="width:${avgS}%;background:${band}"></div></div>
       </div>
     </div>`;
+  }
+  // v1.0.11: discoverability footer when some exercise types still untried
+  const ALL_TYPES = ['letters', 'numbers', 'words', 'sentences'];
+  const triedTypes = new Set(Object.keys(byType));
+  const untriedCount = ALL_TYPES.filter(function(t){ return !triedTypes.has(t); }).length;
+  if (peHtml && untriedCount > 0) {
+    const tpl = untriedCount === 1
+      ? (lang.progressMoreOne || '1 more exercise type available — try it on the Exercises tab')
+      : (lang.progressMoreOther || '{count} more exercise types available — try them on the Exercises tab');
+    const footerTxt = tpl.replace('{count}', untriedCount);
+    peHtml += '<div class="bench-more-footer" style="text-align:center;color:var(--text3);font-size:12px;padding:12px 16px;margin:4px 0 8px;font-style:italic">' + footerTxt + '</div>';
   }
   peDiv.innerHTML = peHtml || `<p style="font-size:12px;color:var(--text3);padding:8px 0">${lang.noExercises || 'No exercises recorded yet.'}</p>`;
 
@@ -6708,7 +6948,7 @@ function mpSaveItems(items) {
 
 function openMyPractice() {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('exerciseActive').style.display = 'none';
+  document.getElementById('exerciseActive').style.display = 'none'; if (typeof window.__updateRotationGate__ === 'function') window.__updateRotationGate__();
   document.getElementById('sessionSummary').style.display = 'none';
   document.getElementById('mpTraceScreen').style.display = 'none';
   var s = document.getElementById('myPracticeScreen');
@@ -7074,6 +7314,107 @@ function mpFreeSave() {
 
 <!-- Rotation gate logic (v1.0.7) — native only, always-on -->
 <script>
+
+// ── v1.0.11: error logging + dev mode + contact support (ported from Stroke Sight 1.0.13) ──
+var _rwErrorLog;
+try { _rwErrorLog = JSON.parse(localStorage.getItem('rewrite_errorLog') || '[]'); }
+catch (e) { _rwErrorLog = []; }
+window.addEventListener('error', function(e) {
+  _rwErrorLog.push({
+    time: new Date().toISOString(),
+    msg: e.message,
+    src: (e.filename || '').split('/').pop(),
+    line: e.lineno
+  });
+  if (_rwErrorLog.length > 20) _rwErrorLog = _rwErrorLog.slice(-20);
+  try { localStorage.setItem('rewrite_errorLog', JSON.stringify(_rwErrorLog)); } catch (e2) {}
+});
+// One-time migration: clear stale error logs from pre-1.0.11 builds
+try {
+  if (!localStorage.getItem('rewrite_log_cleared_v1_0_11')) {
+    localStorage.removeItem('rewrite_errorLog');
+    localStorage.setItem('rewrite_log_cleared_v1_0_11', '1');
+    _rwErrorLog = [];
+  }
+} catch (e) {}
+
+// Tap-7 reveal
+var _rwVersionTaps = 0;
+var _rwDevMode;
+try { _rwDevMode = localStorage.getItem('rewrite_devMode') === '1'; } catch (e) { _rwDevMode = false; }
+function _rwInitDevReveal() {
+  var v = document.getElementById('app-version-display');
+  var errCard = document.getElementById('settings-errors');
+  if (_rwDevMode && errCard) {
+    errCard.style.display = '';
+    _rwRenderErrorLog();
+  }
+  if (v) {
+    v.addEventListener('click', function() {
+      _rwVersionTaps++;
+      if (_rwVersionTaps >= 7) {
+        _rwDevMode = true;
+        try { localStorage.setItem('rewrite_devMode', '1'); } catch (e) {}
+        if (errCard) { errCard.style.display = ''; _rwRenderErrorLog(); }
+        _rwVersionTaps = 0;
+      }
+      setTimeout(function() { _rwVersionTaps = 0; }, 4000);
+    });
+  }
+}
+function _rwRenderErrorLog() {
+  var listEl = document.getElementById('error-log-list');
+  if (!listEl) return;
+  var lang = (typeof STRINGS !== 'undefined' && STRINGS[currentLang]) ? STRINGS[currentLang] : (typeof STRINGS !== 'undefined' ? STRINGS.en : {});
+  if (!_rwErrorLog || !_rwErrorLog.length) {
+    listEl.textContent = lang.settingsNoErrors || 'No errors recorded';
+    return;
+  }
+  listEl.innerHTML = _rwErrorLog.map(function(e) {
+    return '<div>' + e.time + ' — ' + (e.msg || '') + '</div>';
+  }).join('');
+}
+// Contact support — open mailto with diagnostic pre-filled
+function _rwInitContactSupport() {
+  var link = document.getElementById('contact-support-link');
+  if (!link) return;
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    var subject = 'ReWrite v1.0.11 support';
+    var lines = [
+      '',
+      '[Please describe the issue you experienced here]',
+      '',
+      '---',
+      'Diagnostic info (please leave below this line):',
+      'App: ReWrite v1.0.11',
+      'Locale: ' + (typeof currentLang !== 'undefined' ? currentLang : 'unknown'),
+      'Platform: ' + (navigator.userAgent || 'unknown').substring(0, 120),
+      '',
+      'Recent errors:'
+    ];
+    if (!_rwErrorLog || _rwErrorLog.length === 0) {
+      lines.push('  (none — diagnostic log is empty)');
+    } else {
+      _rwErrorLog.forEach(function(e) {
+        lines.push('  ' + e.time + ' — ' + (e.msg || ''));
+      });
+    }
+    var body = lines.join('\n');
+    var url = 'mailto:support@ansteyapps.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    window.location.href = url;
+  });
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() {
+    _rwInitDevReveal();
+    _rwInitContactSupport();
+  });
+} else {
+  _rwInitDevReveal();
+  _rwInitContactSupport();
+}
+
 (function() {
   var gate = document.getElementById('rotate-gate');
   if (!gate) return;
@@ -7112,6 +7453,12 @@ function mpFreeSave() {
     subEl.textContent = pair[1];
   }
 
+  function isOnExerciseScreen() {
+    // v1.0.11: only enforce landscape during writing canvas — Settings,
+    // About, Progress and Exercises tab all work fine in portrait.
+    var ex = document.getElementById('exerciseActive');
+    return !!(ex && ex.style.display === 'block');
+  }
   function update() {
     if (!isNative()) {
       // Web/PWA — never show the gate
@@ -7120,6 +7467,12 @@ function mpFreeSave() {
       return;
     }
     var wasVisible = gate.classList.contains('is-visible');
+    // v1.0.11: scope rotation gate to the writing canvas only
+    if (!isOnExerciseScreen()) {
+      gate.classList.remove('is-visible');
+      gate.setAttribute('aria-hidden', 'true');
+      return;
+    }
     if (isPortrait()) {
       localiseGate();
       gate.classList.add('is-visible');
@@ -7150,6 +7503,8 @@ function mpFreeSave() {
   if (picker) picker.addEventListener('change', function() { setTimeout(localiseGate, 0); });
 
   // Initial check (deferred so Capacitor has time to attach)
+  // v1.0.11: expose update so panel-switching code can re-evaluate gate
+  window.__updateRotationGate__ = update;
   setTimeout(update, 0);
   setTimeout(update, 200);
 
