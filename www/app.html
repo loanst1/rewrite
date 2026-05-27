@@ -6040,6 +6040,14 @@ function switchTab(btn) {
   document.getElementById('exerciseActive').style.display = 'none'; if (typeof window.__updateRotationGate__ === 'function') window.__updateRotationGate__();
   document.getElementById('sessionSummary').style.display = 'none';
 
+  // v1.0.12 fix: also dismiss My Practice screens so the bottom tab bar
+  // remains responsive when tapped from inside My Practice → Free Practice.
+  // Previously these stayed visible, overlaying the newly-activated panel.
+  var mpScreen = document.getElementById('myPracticeScreen');
+  if (mpScreen) { mpScreen.style.display = 'none'; mpScreen.classList.remove('active'); }
+  var mpTrace = document.getElementById('mpTraceScreen');
+  if (mpTrace) mpTrace.style.display = 'none';
+
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   const target = btn.dataset.tab;
@@ -7459,14 +7467,14 @@ function _rwInitContactSupport() {
   if (!link) return;
   link.addEventListener('click', function(e) {
     e.preventDefault();
-    var subject = 'ReWrite v1.0.11 support';
+    var subject = 'ReWrite v1.0.12 support';
     var lines = [
       '',
       '[Please describe the issue you experienced here]',
       '',
       '---',
       'Diagnostic info (please leave below this line):',
-      'App: ReWrite v1.0.11',
+      'App: ReWrite v1.0.12',
       'Locale: ' + (typeof currentLang !== 'undefined' ? currentLang : 'unknown'),
       'Platform: ' + (navigator.userAgent || 'unknown').substring(0, 120),
       '',
