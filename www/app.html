@@ -123,6 +123,12 @@ canvas{display:block;touch-action:none}
   transition:opacity .3s;
 }
 
+.pen-color-swatches{display:flex;gap:10px;align-items:center}
+.pen-color-swatch{width:32px;height:32px;border-radius:50%;border:3px solid transparent;cursor:pointer;padding:0;transition:all .15s;box-shadow:0 0 0 1px rgba(0,0,0,0.1)}
+.pen-color-swatch:hover{transform:scale(1.08)}
+.pen-color-swatch.active{border-color:var(--text);box-shadow:0 0 0 2px var(--card),0 0 0 3px var(--text)}
+.pen-color-swatch:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+
 /* ── Action Buttons ── */
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
@@ -216,7 +222,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 .lang-btn .english{font-size:10px;color:var(--text3);display:block;margin-top:2px;line-height:1.3}
 
 /* ── Exercise Active Screen ── */
-.exercise-screen{display:none;padding:16px 16px 100px;max-width:600px;margin:0 auto;width:100%}
+.exercise-screen{display:none;padding:16px 16px 100px;max-width:min(1100px,95vw);margin:0 auto;width:100%}
 .exercise-screen.active{display:block}
 .exercise-progress{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;font-size:13px;color:var(--text2)}
 .progress-bar{height:4px;background:var(--bg2);border-radius:2px;overflow:hidden;margin-bottom:16px}
@@ -845,6 +851,19 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
       <select class="setting-select" id="settingPenWidth" onchange="saveSetting('penWidth',this.value)">
         <option value="3" id="penOptThin">Thin</option><option value="5" selected id="penOptMedium">Medium</option><option value="8" id="penOptThick">Thick</option>
       </select>
+    </div>
+    <!-- v1.0.12: Pen colour swatches -->
+    <div class="setting-row" id="setPenColorRow">
+      <div>
+        <div class="setting-label" id="setPenColor">Pen colour</div>
+        <div class="setting-desc" id="setPenColorDesc">Choose your writing pen colour</div>
+      </div>
+      <div class="pen-color-swatches">
+        <button type="button" class="pen-color-swatch" data-color="#2a6a4a" style="background:#2a6a4a" onclick="setPenColor('#2a6a4a')" aria-label="Dark green"></button>
+        <button type="button" class="pen-color-swatch" data-color="#1a1a1a" style="background:#1a1a1a" onclick="setPenColor('#1a1a1a')" aria-label="Black"></button>
+        <button type="button" class="pen-color-swatch" data-color="#1d3a8a" style="background:#1d3a8a" onclick="setPenColor('#1d3a8a')" aria-label="Dark blue"></button>
+        <button type="button" class="pen-color-swatch" data-color="#8a2a2a" style="background:#8a2a2a" onclick="setPenColor('#8a2a2a')" aria-label="Dark red"></button>
+      </div>
     </div>
     <div class="setting-row">
       <div>
@@ -3866,7 +3885,7 @@ let currentStroke = [];
 let startTime = 0;
 let drawCtx = null;
 let guideCtx = null;
-let settings = { sessionLength: 8, penWidth: 5, sounds: false };
+let settings = { sessionLength: 8, penWidth: 5, sounds: false, penColor: '#2a6a4a' };
 
 // ══════════════ IndexedDB with fallback ══════════════
 let db;
@@ -3964,6 +3983,10 @@ function loadSettings() {
 function applySettings() {
   document.getElementById('settingSessionLength').value = settings.sessionLength || 8;
   document.getElementById('settingPenWidth').value = settings.penWidth || 5;
+  // v1.0.12: initialise active pen colour swatch from saved setting
+  document.querySelectorAll('.pen-color-swatch').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.color === (settings.penColor || '#2a6a4a'));
+  });
   const soundsEl = document.getElementById('settingSounds');
   if (settings.sounds) soundsEl.classList.add('on');
   else soundsEl.classList.remove('on');
@@ -4093,6 +4116,8 @@ const STRINGS = {
     exerciseTypeSentences: 'Sentences',
     sessionLogExercises: 'exercises',
     canvasHint: 'Draw with your finger or mouse',
+    setPenColor: "Pen colour",
+    setPenColorDesc: "Choose your writing pen colour",
     settingsAboutSection: "ABOUT",
     settingsAppVersion: "App version",
     settingsContactSupport: "Contact support",
@@ -4196,6 +4221,8 @@ const STRINGS = {
     exerciseTypeSentences: 'Frases',
     sessionLogExercises: 'ejercicios',
     canvasHint: 'Dibuje con el dedo o el ratón',
+    setPenColor: "Color del bolígrafo",
+    setPenColorDesc: "Elige el color de tu bolígrafo",
     settingsAboutSection: "ACERCA DE",
     settingsAppVersion: "Versión de la aplicación",
     settingsContactSupport: "Contactar con soporte",
@@ -4299,6 +4326,8 @@ const STRINGS = {
     exerciseTypeSentences: 'Phrases',
     sessionLogExercises: 'exercices',
     canvasHint: 'Dessinez avec votre doigt ou la souris',
+    setPenColor: "Couleur du stylo",
+    setPenColorDesc: "Choisissez la couleur de votre stylo",
     settingsAboutSection: "À PROPOS",
     settingsAppVersion: "Version de l'application",
     settingsContactSupport: "Contacter le support",
@@ -4402,6 +4431,8 @@ const STRINGS = {
     exerciseTypeSentences: 'Sätze',
     sessionLogExercises: 'Übungen',
     canvasHint: 'Zeichnen Sie mit dem Finger oder der Maus',
+    setPenColor: "Stiftfarbe",
+    setPenColorDesc: "Wählen Sie Ihre Stiftfarbe",
     settingsAboutSection: "ÜBER",
     settingsAppVersion: "App-Version",
     settingsContactSupport: "Support kontaktieren",
@@ -4505,6 +4536,8 @@ const STRINGS = {
     exerciseTypeSentences: 'Frasi',
     sessionLogExercises: 'esercizi',
     canvasHint: 'Disegna con il dito o il mouse',
+    setPenColor: "Colore della penna",
+    setPenColorDesc: "Scegli il colore della tua penna",
     settingsAboutSection: "INFORMAZIONI",
     settingsAppVersion: "Versione app",
     settingsContactSupport: "Contatta l'assistenza",
@@ -4608,6 +4641,8 @@ const STRINGS = {
     exerciseTypeSentences: 'Frases',
     sessionLogExercises: 'exercícios',
     canvasHint: 'Desenhe com o dedo ou o rato',
+    setPenColor: "Cor da caneta",
+    setPenColorDesc: "Escolha a cor da sua caneta",
     settingsAboutSection: "SOBRE",
     settingsAppVersion: "Versão da aplicação",
     settingsContactSupport: "Contactar a equipa de apoio",
@@ -4711,6 +4746,8 @@ const STRINGS = {
     exerciseTypeSentences: 'Brawddegau',
     sessionLogExercises: 'ymarferion',
     canvasHint: 'Tynnwch â\'ch bys neu\'r llygoden',
+    setPenColor: "Lliw pin",
+    setPenColorDesc: "Dewiswch liw eich pin ysgrifennu",
     settingsAboutSection: "AMDANOM",
     settingsAppVersion: "Fersiwn yr ap",
     settingsContactSupport: "Cysylltu â chefnogaeth",
@@ -4820,6 +4857,8 @@ const STRINGS = {
     exerciseTypeSentences: '文章',
     sessionLogExercises: '問題',
     canvasHint: '指またはマウスで描いてください',
+    setPenColor: "ペンの色",
+    setPenColorDesc: "ペンの色を選んでください",
     settingsAboutSection: "情報",
     settingsAppVersion: "アプリのバージョン",
     settingsContactSupport: "サポートに連絡",
@@ -4929,6 +4968,8 @@ const STRINGS = {
     exerciseTypeSentences: '문장',
     sessionLogExercises: '연습',
     canvasHint: '손가락이나 마우스로 그리세요',
+    setPenColor: "펜 색상",
+    setPenColorDesc: "펜 색상을 선택하세요",
     settingsAboutSection: "정보",
     settingsAppVersion: "앱 버전",
     settingsContactSupport: "지원팀에 문의",
@@ -5038,6 +5079,8 @@ const STRINGS = {
     exerciseTypeSentences: 'वाक्य',
     sessionLogExercises: 'अभ्यास',
     canvasHint: 'अपनी उंगली या माउस से लिखें',
+    setPenColor: "पेन का रंग",
+    setPenColorDesc: "अपनी पेन का रंग चुनें",
     settingsAboutSection: "के बारे में",
     settingsAppVersion: "ऐप संस्करण",
     settingsContactSupport: "सहायता से संपर्क करें",
@@ -5147,6 +5190,8 @@ const STRINGS = {
     exerciseTypeSentences: 'جمل',
     sessionLogExercises: 'تمارين',
     canvasHint: 'ارسم بإصبعك أو بالماوس',
+    setPenColor: "لون القلم",
+    setPenColorDesc: "اختر لون قلمك",
     settingsAboutSection: "حول",
     settingsAppVersion: "إصدار التطبيق",
     settingsContactSupport: "الاتصال بالدعم",
@@ -5256,6 +5301,8 @@ const STRINGS = {
     exerciseTypeSentences: '句子',
     sessionLogExercises: '题',
     canvasHint: '用手指或鼠标书写',
+    setPenColor: "笔的颜色",
+    setPenColorDesc: "选择您的笔颜色",
     settingsAboutSection: "关于",
     settingsAppVersion: "应用版本",
     settingsContactSupport: "联系支持",
@@ -5365,6 +5412,8 @@ const STRINGS = {
     exerciseTypeSentences: 'Zdania',
     sessionLogExercises: 'ćwiczeń',
     canvasHint: 'Rysuj palcem lub myszką',
+    setPenColor: "Kolor pióra",
+    setPenColorDesc: "Wybierz kolor swojego pióra",
     settingsAboutSection: "O APLIKACJI",
     settingsAppVersion: "Wersja aplikacji",
     settingsContactSupport: "Skontaktuj się z pomocą",
@@ -5474,6 +5523,8 @@ const STRINGS = {
     exerciseTypeSentences: 'Frases',
     sessionLogExercises: 'ejercicios',
     canvasHint: 'Dibuje con el dedo o el ratón',
+    setPenColor: "Color de la pluma",
+    setPenColorDesc: "Elige el color de tu pluma",
     settingsAboutSection: "ACERCA DE",
     settingsAppVersion: "Versión de la aplicación",
     settingsContactSupport: "Contactar con soporte",
@@ -5583,6 +5634,8 @@ const STRINGS = {
     exerciseTypeSentences: 'Frases',
     sessionLogExercises: 'exercícios',
     canvasHint: 'Desenhe com o dedo ou o mouse',
+    setPenColor: "Cor da caneta",
+    setPenColorDesc: "Escolha a cor da sua caneta",
     settingsAboutSection: "SOBRE",
     settingsAppVersion: "Versão do aplicativo",
     settingsContactSupport: "Contatar o suporte",
@@ -5692,6 +5745,8 @@ const STRINGS = {
     exerciseTypeSentences: 'Phrases',
     sessionLogExercises: 'exercices',
     canvasHint: 'Dessinez avec votre doigt ou la souris',
+    setPenColor: "Couleur du stylo",
+    setPenColorDesc: "Choisissez la couleur de votre stylo",
     settingsAboutSection: "À PROPOS",
     settingsAppVersion: "Version de l'application",
     settingsContactSupport: "Contacter le soutien",
@@ -5857,6 +5912,8 @@ const STRINGS = {
     "exerciseTypeSentences": "Abairtí",
     "sessionLogExercises": "cleachtaí",
     "canvasHint": "Tarraing le do mhéar nó luch",
+    "setPenColor": "Dath an phinn",
+    "setPenColorDesc": "Roghnaigh dath do pheann scríbhneoireachta",
     "settingsAboutSection": "MAIDIR LE",
     "settingsAppVersion": "Leagan na haipe",
     "settingsContactSupport": "Téigh i dteagmháil le tacaíocht",
@@ -6218,7 +6275,8 @@ function setupCanvas(text) {
   drawCtx.lineCap = 'round';
   drawCtx.lineJoin = 'round';
   drawCtx.lineWidth = settings.penWidth || 5;
-  drawCtx.strokeStyle = isDarkMode ? '#6abf8a' : '#2a6a4a';
+  // v1.0.12: respect user pen colour choice; lighten in dark mode for legibility
+  drawCtx.strokeStyle = getActivePenColor(isDarkMode);
 
   // Store dpr and cssW/cssH on canvas for coordinate transforms
   drawC._dpr = dpr; drawC._cssW = cssW; drawC._cssH = cssH;
@@ -6303,6 +6361,27 @@ function clearCanvas() {
 }
 
 // ══════════════ SCORING ══════════════
+
+// ── v1.0.12: pen colour helpers ──
+const PEN_PALETTE = {
+  '#2a6a4a': '#6abf8a',  // forest green (default) → light variant
+  '#1a1a1a': '#e0e0e0',  // black → near-white
+  '#1d3a8a': '#7a9cdb',  // dark blue → light blue
+  '#8a2a2a': '#d97a7a',  // dark red → light red
+};
+function getActivePenColor(isDark) {
+  const c = (settings && settings.penColor) || '#2a6a4a';
+  return isDark ? (PEN_PALETTE[c] || '#6abf8a') : c;
+}
+function setPenColor(color) {
+  if (!(color in PEN_PALETTE)) return;
+  settings.penColor = color;
+  try { localStorage.setItem('rewrite_settings', JSON.stringify(settings)); } catch (e) {}
+  document.querySelectorAll('.pen-color-swatch').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.color === color);
+  });
+}
+
 function submitAttempt() {
   if (!hasStrokes) return;
   const score = calculateScore();
@@ -6456,8 +6535,10 @@ function calculateScore() {
   }
   const smoothness = pts > 0 ? Math.max(0, 1 - (totalVar / pts) / (Math.PI * 0.5)) : 0.5;
 
-  // Final score: 55% shape match, 20% aspect ratio, 25% smoothness
-  let score = (shapeMatch * 0.55 + arBonus * 0.20 + smoothness * 0.25) * 100;
+  // v1.0.12: re-weighted for stroke rehab — shape matters most;
+  // smoothness reduced to 5% (was 25%) so post-stroke tremor doesn't
+  // punish an otherwise legible letter. Final: 70% shape, 25% aspect ratio, 5% smoothness.
+  let score = (shapeMatch * 0.70 + arBonus * 0.25 + smoothness * 0.05) * 100;
   if (hasStrokes && strokes.length > 0) score = Math.max(score, 5);
   return Math.min(100, Math.round(score));
 }
@@ -6470,22 +6551,20 @@ function showScoreFeedback(score) {
   // Ring animation
   const offset = 314.16 - (score / 100) * 314.16;
   const ring = document.getElementById('scoreRing');
-  ring.style.stroke = score >= 80 ? 'var(--success)' : score >= 50 ? 'var(--warning)' : 'var(--text3)';
+  // v1.0.12: shifted thresholds (75/55/35) so legible letters with tremor
+  // land in encouraging territory rather than getting penalised.
+  ring.style.stroke = score >= 75 ? 'var(--success)' : score >= 55 ? 'var(--warning)' : 'var(--text3)';
   setTimeout(() => { ring.style.strokeDashoffset = offset; }, 50);
 
-  // Show band label in the ring instead of percentage
-  let bandLabel;
-  if (score >= 80) bandLabel = '★★★';
-  else if (score >= 60) bandLabel = '★★';
-  else if (score >= 40) bandLabel = '★';
-  else bandLabel = '·';
-  document.getElementById('scoreValue').textContent = bandLabel;
+  // v1.0.12: show actual percentage in the ring centre. Adult, clinical,
+  // transparent. The qualitative band label appears below as text already.
+  document.getElementById('scoreValue').textContent = score + '%';
 
-  // Label + message
+  // Label + message — same keys, new thresholds
   let label, msg;
-  if (score >= 80) { label = s.excellent; msg = s.excellentMsg; }
-  else if (score >= 60) { label = s.good; msg = s.goodMsg; }
-  else if (score >= 40) { label = s.improving; msg = s.improvingMsg; }
+  if (score >= 75) { label = s.excellent; msg = s.excellentMsg; }
+  else if (score >= 55) { label = s.good; msg = s.goodMsg; }
+  else if (score >= 35) { label = s.improving; msg = s.improvingMsg; }
   else { label = s.early; msg = s.earlyMsg; }
   document.getElementById('scoreLabel').textContent = label;
   document.getElementById('scoreMessage').textContent = msg;
@@ -6540,8 +6619,8 @@ function showSessionSummary(avg, best, total) {
 
   document.getElementById('summaryTitle').textContent = s.summaryTitle || 'Session Complete';
   document.getElementById('summarySubtitle').textContent = s.summarySubtitle || 'Great work';
-  let summaryBand = avg >= 80 ? '★★★' : avg >= 60 ? '★★' : avg >= 40 ? '★' : '·';
-  document.getElementById('summaryScore').textContent = summaryBand;
+  // v1.0.12: show actual session percentage instead of stars
+  document.getElementById('summaryScore').textContent = Math.round(avg) + '%';
   document.getElementById('sumExCount').textContent = total;
   let bestBand = best >= 80 ? (s.bandStrong || 'Strong') : best >= 50 ? (s.bandDeveloping || 'Developing') : (s.bandEarly || 'Early');
   document.getElementById('sumBest').textContent = bestBand;
