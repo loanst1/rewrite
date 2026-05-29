@@ -878,6 +878,8 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
     <div class="card-title" id="setDataTitle">Data</div>
     <p style="font-size:12px;color:var(--text2);margin-bottom:12px" id="setDataDesc">All progress data is stored locally on this device.</p>
     <button class="btn btn-outline btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="confirmReset()" id="resetBtn">Reset All Progress</button>
+    <p style="font-size:12px;color:var(--text2);margin-top:14px;margin-bottom:8px">Show the first-launch language picker again.</p>
+    <button class="btn btn-outline btn-sm" id="resetOnboardingBtn" onclick="resetOnboarding()">Restart onboarding</button>
   </div>
 
   <div class="card" id="settings-card-about">
@@ -6919,6 +6921,23 @@ function renderTrendChart(sessions) {
       }
     });
   }
+}
+
+async function resetOnboarding() {
+  if (!confirm('Restart onboarding? The language picker will appear again on next launch. Your handwriting progress will not be affected.')) return;
+  try {
+    if (typeof db !== 'undefined' && db && db.transaction) {
+      const tx = db.transaction('settings', 'readwrite');
+      tx.objectStore('settings').delete('language');
+      await new Promise(function(r){ tx.oncomplete = r; tx.onerror = r; });
+    }
+  } catch (e) {}
+  try {
+    localStorage.removeItem('rewrite_lang');
+    localStorage.removeItem('strokesight_lang');
+    localStorage.removeItem('lang');
+  } catch (e) {}
+  location.reload();
 }
 
 function confirmReset() {
