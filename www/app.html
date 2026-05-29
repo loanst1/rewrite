@@ -879,8 +879,8 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
     <div class="card-title" id="setDataTitle">Data</div>
     <p style="font-size:12px;color:var(--text2);margin-bottom:12px" id="setDataDesc">All progress data is stored locally on this device.</p>
     <button class="btn btn-outline btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="confirmReset()" id="resetBtn">Reset All Progress</button>
-    <p style="font-size:12px;color:var(--text2);margin-top:14px;margin-bottom:8px">Show the first-launch language picker again.</p>
-    <button class="btn btn-outline btn-sm" id="resetOnboardingBtn" onclick="resetOnboarding()">Restart onboarding</button>
+    <p style="font-size:12px;color:var(--text2);margin-top:14px;margin-bottom:8px" data-i18n="restart_onb_desc">Show the first-launch language picker again.</p>
+    <button class="btn btn-outline btn-sm" id="resetOnboardingBtn" onclick="resetOnboarding()" data-i18n="restart_onb_btn">Restart onboarding</button>
   </div>
 
   <div class="card" id="settings-card-about">
@@ -4018,6 +4018,9 @@ function toggleSounds() {
 // ══════════════ LANGUAGE ══════════════
 const STRINGS = {
   en: {
+    "restart_onb_btn":"Restart onboarding",
+    "restart_onb_desc":"Show the first-launch language picker again.",
+    "restart_onb_confirm":"Restart onboarding? The language picker will appear again on next launch. Your handwriting progress will not be affected.",
     headerSubtitle: 'Handwriting Rehab',
     exercisesTitle: 'Practice Handwriting', exercisesSubtitle: 'Choose an exercise type to begin',
     disclaimer: '<strong>Wellness tool only.</strong> ReWrite supports handwriting rehabilitation but is not a medical device. Always follow guidance from your occupational therapist or care team.',
@@ -4133,6 +4136,9 @@ const STRINGS = {
     progressMoreOther: "{count} more exercises available — try them on the Exercises tab",
   },
   es: {
+    "restart_onb_btn":"Reiniciar configuración inicial",
+    "restart_onb_desc":"Volver a mostrar el selector de idioma inicial.",
+    "restart_onb_confirm":"¿Reiniciar la configuración inicial? El selector de idioma volverá a aparecer en el próximo inicio. Tu progreso de escritura no se verá afectado.",
     headerSubtitle: 'Rehabilitación de escritura',
     exercisesTitle: 'Practicar escritura', exercisesSubtitle: 'Elija un tipo de ejercicio para comenzar',
     disclaimer: '<strong>Solo herramienta de bienestar.</strong> ReWrite apoya la rehabilitación de la escritura pero no es un dispositivo médico. Siga siempre las indicaciones de su terapeuta ocupacional.',
@@ -4238,6 +4244,9 @@ const STRINGS = {
     progressMoreOther: "{count} ejercicios más disponibles: pruébalos en la pestaña Ejercicios",
   },
   fr: {
+    "restart_onb_btn":"Recommencer la configuration",
+    "restart_onb_desc":"Afficher à nouveau l'écran de sélection de la langue.",
+    "restart_onb_confirm":"Recommencer la configuration ? Le sélecteur de langue réapparaîtra au prochain lancement. Votre progression d'écriture ne sera pas affectée.",
     headerSubtitle: 'Rééducation de l\'écriture',
     exercisesTitle: 'Pratiquer l\'écriture', exercisesSubtitle: 'Choisissez un type d\'exercice',
     disclaimer: '<strong>Outil de bien-être uniquement.</strong> ReWrite soutient la rééducation de l\'écriture mais n\'est pas un dispositif médical. Suivez toujours les conseils de votre ergothérapeute ou de votre équipe soignante.',
@@ -4343,6 +4352,9 @@ const STRINGS = {
     progressMoreOther: "{count} exercices supplémentaires disponibles — essayez-les dans l'onglet Exercices",
   },
   de: {
+    "restart_onb_btn":"Einrichtung neu starten",
+    "restart_onb_desc":"Den Sprachauswahl-Bildschirm erneut anzeigen.",
+    "restart_onb_confirm":"Einrichtung neu starten? Die Sprachauswahl erscheint beim nächsten Start erneut. Ihr Schreibfortschritt wird nicht beeinflusst.",
     headerSubtitle: 'Schreib-Rehabilitation',
     exercisesTitle: 'Schreiben üben', exercisesSubtitle: 'Wählen Sie eine Übungsart',
     disclaimer: '<strong>Nur Wellness-Tool.</strong> ReWrite unterstützt die Schreibrehabilitation, ist aber kein Medizinprodukt. Befolgen Sie stets die Empfehlungen Ihres Ergotherapeuten oder Behandlungsteams.',
@@ -4448,6 +4460,9 @@ const STRINGS = {
     progressMoreOther: "{count} weitere Übungen verfügbar — probieren Sie sie im Tab Übungen aus",
   },
   it: {
+    "restart_onb_btn":"Riavvia configurazione",
+    "restart_onb_desc":"Mostra di nuovo la schermata di selezione della lingua.",
+    "restart_onb_confirm":"Riavviare la configurazione? Il selettore di lingua apparirà di nuovo al prossimo avvio. I tuoi progressi nella scrittura non saranno influenzati.",
     headerSubtitle: 'Riabilitazione della scrittura',
     exercisesTitle: 'Pratica di scrittura', exercisesSubtitle: 'Scegli un tipo di esercizio',
     disclaimer: '<strong>Solo strumento di benessere.</strong> ReWrite supporta la riabilitazione della scrittura ma non è un dispositivo medico. Segui sempre le indicazioni del tuo terapista occupazionale o del team di cura.',
@@ -4553,6 +4568,9 @@ const STRINGS = {
     progressMoreOther: "{count} altri esercizi disponibili — provali nella scheda Esercizi",
   },
   pt: {
+    "restart_onb_btn":"Reiniciar configuração",
+    "restart_onb_desc":"Mostrar novamente o seletor de idioma inicial.",
+    "restart_onb_confirm":"Reiniciar a configuração? O seletor de idioma aparecerá novamente no próximo arranque. O seu progresso de escrita não será afetado.",
     headerSubtitle: 'Reabilitação da escrita',
     exercisesTitle: 'Praticar escrita', exercisesSubtitle: 'Escolha um tipo de exercício',
     disclaimer: '<strong>Apenas ferramenta de bem-estar.</strong> O ReWrite apoia a reabilitação da escrita mas não é um dispositivo médico. Siga sempre as orientações do seu terapeuta ocupacional ou equipa de saúde.',
@@ -4658,6 +4676,9 @@ const STRINGS = {
     progressMoreOther: "Mais {count} exercícios disponíveis — experimente-os no separador Exercícios",
   },
   cy: {
+    "restart_onb_btn":"Ailgychwyn cyflwyniad",
+    "restart_onb_desc":"Dangos y dewisydd iaith cychwynnol eto.",
+    "restart_onb_confirm":"Ailgychwyn y cyflwyniad? Bydd y dewisydd iaith yn ymddangos eto ar y lansiad nesaf. Ni effeithir ar eich cynnydd llawysgrifen.",
     diffLettersEasy: 'a-z',
     diffLettersMed: 'A-Z',
     diffWordsEasy: 'Byr',
@@ -4763,6 +4784,9 @@ const STRINGS = {
     progressMoreOther: "{count} ymarfer arall ar gael — rhowch gynnig arnyn nhw yn y tab Ymarferion",
   },
   ja: {
+    "restart_onb_btn":"初期設定をやり直す",
+    "restart_onb_desc":"言語選択画面を再び表示します。",
+    "restart_onb_confirm":"初期設定をやり直しますか？言語選択画面が次回起動時に再表示されます。これまでの手書き履歴には影響しません。",
     diffLettersEasy: 'a-z',
     diffLettersMed: 'A-Z',
     diffWordsEasy: '短い',
@@ -4874,6 +4898,9 @@ const STRINGS = {
     progressMoreOther: "他に{count}つの練習があります — エクササイズタブからお試しください",
   },
   ko: {
+    "restart_onb_btn":"초기 설정 다시 시작",
+    "restart_onb_desc":"언어 선택 화면을 다시 표시합니다.",
+    "restart_onb_confirm":"초기 설정을 다시 시작하시겠습니까? 언어 선택 화면이 다음 실행 시 다시 나타납니다. 손글씨 기록은 영향을 받지 않습니다.",
     diffLettersEasy: 'a-z',
     diffLettersMed: 'A-Z',
     diffWordsEasy: '짧음',
@@ -4985,6 +5012,9 @@ const STRINGS = {
     progressMoreOther: "{count}개의 운동을 더 사용할 수 있습니다 — 운동 탭에서 시도해 보세요",
   },
   hi: {
+    "restart_onb_btn":"ऑनबोर्डिंग पुनः प्रारंभ करें",
+    "restart_onb_desc":"भाषा चयन स्क्रीन को फिर से दिखाएं।",
+    "restart_onb_confirm":"ऑनबोर्डिंग पुनः प्रारंभ करें? अगले लॉन्च पर भाषा चयनकर्ता फिर से दिखाई देगा। आपकी हस्तलेखन प्रगति प्रभावित नहीं होगी।",
     diffLettersEasy: 'a-z',
     diffLettersMed: 'A-Z',
     diffWordsEasy: 'छोटे',
@@ -5096,6 +5126,9 @@ const STRINGS = {
     progressMoreOther: "{count} और व्यायाम उपलब्ध हैं — इन्हें व्यायाम टैब में आज़माएं",
   },
   ar: {
+    "restart_onb_btn":"إعادة إعداد التطبيق",
+    "restart_onb_desc":"إعادة عرض شاشة اختيار اللغة.",
+    "restart_onb_confirm":"هل تريد إعادة إعداد التطبيق؟ ستظهر شاشة اختيار اللغة مرة أخرى عند التشغيل التالي. لن يتأثر تقدمك في الكتابة.",
     diffLettersEasy: 'a-z',
     diffLettersMed: 'A-Z',
     diffWordsEasy: 'قصيرة',
@@ -5207,6 +5240,9 @@ const STRINGS = {
     progressMoreOther: "يتوفر {count} تمارين أخرى — جربها من علامة تبويب التمارين",
   },
   zh: {
+    "restart_onb_btn":"重新开始设置",
+    "restart_onb_desc":"重新显示语言选择界面。",
+    "restart_onb_confirm":"确定重新开始设置吗?语言选择界面将在下次启动时再次显示。您的书写进度不会受到影响。",
     diffLettersEasy: 'a-z',
     diffLettersMed: 'A-Z',
     diffWordsEasy: '短词',
@@ -5318,6 +5354,9 @@ const STRINGS = {
     progressMoreOther: "还有 {count} 项练习可用 — 在练习选项卡中尝试",
   },
   pl: {
+    "restart_onb_btn":"Uruchom konfigurację ponownie",
+    "restart_onb_desc":"Pokaż ponownie ekran wyboru języka.",
+    "restart_onb_confirm":"Uruchomić konfigurację ponownie? Wybór języka pojawi się ponownie przy następnym uruchomieniu. Twoje postępy w pisaniu nie zostaną zmienione.",
     diffLettersEasy: 'a-z',
     diffLettersMed: 'A-Z',
     diffWordsEasy: 'Krótkie',
@@ -5429,6 +5468,9 @@ const STRINGS = {
     progressMoreOther: "Dostępnych jeszcze {count} ćwiczeń — wypróbuj je w zakładce Ćwiczenia",
   },
   es_mx: {
+    "restart_onb_btn":"Reiniciar configuración inicial",
+    "restart_onb_desc":"Volver a mostrar el selector de idioma inicial.",
+    "restart_onb_confirm":"¿Reiniciar la configuración inicial? El selector de idioma aparecerá de nuevo en el próximo inicio. Tu progreso de escritura no se verá afectado.",
     diffLettersEasy: 'a-z',
     diffLettersMed: 'A-Z',
     diffWordsEasy: 'Cortas',
@@ -5540,6 +5582,9 @@ const STRINGS = {
     progressMoreOther: "{count} ejercicios más disponibles: pruébalos en la pestaña Ejercicios",
   },
   pt_br: {
+    "restart_onb_btn":"Reiniciar configuração",
+    "restart_onb_desc":"Mostrar novamente o seletor de idioma inicial.",
+    "restart_onb_confirm":"Reiniciar a configuração? O seletor de idioma aparecerá novamente na próxima inicialização. Seu progresso na escrita não será afetado.",
     diffLettersEasy: 'a-z',
     diffLettersMed: 'A-Z',
     diffWordsEasy: 'Curtas',
@@ -5651,6 +5696,9 @@ const STRINGS = {
     progressMoreOther: "Mais {count} exercícios disponíveis — experimente na aba Exercícios",
   },
   fr_ca: {
+    "restart_onb_btn":"Recommencer la configuration",
+    "restart_onb_desc":"Afficher à nouveau l'écran de sélection de la langue.",
+    "restart_onb_confirm":"Recommencer la configuration ? Le sélecteur de langue réapparaîtra au prochain lancement. Votre progression d'écriture ne sera pas affectée.",
     diffLettersEasy: 'a-z',
     diffLettersMed: 'A-Z',
     diffWordsEasy: 'Courts',
@@ -5763,6 +5811,9 @@ const STRINGS = {
   },
 
   "ga": {
+    "restart_onb_btn":"Atosaigh ionduchtú",
+    "restart_onb_desc":"Taispeáin an piocaire teanga chéad-lainseála arís.",
+    "restart_onb_confirm":"Atosaigh an t-ionduchtú? Beidh an piocaire teanga le feiceáil arís ar an gcéad lainseáil eile. Ní bheidh tionchar ar do dhul chun cinn lámhscríbhneoireachta.",
     "headerSubtitle": "Athshlánú Lámhscríbhneoireachta",
     "exercisesTitle": "Cleachtadh Lámhscríbhneoireachta",
     "exercisesSubtitle": "Roghnaigh cineál cleachtaidh chun tosú",
@@ -6925,7 +6976,10 @@ function renderTrendChart(sessions) {
 }
 
 async function resetOnboarding() {
-  if (!confirm('Restart onboarding? The language picker will appear again on next launch. Your handwriting progress will not be affected.')) return;
+  var msg = (STRINGS[currentLang] && STRINGS[currentLang]['restart_onb_confirm'])
+    || STRINGS['en']['restart_onb_confirm']
+    || 'Restart onboarding?';
+  if (!confirm(msg)) return;
   try {
     if (typeof db !== 'undefined' && db && db.transaction) {
       const tx = db.transaction('settings', 'readwrite');
