@@ -7191,7 +7191,6 @@ async function generateProgressPDF(){
         var xPos = x;
         if(align === 'center') xPos = x - widthMm/2;
         else if(align === 'right') xPos = x - widthMm;
-        if(__rwIsRTL(lang)) xPos = (pageW - margin) - widthMm;
         try{ doc.addImage(img.dataURL, 'PNG', xPos, y - heightMm*0.85, widthMm, heightMm); }catch(e){console.warn('text image',e);}
         return y + heightMm * 0.4;
       }
@@ -7213,25 +7212,31 @@ async function generateProgressPDF(){
       var S = STRINGS[lang] || STRINGS.en;
       function tt(k){return S[k] || STRINGS.en[k] || k;}
       var dateLocale = lang==='en' ? 'en-GB' : lang.replace('_','-');
+      var isRTL = __rwIsRTL(lang);
+      var leadX = isRTL ? (pageW - margin) : margin;
+      var leadAlign = isRTL ? 'right' : 'left';
+      var blockInnerLead = isRTL ? (pageW - margin - 4) : (margin + 4);
 
       if(!isFirstSection) doc.addPage();
       var y = 22;
 
       if(isFirstSection && lang !== 'en'){
-        drawText(tt('pdf_scroll_english') + ' ↓', margin, y, {lang:lang, size:9, colour:MUTED});
+        drawText(tt('pdf_scroll_english') + ' ↓', leadX, y, {lang:lang, size:9, colour:MUTED, align:leadAlign});
         y += 8;
       }
 
+      // Logo — mirrored for RTL
       if(isFirstSection && window.__rwLogoDataURL){
-        try{ doc.addImage(window.__rwLogoDataURL,'PNG', pageW-margin-18, y-6, 18, 18); }catch(e){}
+        var logoX = isRTL ? margin : (pageW - margin - 18);
+        try{ doc.addImage(window.__rwLogoDataURL,'PNG', logoX, y-6, 18, 18); }catch(e){}
       }
 
-      drawText('ReWrite', margin, y, {lang:lang, size:22, weight:'bold', colour:MOSS});
+      drawText('ReWrite', leadX, y, {lang:'en', size:22, weight:'bold', colour:MOSS, align:leadAlign});
       y += 9;
       var sub = tt('pdf_title').replace(/ReWrite\s*/i,'').trim() || 'Progress Report';
-      drawText(sub, margin, y, {lang:lang, size:13, colour:INK});
+      drawText(sub, leadX, y, {lang:lang, size:13, colour:INK, align:leadAlign});
       y += 6;
-      drawText(new Date().toLocaleDateString(dateLocale,{day:'numeric',month:'long',year:'numeric'}), margin, y, {lang:lang, size:9, colour:MUTED});
+      drawText(new Date().toLocaleDateString(dateLocale,{day:'numeric',month:'long',year:'numeric'}), leadX, y, {lang:lang, size:9, colour:MUTED, align:leadAlign});
       y += 10;
 
       // Patient block
@@ -7239,8 +7244,8 @@ async function generateProgressPDF(){
         doc.setFillColor(BG_SOFT[0],BG_SOFT[1],BG_SOFT[2]);
         doc.setDrawColor(RULE[0],RULE[1],RULE[2]);
         doc.roundedRect(margin, y, pageW-2*margin, 22, 2, 2, 'FD');
-        drawText(tt('pdf_patient').toUpperCase(), margin+4, y+5, {lang:lang, size:7, colour:MUTED});
-        if(fullName) drawText(fullName, margin+4, y+12, {lang:'en', size:13, weight:'bold', colour:INK});
+        drawText(tt('pdf_patient').toUpperCase(), blockInnerLead, y+5, {lang:lang, size:7, colour:MUTED, align:leadAlign});
+        if(fullName) drawText(fullName, blockInnerLead, y+12, {lang:'en', size:13, weight:'bold', colour:INK, align:leadAlign});
         var meta = [];
         if(pd.dob) meta.push(tt('pdf_dob')+': '+new Date(pd.dob).toLocaleDateString(dateLocale,{day:'numeric',month:'long',year:'numeric'}));
         if(pd.patientid){
@@ -7248,14 +7253,14 @@ async function generateProgressPDF(){
           var label = isUK ? tt('pd_patientid').replace(/\s*\(.*\)$/,'') : tt('pd_patientid_intl').replace(/\s*\(.*\)$/,'');
           meta.push(label+': '+pd.patientid);
         }
-        if(meta.length) drawText(meta.join('   ·   '), margin+4, y+18, {lang:lang, size:9, colour:[68,68,68]});
+        if(meta.length) drawText(meta.join('   ·   '), blockInnerLead, y+18, {lang:lang, size:9, colour:[68,68,68], align:leadAlign});
         y += 26;
       }
 
       // Clinician
       if(pd.clinician || pd.clinicianEmail){
-        drawText(tt('pdf_clinician')+':', margin, y, {lang:lang, size:9, colour:MUTED});
-        drawText([pd.clinician, pd.clinicianEmail].filter(Boolean).join(' · '), margin+22, y, {lang:'en', size:9, colour:INK});
+        var clinText = [pd.clinician, pd.clinicianEmail].filter(Boolean).join(' · ');
+        drawText(tt('pdf_clinician')+': '+clinText, leadX, y, {lang:lang, size:9, colour:INK, align:leadAlign});
         y += 6;
       }
 
@@ -7285,7 +7290,7 @@ async function generateProgressPDF(){
       // Chart — use locale-specific capture
       var thisChart = chartByLang[lang] || chartByLang['en'];
       if(thisChart && sessions.length >= 2){
-        drawText(tt('trendChartTitle') || 'Your Progress Over Time', margin, y, {lang:lang, size:11, weight:'bold', colour:MOSS});
+        drawText(tt('trendChartTitle') || 'Your Progress Over Time', leadX, y, {lang:lang, size:11, weight:'bold', colour:MOSS, align:leadAlign});
         y += 3;
         try{
           var chartW = pageW - 2*margin;
@@ -7310,7 +7315,7 @@ async function generateProgressPDF(){
       });
 
       newPageIfNeeded(15);
-      drawText(tt('perExTitle') || 'Per-Exercise Breakdown', margin, y, {lang:lang, size:11, weight:'bold', colour:MOSS});
+      drawText(tt('perExTitle') || 'Per-Exercise Breakdown', leadX, y, {lang:lang, size:11, weight:'bold', colour:MOSS, align:leadAlign});
       y += 5;
       ['letter','word','sentence'].forEach(function(typ){
         var arr = byType[typ] || [];
@@ -7323,23 +7328,31 @@ async function generateProgressPDF(){
         doc.setDrawColor(RULE[0],RULE[1],RULE[2]);
         doc.line(margin, y, pageW-margin, y);
         y += 4;
-        drawText(label, margin, y, {lang:lang, size:10, weight:'bold', colour:INK});
-        drawText('('+arr.length+' '+(tt('exercises_count')||'exercises')+')', margin+50, y, {lang:lang, size:9, colour:MUTED});
+        var rowHead = label + '   (' + arr.length + ' ' + (tt('exercises_count')||'exercises') + ')';
+        drawText(rowHead, leadX, y, {lang:lang, size:10, weight:'bold', colour:INK, align:leadAlign});
         y += 4;
-        drawText((tt('pdf_best')||'Best')+': '+best+'%   ·   '+(tt('pdf_avg')||'Average')+': '+avg+'%', margin, y, {lang:lang, size:9, colour:[68,68,68]});
+        drawText((tt('pdf_best')||'Best')+': '+best+'%   ·   '+(tt('pdf_avg')||'Average')+': '+avg+'%', leadX, y, {lang:lang, size:9, colour:[68,68,68], align:leadAlign});
         y += 5;
       });
       y += 2;
 
-      // Sessions table
+      // Sessions table — columns mirror for RTL
       newPageIfNeeded(25);
-      drawText(tt('sessionLogTitle') || 'Session History', margin, y, {lang:lang, size:11, weight:'bold', colour:MOSS});
+      drawText(tt('sessionLogTitle') || 'Session History', leadX, y, {lang:lang, size:11, weight:'bold', colour:MOSS, align:leadAlign});
       y += 5;
+
+      var dateLeadX = isRTL ? (pageW - margin - 2) : (margin + 2);
+      var exerciseLeadX = isRTL ? (pageW - margin - 45) : (margin + 45);
+      var scoreLeadX = isRTL ? (margin + 2) : (pageW - margin - 2);
+      var scoreAlign = isRTL ? 'left' : 'right';
+      var dateAlign = isRTL ? 'right' : 'left';
+      var exerciseAlign = isRTL ? 'right' : 'left';
+
       doc.setFillColor(BG_BAND[0],BG_BAND[1],BG_BAND[2]);
       doc.rect(margin, y, pageW-2*margin, 7, 'F');
-      drawText(tt('pdf_date') || 'Date', margin+2, y+5, {lang:lang, size:9, weight:'bold', colour:INK});
-      drawText(tt('pdf_exercise') || 'Exercise', margin+45, y+5, {lang:lang, size:9, weight:'bold', colour:INK});
-      drawText(tt('pdf_avg') || 'Average', pageW-margin-2, y+5, {lang:lang, size:9, weight:'bold', colour:INK, align:'right'});
+      drawText(tt('pdf_date') || 'Date', dateLeadX, y+5, {lang:lang, size:9, weight:'bold', colour:INK, align:dateAlign});
+      drawText(tt('pdf_exercise') || 'Exercise', exerciseLeadX, y+5, {lang:lang, size:9, weight:'bold', colour:INK, align:exerciseAlign});
+      drawText(tt('pdf_avg') || 'Average', scoreLeadX, y+5, {lang:lang, size:9, weight:'bold', colour:INK, align:scoreAlign});
       y += 7;
       sessions.slice(-10).reverse().forEach(function(sn,i){
         newPageIfNeeded(8);
@@ -7349,9 +7362,9 @@ async function generateProgressPDF(){
           doc.setFillColor(BG_SOFT[0],BG_SOFT[1],BG_SOFT[2]);
           doc.rect(margin, y, pageW-2*margin, 6, 'F');
         }
-        drawText(dStr, margin+2, y+4, {lang:lang, size:9, colour:INK});
-        drawText(tt('exType_'+sn.type) || (sn.type?(sn.type.charAt(0).toUpperCase()+sn.type.slice(1)+'s'):'—'), margin+45, y+4, {lang:lang, size:9, colour:INK});
-        drawText((sn.averageScore||0)+'%', pageW-margin-2, y+4, {lang:'en', size:9, colour:INK, align:'right'});
+        drawText(dStr, dateLeadX, y+4, {lang:lang, size:9, colour:INK, align:dateAlign});
+        drawText(tt('exType_'+sn.type) || (sn.type?(sn.type.charAt(0).toUpperCase()+sn.type.slice(1)+'s'):'—'), exerciseLeadX, y+4, {lang:lang, size:9, colour:INK, align:exerciseAlign});
+        drawText((sn.averageScore||0)+'%', scoreLeadX, y+4, {lang:'en', size:9, colour:INK, align:scoreAlign});
         y += 6;
       });
       y += 4;
@@ -7361,10 +7374,10 @@ async function generateProgressPDF(){
       doc.setDrawColor(RULE[0],RULE[1],RULE[2]);
       doc.line(margin, y, pageW-margin, y);
       y += 4;
-      drawText(tt('disclaimerTitle') || 'Important', margin, y, {lang:lang, size:8, weight:'bold', colour:MUTED});
+      drawText(tt('disclaimerTitle') || 'Important', leadX, y, {lang:lang, size:8, weight:'bold', colour:MUTED, align:leadAlign});
       y += 4;
       var disclaimer = tt('aboutDisclaimerText') || 'ReWrite is a wellness support tool, not a medical device.';
-      drawText(disclaimer, margin, y, {lang:lang, size:8, colour:MUTED, maxWidth: pageW-2*margin});
+      drawText(disclaimer, leadX, y, {lang:lang, size:8, colour:MUTED, maxWidth: pageW-2*margin, align:leadAlign});
     }
 
     buildSection(currentLang, true);
