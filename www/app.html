@@ -7139,9 +7139,22 @@ async function generateProgressPDF(){
     }
     rwSavePersonalDetails();
     await __rwPreloadLogo();
-    try{if(typeof renderTrendChart==='function') renderTrendChart(sessions);}catch(e){}
-    await new Promise(function(r){setTimeout(r,100);});
-    var chartDataURL = __rwGetChartDataURL();
+
+    // Capture chart twice — once in user's language, once in English
+    var chartByLang = {};
+    try{
+      if(typeof renderTrendChart==='function'){
+        renderTrendChart(sessions, currentLang);
+        await new Promise(function(r){setTimeout(r,60);});
+        chartByLang[currentLang] = __rwGetChartDataURL();
+        if(currentLang !== 'en'){
+          renderTrendChart(sessions, 'en');
+          await new Promise(function(r){setTimeout(r,60);});
+          chartByLang['en'] = __rwGetChartDataURL();
+        }
+        renderTrendChart(sessions, currentLang); // restore on-screen state
+      }
+    }catch(e){console.warn('chart capture',e);}
 
     var pd = rwSavePersonalDetails();
     var fullName = [pd.firstname,pd.lastname].filter(Boolean).join(' ');
@@ -7269,8 +7282,9 @@ async function generateProgressPDF(){
       });
       y += kpiH + 8;
 
-      // Chart
-      if(chartDataURL && sessions.length >= 2){
+      // Chart — use locale-specific capture
+      var thisChart = chartByLang[lang] || chartByLang['en'];
+      if(thisChart && sessions.length >= 2){
         drawText(tt('trendChartTitle') || 'Your Progress Over Time', margin, y, {lang:lang, size:11, weight:'bold', colour:MOSS});
         y += 3;
         try{
@@ -7278,7 +7292,7 @@ async function generateProgressPDF(){
           var chartH = 55;
           doc.setDrawColor(RULE[0],RULE[1],RULE[2]);
           doc.rect(margin, y, chartW, chartH);
-          doc.addImage(chartDataURL, 'PNG', margin, y, chartW, chartH);
+          doc.addImage(thisChart, 'PNG', margin, y, chartW, chartH);
           y += chartH + 6;
         }catch(e){y += 3;}
       }
@@ -7342,14 +7356,15 @@ async function generateProgressPDF(){
       });
       y += 4;
 
-      // Disclaimer
-      newPageIfNeeded(25);
+      // Disclaimer — label on its own line, body below
+      newPageIfNeeded(28);
       doc.setDrawColor(RULE[0],RULE[1],RULE[2]);
       doc.line(margin, y, pageW-margin, y);
       y += 4;
-      drawText((tt('disclaimerTitle') || 'Important')+':', margin, y, {lang:lang, size:8, weight:'bold', colour:MUTED});
+      drawText(tt('disclaimerTitle') || 'Important', margin, y, {lang:lang, size:8, weight:'bold', colour:MUTED});
+      y += 4;
       var disclaimer = tt('aboutDisclaimerText') || 'ReWrite is a wellness support tool, not a medical device.';
-      drawText(disclaimer, margin+18, y, {lang:lang, size:8, colour:MUTED, maxWidth: pageW-2*margin-20});
+      drawText(disclaimer, margin, y, {lang:lang, size:8, colour:MUTED, maxWidth: pageW-2*margin});
     }
 
     buildSection(currentLang, true);
@@ -7397,11 +7412,13 @@ function rwDownloadBlob(blob, fname){
   setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
 }
 
-function renderTrendChart(sessions) {
+function renderTrendChart(sessions, forLang) {
   const canvas = document.getElementById('trendChart');
   const container = canvas.parentElement;
   const chartCard = document.getElementById('trendChartCard');
-  const chartLang = STRINGS[currentLang] || STRINGS.en;
+  const __lang = (forLang && STRINGS[forLang]) ? forLang : currentLang;
+  const chartLang = STRINGS[__lang] || STRINGS.en;
+  const __dateLocale = __lang === 'en' ? 'en-GB' : __lang.replace('_','-');
   if (sessions.length < 2) {
     chartCard.style.display = '';
     const ctx2 = canvas.getContext('2d');
@@ -7426,7 +7443,8 @@ function renderTrendChart(sessions) {
   const data = sessions.map(s => s.averageScore || 0);
   const labels = sessions.map(s => {
     const d = new Date(s.date);
-    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    try { return d.toLocaleDateString(__dateLocale, { day: 'numeric', month: 'short' }); }
+    catch(e) { return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
   });
   const maxPts = Math.min(data.length, 30);
   const pts = data.slice(-maxPts);
