@@ -7009,136 +7009,11 @@ document.addEventListener('DOMContentLoaded',function(){
   rwLoadPersonalDetails();
 });
 
-// ── PDF report generation ─────────────────────────────────────────────────────
-function rwGetTrendChartImage(){
-  try{
-    var c=document.getElementById('trendChart');
-    if(!c) return null;
-    return c.toDataURL('image/png');
-  }catch(e){return null;}
-}
+// ── PDF Report Generator (jsPDF direct + Noto Sans for Latin, canvas-image for non-Latin) ──
 
-function rwBuildReportSection(sessions, lang, isFirst){
-  var s=(window.STRINGS&&window.STRINGS[lang])||(window.STRINGS&&window.STRINGS.en)||{};
-  function tt(k){return s[k] || (window.STRINGS&&window.STRINGS.en&&window.STRINGS.en[k]) || k;}
-  var pd=rwSavePersonalDetails();
-  var fullName=[pd.firstname,pd.lastname].filter(Boolean).join(' ');
-  var total=sessions.length;
-  var html='';
-  var isRTL=['ar','he','fa','ur'].indexOf(lang)>=0;
-  var dirAttr=isRTL?' dir="rtl"':'';
+var __rwNonLatin = ['ja','ko','zh','ar','hi'];
+var __rwIsRTL = function(l){return ['ar','he','fa','ur'].indexOf(l)>=0;};
 
-  html+='<section'+dirAttr+' style="font-family:Inter,Arial,sans-serif;color:#222;padding:18mm 16mm;'+(isFirst?'':'page-break-before:always;')+'min-height:240mm;position:relative;background:#fff;">';
-
-  if(isFirst && window.__rwLogoDataURL){
-    html+='<img src="'+window.__rwLogoDataURL+'" alt="ReWrite" style="position:absolute;top:14mm;right:16mm;width:18mm;height:18mm;border-radius:4mm;"/>';
-  }
-
-  if(isFirst && lang!=='en'){
-    html+='<div style="font-size:9pt;color:#777;margin-bottom:8mm;">'+tt('pdf_scroll_english')+' ↓</div>';
-  }
-
-  html+='<div style="font-family:Georgia,serif;font-size:24pt;color:#1a4a3a;margin-bottom:2mm;font-weight:700;">'+tt('pdf_title')+'</div>';
-  html+='<div style="font-size:10pt;color:#666;margin-bottom:8mm;">'+new Date().toLocaleDateString(lang==='en'?'en-GB':lang.replace('_','-'),{day:'numeric',month:'long',year:'numeric'})+'</div>';
-
-  // Patient block
-  if(fullName||pd.dob||pd.patientid){
-    html+='<div style="border:1px solid #d4d1ca;border-radius:3mm;padding:5mm;margin-bottom:6mm;background:#faf7f0;">';
-    html+='<div style="font-size:8pt;color:#777;letter-spacing:0.5pt;text-transform:uppercase;margin-bottom:2mm;">'+tt('pdf_patient')+'</div>';
-    if(fullName) html+='<div style="font-size:14pt;font-weight:600;margin-bottom:1mm;">'+fullName+'</div>';
-    var meta=[];
-    if(pd.dob) meta.push(tt('pdf_dob')+': '+new Date(pd.dob).toLocaleDateString(lang==='en'?'en-GB':lang.replace('_','-'),{day:'numeric',month:'long',year:'numeric'}));
-    if(pd.patientid){
-      var idLabel=['en','cy','ga'].indexOf(lang)>=0?tt('pd_patientid'):tt('pd_patientid_intl');
-      meta.push(idLabel+': '+pd.patientid);
-    }
-    if(meta.length) html+='<div style="font-size:10pt;color:#444;">'+meta.join(' · ')+'</div>';
-    html+='</div>';
-  }
-
-  if(pd.clinician||pd.clinicianEmail){
-    html+='<div style="font-size:10pt;color:#444;margin-bottom:6mm;">';
-    html+='<span style="color:#777;">'+tt('pdf_clinician')+': </span>';
-    if(pd.clinician) html+=pd.clinician;
-    if(pd.clinicianEmail) html+=(pd.clinician?' · ':'')+pd.clinicianEmail;
-    html+='</div>';
-  }
-
-  // KPIs — sessions, exercises, avg, best
-  var totalSessions=total;
-  var totalEx=sessions.reduce(function(a,sn){return a+(sn.count||0);},0);
-  var allScores=sessions.reduce(function(a,sn){
-    return a.concat((sn.exercises||[]).map(function(e){return e.score;}));
-  },[]);
-  var avgScore=allScores.length?Math.round(allScores.reduce(function(a,b){return a+b;},0)/allScores.length):0;
-  var bestScore=allScores.length?Math.max.apply(null,allScores):0;
-
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:3mm;margin-bottom:6mm;">';
-  function kpi(label,val){return '<div style="border:1px solid #d4d1ca;border-radius:2mm;padding:4mm;text-align:center;background:#fff;"><div style="font-size:18pt;font-weight:700;color:#1a4a3a;">'+val+'</div><div style="font-size:7pt;color:#777;letter-spacing:0.5pt;text-transform:uppercase;margin-top:1mm;">'+label+'</div></div>';}
-  html+=kpi(tt('statSessionsLabel')||'Sessions',totalSessions);
-  html+=kpi(tt('statExercisesLabel')||'Exercises',totalEx);
-  html+=kpi(tt('statAvgLabel')||'Avg Score',avgScore?avgScore+'%':'—');
-  html+=kpi(tt('statBestLabel')||'Best Score',bestScore?bestScore+'%':'—');
-  html+='</div>';
-
-  // Chart
-  var chartImg=rwGetTrendChartImage();
-  if(chartImg && total>=2){
-    html+='<div style="margin-bottom:6mm;">';
-    html+='<div style="font-size:11pt;font-weight:600;color:#1a4a3a;margin-bottom:3mm;">'+(tt('trendChartTitle')||'Your Progress Over Time')+'</div>';
-    html+='<img src="'+chartImg+'" style="width:100%;border:1px solid #d4d1ca;border-radius:2mm;"/>';
-    html+='</div>';
-  }
-
-  // Per-exercise breakdown
-  var byType={letter:[],word:[],sentence:[]};
-  sessions.forEach(function(sn){
-    var t=sn.type || (sn.exercises&&sn.exercises[0]&&sn.exercises[0].type) || 'letter';
-    if(!byType[t]) byType[t]=[];
-    byType[t]=byType[t].concat(sn.exercises||[]);
-  });
-  html+='<div style="font-size:11pt;font-weight:600;color:#1a4a3a;margin-bottom:3mm;margin-top:4mm;">'+(tt('perExTitle')||'Per-Exercise Breakdown')+'</div>';
-  ['letter','word','sentence'].forEach(function(typ){
-    var arr=byType[typ]||[];
-    if(!arr.length) return;
-    var scores=arr.map(function(e){return e.score;});
-    var best=Math.max.apply(null,scores);
-    var avg=Math.round(scores.reduce(function(a,b){return a+b;},0)/scores.length);
-    var label=tt('exType_'+typ)|| (typ.charAt(0).toUpperCase()+typ.slice(1)+'s');
-    html+='<div style="border-top:1px solid #ede3cb;padding:3mm 0;font-size:10pt;">';
-    html+='<div style="font-weight:600;color:#222;margin-bottom:1mm;">'+label+' <span style="color:#777;font-weight:400;">('+arr.length+' '+(tt('exercises_count')||'exercises')+')</span></div>';
-    html+='<div style="color:#444;font-size:9pt;">'+(tt('pdf_best')||'Best')+': '+best+'% · '+(tt('pdf_avg')||'Average')+': '+avg+'%</div>';
-    html+='</div>';
-  });
-
-  // Recent sessions table
-  if(sessions.length){
-    html+='<div style="font-size:11pt;font-weight:600;color:#1a4a3a;margin-bottom:3mm;margin-top:5mm;">'+(tt('sessionLogTitle')||'Session History')+'</div>';
-    html+='<table style="width:100%;border-collapse:collapse;font-size:9pt;">';
-    html+='<thead><tr style="background:#ede3cb;"><th style="text-align:left;padding:2mm 3mm;">'+tt('pdf_date')+'</th><th style="text-align:left;padding:2mm 3mm;">'+tt('pdf_exercise')+'</th><th style="text-align:right;padding:2mm 3mm;">'+(tt('pdf_avg')||'Average')+'</th></tr></thead><tbody>';
-    sessions.slice(-10).reverse().forEach(function(sn,i){
-      var d=new Date(sn.date||Date.now());
-      var dateStr=d.toLocaleDateString(lang==='en'?'en-GB':lang.replace('_','-'),{day:'numeric',month:'short',year:'numeric'});
-      var typeLabel=tt('exType_'+sn.type)|| (sn.type?(sn.type.charAt(0).toUpperCase()+sn.type.slice(1)+'s'):'—');
-      html+='<tr style="border-bottom:1px solid #ede3cb;'+(i%2?'background:#faf7f0;':'')+'">';
-      html+='<td style="padding:2mm 3mm;">'+dateStr+'</td>';
-      html+='<td style="padding:2mm 3mm;">'+typeLabel+'</td>';
-      html+='<td style="padding:2mm 3mm;text-align:right;font-variant-numeric:tabular-nums;">'+(sn.averageScore||0)+'%</td>';
-      html+='</tr>';
-    });
-    html+='</tbody></table>';
-  }
-
-  // Footer disclaimer
-  html+='<div style="margin-top:8mm;padding-top:4mm;border-top:1px solid #d4d1ca;font-size:8pt;color:#777;line-height:1.4;">';
-  html+='<strong>'+(tt('disclaimerTitle')||'Important')+':</strong> '+(tt('aboutDisclaimerText')||'ReWrite is a wellness support tool, not a medical device. It is designed to supplement — not replace — occupational therapy. Always follow the guidance of your therapist or care team.');
-  html+='</div>';
-
-  html+='</section>';
-  return html;
-}
-
-// Preload ReWrite logo as data URL for reliable PDF embed
 function __rwPreloadLogo(){
   return new Promise(function(resolve){
     if(window.__rwLogoDataURL) return resolve(window.__rwLogoDataURL);
@@ -7158,105 +7033,368 @@ function __rwPreloadLogo(){
   });
 }
 
-async function generateProgressPDF(){
-  if(typeof html2pdf==='undefined'){alert('PDF library not loaded');return;}
-  var btn=document.getElementById('generatePdfBtn');
-  var lbl=document.getElementById('generatePdfBtnLabel');
-  var origLabel=lbl?lbl.textContent:'';
-  var s=(window.STRINGS&&window.STRINGS[currentLang])||(window.STRINGS&&window.STRINGS.en)||{};
-  if(lbl) lbl.textContent=(s.pdf_generating||'Generating')+'…';
-  if(btn) btn.disabled=true;
+function __rwGetChartDataURL(){
+  try{
+    var c=document.getElementById('trendChart');
+    if(!c || c.width===0 || c.height===0) return null;
+    return c.toDataURL('image/png');
+  }catch(e){return null;}
+}
 
-  var container=null, overlay=null;
-  function cleanup(){
-    try{document.body.removeChild(container);}catch(e){}
-    try{document.body.removeChild(overlay);}catch(e){}
-    if(lbl) lbl.textContent=origLabel;
-    if(btn) btn.disabled=false;
+function __rwRegisterNotoSans(doc){
+  if(!window.__notoSansFonts) return false;
+  try{
+    if(!doc.__rwNotoRegistered){
+      doc.addFileToVFS('NotoSans-Regular.ttf', window.__notoSansFonts.regular);
+      doc.addFont('NotoSans-Regular.ttf', 'NotoSans', 'normal');
+      doc.addFileToVFS('NotoSans-Bold.ttf', window.__notoSansFonts.bold);
+      doc.addFont('NotoSans-Bold.ttf', 'NotoSans', 'bold');
+      doc.__rwNotoRegistered = true;
+    }
+    return true;
+  }catch(e){console.warn('Noto Sans register failed',e);return false;}
+}
+
+function __rwTextToImage(text, opts){
+  opts = opts || {};
+  var fontSize = opts.fontSize || 10;
+  var color = opts.color || '#222222';
+  var weight = opts.weight || 'normal';
+  var maxWidthPt = opts.maxWidthPt || 178;
+  var align = opts.align || 'left';
+  var rtl = opts.rtl || false;
+  var lang = opts.lang || 'en';
+  var scale = 3;
+  var fontFamily = '-apple-system, "Apple SD Gothic Neo", "Hiragino Sans", "PingFang SC", "Noto Sans CJK SC", "Noto Sans Arabic", "Noto Sans Devanagari", "Helvetica Neue", Arial, sans-serif';
+
+  var measureCanvas = document.createElement('canvas');
+  var mctx = measureCanvas.getContext('2d');
+  var fontSizePx = fontSize * 1.333;
+  mctx.font = weight + ' ' + fontSizePx + 'px ' + fontFamily;
+  var maxWidthPx = maxWidthPt * (96/72);
+
+  var words = (['ja','ko','zh'].indexOf(lang)>=0) ? text.split('') : text.split(/(\s+)/);
+  var lines = [];
+  var currentLine = '';
+  for(var i=0;i<words.length;i++){
+    var test = currentLine + words[i];
+    if(mctx.measureText(test).width > maxWidthPx && currentLine.length > 0){
+      lines.push(currentLine);
+      currentLine = (['ja','ko','zh'].indexOf(lang)>=0 || /^\s/.test(words[i])) ? words[i].replace(/^\s+/,'') : words[i];
+    } else {
+      currentLine = test;
+    }
+  }
+  if(currentLine.length) lines.push(currentLine);
+
+  var widestLine = 0;
+  for(var li=0;li<lines.length;li++){
+    var w = mctx.measureText(lines[li]).width;
+    if(w > widestLine) widestLine = w;
+  }
+  if(widestLine === 0) widestLine = maxWidthPx;
+
+  var lineHeightPx = Math.ceil(fontSizePx * 1.35);
+  var totalHeightPx = lineHeightPx * lines.length + 4;
+
+  var canvas = document.createElement('canvas');
+  canvas.width = Math.ceil(widestLine * scale) + 8;
+  canvas.height = Math.ceil(totalHeightPx * scale);
+  var ctx = canvas.getContext('2d');
+  ctx.scale(scale, scale);
+  ctx.font = weight + ' ' + fontSizePx + 'px ' + fontFamily;
+  ctx.fillStyle = color;
+  ctx.textBaseline = 'top';
+
+  for(var j=0;j<lines.length;j++){
+    if(rtl) { ctx.textAlign='right'; ctx.fillText(lines[j], widestLine, j*lineHeightPx); }
+    else if(align==='center') { ctx.textAlign='center'; ctx.fillText(lines[j], widestLine/2, j*lineHeightPx); }
+    else { ctx.textAlign='left'; ctx.fillText(lines[j], 0, j*lineHeightPx); }
   }
 
+  return {
+    dataURL: canvas.toDataURL('image/png'),
+    widthPt: widestLine / (96/72),
+    heightPt: totalHeightPx / (96/72),
+    lines: lines.length
+  };
+}
+
+async function generateProgressPDF(){
+  if(!window.jspdf || !window.jspdf.jsPDF){alert('PDF library not loaded');return;}
+  var btn=document.getElementById('generatePdfBtn');
+  var lbl=document.getElementById('generatePdfBtnLabel');
+  var origLabel = lbl ? lbl.textContent : '';
+  var s=(window.STRINGS&&window.STRINGS[currentLang])||(window.STRINGS&&window.STRINGS.en)||{};
+  if(lbl) lbl.textContent = (s.pdf_generating||'Generating')+'…';
+  if(btn) btn.disabled=true;
+
   try{
-    var sessions=await getAllSessions();
-    if(!sessions||!sessions.length){
-      alert(s.pdf_no_sessions||'No sessions yet — start practising to generate a report.');
-      cleanup();
+    var sessions = await getAllSessions();
+    if(!sessions || !sessions.length){
+      alert(s.pdf_no_sessions || 'No sessions yet — start practising to generate a report.');
+      if(lbl) lbl.textContent = origLabel;
+      if(btn) btn.disabled = false;
       return;
     }
     rwSavePersonalDetails();
     await __rwPreloadLogo();
+    try{if(typeof renderTrendChart==='function') renderTrendChart(sessions);}catch(e){}
+    await new Promise(function(r){setTimeout(r,100);});
+    var chartDataURL = __rwGetChartDataURL();
 
-    // Re-render trend chart so its pixel buffer is fresh
-    try{if(typeof renderTrendChart==='function') renderTrendChart(sessions);}catch(e){console.warn('trend chart pre-render',e);}
+    var pd = rwSavePersonalDetails();
+    var fullName = [pd.firstname,pd.lastname].filter(Boolean).join(' ');
+    var dateStr = new Date().toISOString().slice(0,10);
+    var fname = 'ReWrite-Progress-'+(fullName?fullName.replace(/[^A-Za-z0-9]+/g,'-')+'-':'')+dateStr+'.pdf';
 
-    // Loading overlay shown to user while PDF builds beneath
-    overlay=document.createElement('div');
-    overlay.id='pdfLoadingOverlay';
-    overlay.style.cssText='position:fixed;inset:0;background:rgba(247,243,232,0.96);z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Inter,Arial,sans-serif;color:#1a4a3a;';
-    overlay.innerHTML='<div style="font-size:18px;font-weight:600;margin-bottom:10px">'+(s.pdf_generating||'Generating')+'…</div><div style="font-size:13px;color:#777">Preparing your progress report</div>';
-    document.body.appendChild(overlay);
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF({unit:'mm', format:'a4', orientation:'portrait', compress:true});
+    var hasNoto = __rwRegisterNotoSans(doc);
+    var pageW = doc.internal.pageSize.getWidth();
+    var pageH = doc.internal.pageSize.getHeight();
+    var margin = 16;
 
-    // Container ON-SCREEN at full A4 width but BENEATH the overlay
-    container=document.createElement('div');
-    container.id='pdfReportContainer';
-    container.style.cssText='position:fixed;left:0;top:0;width:794px;background:#ffffff;z-index:2147483646;color:#222;';
-    container.innerHTML = rwBuildReportSection(sessions, currentLang, true);
-    if(currentLang!=='en'){
-      container.innerHTML += rwBuildReportSection(sessions, 'en', false);
+    var MOSS=[26,74,58], INK=[34,34,34], MUTED=[119,119,119], RULE=[212,209,202], BG_SOFT=[250,247,240], BG_BAND=[237,227,203];
+
+    function drawText(text, x, y, opts){
+      opts = opts || {};
+      var lang = opts.lang || 'en';
+      var size = opts.size || 10;
+      var weight = opts.weight || 'normal';
+      var colour = opts.colour || INK;
+      var align = opts.align || 'left';
+      var maxWidth = opts.maxWidth || (pageW - 2*margin);
+
+      if(__rwNonLatin.indexOf(lang) >= 0){
+        var hex = '#' + colour.map(function(c){return ('0'+c.toString(16)).slice(-2);}).join('');
+        var img = __rwTextToImage(text, {
+          fontSize: size, color: hex, weight: weight,
+          maxWidthPt: maxWidth * (72/25.4),
+          align: align, rtl: __rwIsRTL(lang), lang: lang
+        });
+        var widthMm = img.widthPt * (25.4/72);
+        var heightMm = img.heightPt * (25.4/72);
+        var xPos = x;
+        if(align === 'center') xPos = x - widthMm/2;
+        else if(align === 'right') xPos = x - widthMm;
+        if(__rwIsRTL(lang)) xPos = (pageW - margin) - widthMm;
+        try{ doc.addImage(img.dataURL, 'PNG', xPos, y - heightMm*0.85, widthMm, heightMm); }catch(e){console.warn('text image',e);}
+        return y + heightMm * 0.4;
+      }
+
+      var fontName = hasNoto ? 'NotoSans' : 'helvetica';
+      doc.setFont(fontName, weight);
+      doc.setFontSize(size);
+      doc.setTextColor(colour[0],colour[1],colour[2]);
+      if(maxWidth && align !== 'center' && align !== 'right'){
+        var split = doc.splitTextToSize(text, maxWidth);
+        doc.text(split, x, y, {align: align});
+        return y + (split.length * size * 0.45);
+      }
+      doc.text(text, x, y, {align: align});
+      return y + size * 0.45;
     }
-    document.body.appendChild(container);
-    await new Promise(function(r){setTimeout(r,150);});
 
-    var pd=rwSavePersonalDetails();
-    var fullName=[pd.firstname,pd.lastname].filter(Boolean).join(' ');
-    var dateStr=new Date().toISOString().slice(0,10);
-    var fname='ReWrite-Progress-'+(fullName?fullName.replace(/[^A-Za-z0-9]+/g,'-')+'-':'')+dateStr+'.pdf';
+    function buildSection(lang, isFirstSection){
+      var S = STRINGS[lang] || STRINGS.en;
+      function tt(k){return S[k] || STRINGS.en[k] || k;}
+      var dateLocale = lang==='en' ? 'en-GB' : lang.replace('_','-');
 
-    var opt={
-      margin:0,
-      filename:fname,
-      image:{type:'jpeg',quality:0.95},
-      html2canvas:{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',logging:false,windowWidth:794,scrollX:0,scrollY:0},
-      jsPDF:{unit:'mm',format:'a4',orientation:'portrait',compress:true},
-      pagebreak:{mode:['css','legacy']}
-    };
+      if(!isFirstSection) doc.addPage();
+      var y = 22;
 
-    var blob = await html2pdf().from(container).set(opt).output('blob');
-    cleanup();
+      if(isFirstSection && lang !== 'en'){
+        drawText(tt('pdf_scroll_english') + ' ↓', margin, y, {lang:lang, size:9, colour:MUTED});
+        y += 8;
+      }
+
+      if(isFirstSection && window.__rwLogoDataURL){
+        try{ doc.addImage(window.__rwLogoDataURL,'PNG', pageW-margin-18, y-6, 18, 18); }catch(e){}
+      }
+
+      drawText('ReWrite', margin, y, {lang:lang, size:22, weight:'bold', colour:MOSS});
+      y += 9;
+      var sub = tt('pdf_title').replace(/ReWrite\s*/i,'').trim() || 'Progress Report';
+      drawText(sub, margin, y, {lang:lang, size:13, colour:INK});
+      y += 6;
+      drawText(new Date().toLocaleDateString(dateLocale,{day:'numeric',month:'long',year:'numeric'}), margin, y, {lang:lang, size:9, colour:MUTED});
+      y += 10;
+
+      // Patient block
+      if(fullName || pd.dob || pd.patientid){
+        doc.setFillColor(BG_SOFT[0],BG_SOFT[1],BG_SOFT[2]);
+        doc.setDrawColor(RULE[0],RULE[1],RULE[2]);
+        doc.roundedRect(margin, y, pageW-2*margin, 22, 2, 2, 'FD');
+        drawText(tt('pdf_patient').toUpperCase(), margin+4, y+5, {lang:lang, size:7, colour:MUTED});
+        if(fullName) drawText(fullName, margin+4, y+12, {lang:'en', size:13, weight:'bold', colour:INK});
+        var meta = [];
+        if(pd.dob) meta.push(tt('pdf_dob')+': '+new Date(pd.dob).toLocaleDateString(dateLocale,{day:'numeric',month:'long',year:'numeric'}));
+        if(pd.patientid){
+          var isUK = ['en','cy','ga'].indexOf(lang)>=0;
+          var label = isUK ? tt('pd_patientid').replace(/\s*\(.*\)$/,'') : tt('pd_patientid_intl').replace(/\s*\(.*\)$/,'');
+          meta.push(label+': '+pd.patientid);
+        }
+        if(meta.length) drawText(meta.join('   ·   '), margin+4, y+18, {lang:lang, size:9, colour:[68,68,68]});
+        y += 26;
+      }
+
+      // Clinician
+      if(pd.clinician || pd.clinicianEmail){
+        drawText(tt('pdf_clinician')+':', margin, y, {lang:lang, size:9, colour:MUTED});
+        drawText([pd.clinician, pd.clinicianEmail].filter(Boolean).join(' · '), margin+22, y, {lang:'en', size:9, colour:INK});
+        y += 6;
+      }
+
+      // KPIs
+      var totalSessions = sessions.length;
+      var totalEx = sessions.reduce(function(a,sn){return a+(sn.count||0);},0);
+      var allScores = sessions.reduce(function(a,sn){return a.concat((sn.exercises||[]).map(function(e){return e.score;}));},[]);
+      var avgScore = allScores.length ? Math.round(allScores.reduce(function(a,b){return a+b;},0)/allScores.length) : 0;
+      var bestScore = allScores.length ? Math.max.apply(null,allScores) : 0;
+      var kpis = [
+        {label: tt('statSessionsLabel') || 'Sessions', value: String(totalSessions)},
+        {label: tt('statExercisesLabel') || 'Exercises', value: String(totalEx)},
+        {label: tt('statAvgLabel') || 'Avg Score', value: avgScore ? avgScore+'%' : '—'},
+        {label: tt('statBestLabel') || 'Best Score', value: bestScore ? bestScore+'%' : '—'}
+      ];
+      var kpiW = (pageW-2*margin-9)/4, kpiH = 22;
+      kpis.forEach(function(k,i){
+        var kx = margin + i*(kpiW+3);
+        doc.setDrawColor(RULE[0],RULE[1],RULE[2]);
+        doc.setFillColor(255,255,255);
+        doc.roundedRect(kx, y, kpiW, kpiH, 1.5, 1.5, 'FD');
+        drawText(k.value, kx+kpiW/2, y+9, {lang:'en', size:16, weight:'bold', colour:MOSS, align:'center'});
+        drawText(k.label.toUpperCase(), kx+kpiW/2, y+18, {lang:lang, size:6, colour:MUTED, align:'center', maxWidth:kpiW-2});
+      });
+      y += kpiH + 8;
+
+      // Chart
+      if(chartDataURL && sessions.length >= 2){
+        drawText(tt('trendChartTitle') || 'Your Progress Over Time', margin, y, {lang:lang, size:11, weight:'bold', colour:MOSS});
+        y += 3;
+        try{
+          var chartW = pageW - 2*margin;
+          var chartH = 55;
+          doc.setDrawColor(RULE[0],RULE[1],RULE[2]);
+          doc.rect(margin, y, chartW, chartH);
+          doc.addImage(chartDataURL, 'PNG', margin, y, chartW, chartH);
+          y += chartH + 6;
+        }catch(e){y += 3;}
+      }
+
+      function newPageIfNeeded(needed){
+        if(y + needed > pageH - 25){ doc.addPage(); y = 22; }
+      }
+
+      // Per-exercise breakdown
+      var byType = {letter:[], word:[], sentence:[]};
+      sessions.forEach(function(sn){
+        var ty = sn.type || (sn.exercises&&sn.exercises[0]&&sn.exercises[0].type) || 'letter';
+        if(!byType[ty]) byType[ty] = [];
+        byType[ty] = byType[ty].concat(sn.exercises||[]);
+      });
+
+      newPageIfNeeded(15);
+      drawText(tt('perExTitle') || 'Per-Exercise Breakdown', margin, y, {lang:lang, size:11, weight:'bold', colour:MOSS});
+      y += 5;
+      ['letter','word','sentence'].forEach(function(typ){
+        var arr = byType[typ] || [];
+        if(!arr.length) return;
+        var scores = arr.map(function(e){return e.score;});
+        var best = Math.max.apply(null, scores);
+        var avg = Math.round(scores.reduce(function(a,b){return a+b;},0)/scores.length);
+        var label = tt('exType_'+typ) || (typ.charAt(0).toUpperCase()+typ.slice(1)+'s');
+        newPageIfNeeded(12);
+        doc.setDrawColor(RULE[0],RULE[1],RULE[2]);
+        doc.line(margin, y, pageW-margin, y);
+        y += 4;
+        drawText(label, margin, y, {lang:lang, size:10, weight:'bold', colour:INK});
+        drawText('('+arr.length+' '+(tt('exercises_count')||'exercises')+')', margin+50, y, {lang:lang, size:9, colour:MUTED});
+        y += 4;
+        drawText((tt('pdf_best')||'Best')+': '+best+'%   ·   '+(tt('pdf_avg')||'Average')+': '+avg+'%', margin, y, {lang:lang, size:9, colour:[68,68,68]});
+        y += 5;
+      });
+      y += 2;
+
+      // Sessions table
+      newPageIfNeeded(25);
+      drawText(tt('sessionLogTitle') || 'Session History', margin, y, {lang:lang, size:11, weight:'bold', colour:MOSS});
+      y += 5;
+      doc.setFillColor(BG_BAND[0],BG_BAND[1],BG_BAND[2]);
+      doc.rect(margin, y, pageW-2*margin, 7, 'F');
+      drawText(tt('pdf_date') || 'Date', margin+2, y+5, {lang:lang, size:9, weight:'bold', colour:INK});
+      drawText(tt('pdf_exercise') || 'Exercise', margin+45, y+5, {lang:lang, size:9, weight:'bold', colour:INK});
+      drawText(tt('pdf_avg') || 'Average', pageW-margin-2, y+5, {lang:lang, size:9, weight:'bold', colour:INK, align:'right'});
+      y += 7;
+      sessions.slice(-10).reverse().forEach(function(sn,i){
+        newPageIfNeeded(8);
+        var d = new Date(sn.date || Date.now());
+        var dStr = d.toLocaleDateString(dateLocale,{day:'numeric',month:'short',year:'numeric'});
+        if(i % 2){
+          doc.setFillColor(BG_SOFT[0],BG_SOFT[1],BG_SOFT[2]);
+          doc.rect(margin, y, pageW-2*margin, 6, 'F');
+        }
+        drawText(dStr, margin+2, y+4, {lang:lang, size:9, colour:INK});
+        drawText(tt('exType_'+sn.type) || (sn.type?(sn.type.charAt(0).toUpperCase()+sn.type.slice(1)+'s'):'—'), margin+45, y+4, {lang:lang, size:9, colour:INK});
+        drawText((sn.averageScore||0)+'%', pageW-margin-2, y+4, {lang:'en', size:9, colour:INK, align:'right'});
+        y += 6;
+      });
+      y += 4;
+
+      // Disclaimer
+      newPageIfNeeded(25);
+      doc.setDrawColor(RULE[0],RULE[1],RULE[2]);
+      doc.line(margin, y, pageW-margin, y);
+      y += 4;
+      drawText((tt('disclaimerTitle') || 'Important')+':', margin, y, {lang:lang, size:8, weight:'bold', colour:MUTED});
+      var disclaimer = tt('aboutDisclaimerText') || 'ReWrite is a wellness support tool, not a medical device.';
+      drawText(disclaimer, margin+18, y, {lang:lang, size:8, colour:MUTED, maxWidth: pageW-2*margin-20});
+    }
+
+    buildSection(currentLang, true);
+    if(currentLang !== 'en') buildSection('en', false);
+
+    var blob = doc.output('blob');
+    if(lbl) lbl.textContent = origLabel;
+    if(btn) btn.disabled = false;
+
     if(!blob || blob.size < 1000){
-      alert('PDF was empty (size '+(blob?blob.size:0)+' bytes). Please try again or contact support.');
+      alert('PDF was empty (size '+(blob?blob.size:0)+' bytes).');
       return;
     }
 
     if(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem && window.Capacitor.Plugins.Share){
-      var FS=window.Capacitor.Plugins.Filesystem;
-      var SH=window.Capacitor.Plugins.Share;
-      var reader=new FileReader();
-      reader.onloadend=function(){
-        var base64=reader.result.split(',')[1];
-        FS.writeFile({path:fname,data:base64,directory:'CACHE',recursive:true}).then(function(r){
-          SH.share({title:s.pdf_share_title||'ReWrite Progress Report',url:r.uri,dialogTitle:s.pdf_share_title||'ReWrite Progress Report'}).catch(function(e){console.warn(e);});
+      var FS = window.Capacitor.Plugins.Filesystem;
+      var SH = window.Capacitor.Plugins.Share;
+      var reader = new FileReader();
+      reader.onloadend = function(){
+        var base64 = reader.result.split(',')[1];
+        FS.writeFile({path:fname, data:base64, directory:'CACHE', recursive:true}).then(function(r){
+          SH.share({title:s.pdf_share_title||'ReWrite Progress Report', url:r.uri, dialogTitle:s.pdf_share_title||'ReWrite Progress Report'}).catch(function(e){console.warn(e);});
         }).catch(function(e){
           console.warn('FS write',e);
-          rwDownloadBlob(blob,fname);
+          rwDownloadBlob(blob, fname);
         });
       };
       reader.readAsDataURL(blob);
     } else {
-      rwDownloadBlob(blob,fname);
+      rwDownloadBlob(blob, fname);
     }
-  }catch(err){
-    console.error('PDF gen failed',err);
-    cleanup();
-    alert((s.pdf_error||'Could not generate the PDF.')+'\n\n'+(err&&err.message?err.message:String(err)));
+  } catch(err){
+    console.error('PDF gen failed', err);
+    if(lbl) lbl.textContent = origLabel;
+    if(btn) btn.disabled = false;
+    alert((s.pdf_error || 'Could not generate the PDF.') + '\n\n' + (err && err.message ? err.message : String(err)));
   }
 }
 
-function rwDownloadBlob(blob,fname){
-  var a=document.createElement('a');
-  var url=URL.createObjectURL(blob);
-  a.href=url; a.download=fname;
+function rwDownloadBlob(blob, fname){
+  var a = document.createElement('a');
+  var url = URL.createObjectURL(blob);
+  a.href = url; a.download = fname;
   document.body.appendChild(a); a.click();
-  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
 }
 
 function renderTrendChart(sessions) {
@@ -8211,8 +8349,10 @@ if (document.readyState === 'loading') {
 })();
 </script>
 
-<!-- PDF generation library (html2pdf.js — bundles html2canvas + jsPDF) -->
+<!-- PDF generation library (html2pdf.js — we only use the jsPDF inside it) -->
 <script src="./lib/html2pdf.bundle.min.js"></script>
+<!-- Noto Sans Regular + Bold base64 — covers all Latin-script locales -->
+<script src="./lib/noto-sans-fonts.js"></script>
 
 </body>
 </html>
