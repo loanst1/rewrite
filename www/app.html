@@ -7030,8 +7030,8 @@ function rwBuildReportSection(sessions, lang, isFirst){
 
   html+='<section'+dirAttr+' style="font-family:Inter,Arial,sans-serif;color:#222;padding:18mm 16mm;'+(isFirst?'':'page-break-before:always;')+'min-height:240mm;position:relative;background:#fff;">';
 
-  if(isFirst){
-    html+='<img src="./icons/icon-192x192.png" alt="ReWrite" style="position:absolute;top:14mm;right:16mm;width:18mm;height:18mm;border-radius:4mm;"/>';
+  if(isFirst && window.__rwLogoDataURL){
+    html+='<img src="'+window.__rwLogoDataURL+'" alt="ReWrite" style="position:absolute;top:14mm;right:16mm;width:18mm;height:18mm;border-radius:4mm;"/>';
   }
 
   if(isFirst && lang!=='en'){
@@ -7138,6 +7138,26 @@ function rwBuildReportSection(sessions, lang, isFirst){
   return html;
 }
 
+// Preload ReWrite logo as data URL for reliable PDF embed
+function __rwPreloadLogo(){
+  return new Promise(function(resolve){
+    if(window.__rwLogoDataURL) return resolve(window.__rwLogoDataURL);
+    var img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=function(){
+      try{
+        var c=document.createElement('canvas');
+        c.width=img.width; c.height=img.height;
+        c.getContext('2d').drawImage(img,0,0);
+        window.__rwLogoDataURL=c.toDataURL('image/png');
+      }catch(e){window.__rwLogoDataURL=null;}
+      resolve(window.__rwLogoDataURL);
+    };
+    img.onerror=function(){resolve(null);};
+    img.src='./icons/icon-192x192.png';
+  });
+}
+
 async function generateProgressPDF(){
   if(typeof html2pdf==='undefined'){alert('PDF library not loaded');return;}
   var btn=document.getElementById('generatePdfBtn');
@@ -7156,14 +7176,17 @@ async function generateProgressPDF(){
       return;
     }
     rwSavePersonalDetails();
+    await __rwPreloadLogo();
 
     var container=document.createElement('div');
-    container.style.cssText='position:fixed;top:-9999px;left:-9999px;width:210mm;background:#fff;';
+    container.id='pdfReportContainer';
+    container.style.cssText='position:absolute;left:0;top:0;width:794px;background:#ffffff;opacity:0.01;pointer-events:none;z-index:-1;overflow:hidden;';
     container.innerHTML += rwBuildReportSection(sessions, currentLang, true);
     if(currentLang!=='en'){
       container.innerHTML += rwBuildReportSection(sessions, 'en', false);
     }
     document.body.appendChild(container);
+    await new Promise(function(r){requestAnimationFrame(function(){requestAnimationFrame(r);});});
 
     var pd=rwSavePersonalDetails();
     var fullName=[pd.firstname,pd.lastname].filter(Boolean).join(' ');
@@ -7174,7 +7197,7 @@ async function generateProgressPDF(){
       margin:0,
       filename:fname,
       image:{type:'jpeg',quality:0.95},
-      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
+      html2canvas:{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',logging:false,windowWidth:794},
       jsPDF:{unit:'mm',format:'a4',orientation:'portrait',compress:true},
       pagebreak:{mode:['css','legacy']}
     };
