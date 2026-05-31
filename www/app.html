@@ -860,10 +860,10 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
         <div class="setting-desc" id="setPenColorDesc">Choose your writing pen colour</div>
       </div>
       <div class="pen-color-swatches">
-        <button type="button" class="pen-color-swatch" data-color="#2a6a4a" style="background:#2a6a4a" onclick="setPenColor('#2a6a4a')" aria-label="Dark green"></button>
-        <button type="button" class="pen-color-swatch" data-color="#1a1a1a" style="background:#1a1a1a" onclick="setPenColor('#1a1a1a')" aria-label="Black"></button>
-        <button type="button" class="pen-color-swatch" data-color="#1d3a8a" style="background:#1d3a8a" onclick="setPenColor('#1d3a8a')" aria-label="Dark blue"></button>
-        <button type="button" class="pen-color-swatch" data-color="#8a2a2a" style="background:#8a2a2a" onclick="setPenColor('#8a2a2a')" aria-label="Dark red"></button>
+        <button type="button" id="penSwatchDarkGreen" class="pen-color-swatch" data-color="#2a6a4a" style="background:#2a6a4a" onclick="setPenColor('#2a6a4a')" aria-label="Dark green"></button>
+        <button type="button" id="penSwatchBlack" class="pen-color-swatch" data-color="#1a1a1a" style="background:#1a1a1a" onclick="setPenColor('#1a1a1a')" aria-label="Black"></button>
+        <button type="button" id="penSwatchDarkBlue" class="pen-color-swatch" data-color="#1d3a8a" style="background:#1d3a8a" onclick="setPenColor('#1d3a8a')" aria-label="Dark blue"></button>
+        <button type="button" id="penSwatchDarkRed" class="pen-color-swatch" data-color="#8a2a2a" style="background:#8a2a2a" onclick="setPenColor('#8a2a2a')" aria-label="Dark red"></button>
       </div>
     </div>
     <div class="setting-row">
@@ -4018,6 +4018,10 @@ function toggleSounds() {
 // ══════════════ LANGUAGE ══════════════
 const STRINGS = {
   en: {
+    "penColorDarkGreen":"Dark green",
+    "penColorBlack":"Black",
+    "penColorDarkBlue":"Dark blue",
+    "penColorDarkRed":"Dark red",
     "restart_onb_btn":"Restart onboarding",
     "restart_onb_desc":"Show the first-launch language picker again.",
     "restart_onb_confirm":"Restart onboarding? The language picker will appear again on next launch. Your handwriting progress will not be affected.",
@@ -4136,6 +4140,10 @@ const STRINGS = {
     progressMoreOther: "{count} more exercises available — try them on the Exercises tab",
   },
   es: {
+    "penColorDarkGreen":"Verde oscuro",
+    "penColorBlack":"Negro",
+    "penColorDarkBlue":"Azul oscuro",
+    "penColorDarkRed":"Rojo oscuro",
     "restart_onb_btn":"Reiniciar configuración inicial",
     "restart_onb_desc":"Volver a mostrar el selector de idioma inicial.",
     "restart_onb_confirm":"¿Reiniciar la configuración inicial? El selector de idioma volverá a aparecer en el próximo inicio. Tu progreso de escritura no se verá afectado.",
@@ -4244,6 +4252,10 @@ const STRINGS = {
     progressMoreOther: "{count} ejercicios más disponibles: pruébalos en la pestaña Ejercicios",
   },
   fr: {
+    "penColorDarkGreen":"Vert foncé",
+    "penColorBlack":"Noir",
+    "penColorDarkBlue":"Bleu foncé",
+    "penColorDarkRed":"Rouge foncé",
     "restart_onb_btn":"Recommencer la configuration",
     "restart_onb_desc":"Afficher à nouveau l'écran de sélection de la langue.",
     "restart_onb_confirm":"Recommencer la configuration ? Le sélecteur de langue réapparaîtra au prochain lancement. Votre progression d'écriture ne sera pas affectée.",
@@ -4352,6 +4364,10 @@ const STRINGS = {
     progressMoreOther: "{count} exercices supplémentaires disponibles — essayez-les dans l'onglet Exercices",
   },
   de: {
+    "penColorDarkGreen":"Dunkelgrün",
+    "penColorBlack":"Schwarz",
+    "penColorDarkBlue":"Dunkelblau",
+    "penColorDarkRed":"Dunkelrot",
     "restart_onb_btn":"Einrichtung neu starten",
     "restart_onb_desc":"Den Sprachauswahl-Bildschirm erneut anzeigen.",
     "restart_onb_confirm":"Einrichtung neu starten? Die Sprachauswahl erscheint beim nächsten Start erneut. Ihr Schreibfortschritt wird nicht beeinflusst.",
@@ -4460,6 +4476,10 @@ const STRINGS = {
     progressMoreOther: "{count} weitere Übungen verfügbar — probieren Sie sie im Tab Übungen aus",
   },
   it: {
+    "penColorDarkGreen":"Verde scuro",
+    "penColorBlack":"Nero",
+    "penColorDarkBlue":"Blu scuro",
+    "penColorDarkRed":"Rosso scuro",
     "restart_onb_btn":"Riavvia configurazione",
     "restart_onb_desc":"Mostra di nuovo la schermata di selezione della lingua.",
     "restart_onb_confirm":"Riavviare la configurazione? Il selettore di lingua apparirà di nuovo al prossimo avvio. I tuoi progressi nella scrittura non saranno influenzati.",
@@ -4568,6 +4588,10 @@ const STRINGS = {
     progressMoreOther: "{count} altri esercizi disponibili — provali nella scheda Esercizi",
   },
   pt: {
+    "penColorDarkGreen":"Verde escuro",
+    "penColorBlack":"Preto",
+    "penColorDarkBlue":"Azul escuro",
+    "penColorDarkRed":"Vermelho escuro",
     "restart_onb_btn":"Reiniciar configuração",
     "restart_onb_desc":"Mostrar novamente o seletor de idioma inicial.",
     "restart_onb_confirm":"Reiniciar a configuração? O seletor de idioma aparecerá novamente no próximo arranque. O seu progresso de escrita não será afetado.",
@@ -4676,6 +4700,10 @@ const STRINGS = {
     progressMoreOther: "Mais {count} exercícios disponíveis — experimente-os no separador Exercícios",
   },
   cy: {
+    "penColorDarkGreen":"Gwyrdd tywyll",
+    "penColorBlack":"Du",
+    "penColorDarkBlue":"Glas tywyll",
+    "penColorDarkRed":"Coch tywyll",
     "restart_onb_btn":"Ailgychwyn cyflwyniad",
     "restart_onb_desc":"Dangos y dewisydd iaith cychwynnol eto.",
     "restart_onb_confirm":"Ailgychwyn y cyflwyniad? Bydd y dewisydd iaith yn ymddangos eto ar y lansiad nesaf. Ni effeithir ar eich cynnydd llawysgrifen.",
@@ -4784,6 +4812,10 @@ const STRINGS = {
     progressMoreOther: "{count} ymarfer arall ar gael — rhowch gynnig arnyn nhw yn y tab Ymarferion",
   },
   ja: {
+    "penColorDarkGreen":"ダークグリーン",
+    "penColorBlack":"黒",
+    "penColorDarkBlue":"ダークブルー",
+    "penColorDarkRed":"ダークレッド",
     "restart_onb_btn":"初期設定をやり直す",
     "restart_onb_desc":"言語選択画面を再び表示します。",
     "restart_onb_confirm":"初期設定をやり直しますか？言語選択画面が次回起動時に再表示されます。これまでの手書き履歴には影響しません。",
@@ -4898,6 +4930,10 @@ const STRINGS = {
     progressMoreOther: "他に{count}つの練習があります — エクササイズタブからお試しください",
   },
   ko: {
+    "penColorDarkGreen":"진녹색",
+    "penColorBlack":"검정",
+    "penColorDarkBlue":"진청색",
+    "penColorDarkRed":"진빨강",
     "restart_onb_btn":"초기 설정 다시 시작",
     "restart_onb_desc":"언어 선택 화면을 다시 표시합니다.",
     "restart_onb_confirm":"초기 설정을 다시 시작하시겠습니까? 언어 선택 화면이 다음 실행 시 다시 나타납니다. 손글씨 기록은 영향을 받지 않습니다.",
@@ -5012,6 +5048,10 @@ const STRINGS = {
     progressMoreOther: "{count}개의 운동을 더 사용할 수 있습니다 — 운동 탭에서 시도해 보세요",
   },
   hi: {
+    "penColorDarkGreen":"गहरा हरा",
+    "penColorBlack":"काला",
+    "penColorDarkBlue":"गहरा नीला",
+    "penColorDarkRed":"गहरा लाल",
     "restart_onb_btn":"ऑनबोर्डिंग पुनः प्रारंभ करें",
     "restart_onb_desc":"भाषा चयन स्क्रीन को फिर से दिखाएं।",
     "restart_onb_confirm":"ऑनबोर्डिंग पुनः प्रारंभ करें? अगले लॉन्च पर भाषा चयनकर्ता फिर से दिखाई देगा। आपकी हस्तलेखन प्रगति प्रभावित नहीं होगी।",
@@ -5126,6 +5166,10 @@ const STRINGS = {
     progressMoreOther: "{count} और व्यायाम उपलब्ध हैं — इन्हें व्यायाम टैब में आज़माएं",
   },
   ar: {
+    "penColorDarkGreen":"أخضر داكن",
+    "penColorBlack":"أسود",
+    "penColorDarkBlue":"أزرق داكن",
+    "penColorDarkRed":"أحمر داكن",
     "restart_onb_btn":"إعادة إعداد التطبيق",
     "restart_onb_desc":"إعادة عرض شاشة اختيار اللغة.",
     "restart_onb_confirm":"هل تريد إعادة إعداد التطبيق؟ ستظهر شاشة اختيار اللغة مرة أخرى عند التشغيل التالي. لن يتأثر تقدمك في الكتابة.",
@@ -5240,6 +5284,10 @@ const STRINGS = {
     progressMoreOther: "يتوفر {count} تمارين أخرى — جربها من علامة تبويب التمارين",
   },
   zh: {
+    "penColorDarkGreen":"深绿色",
+    "penColorBlack":"黑色",
+    "penColorDarkBlue":"深蓝色",
+    "penColorDarkRed":"深红色",
     "restart_onb_btn":"重新开始设置",
     "restart_onb_desc":"重新显示语言选择界面。",
     "restart_onb_confirm":"确定重新开始设置吗?语言选择界面将在下次启动时再次显示。您的书写进度不会受到影响。",
@@ -5354,6 +5402,10 @@ const STRINGS = {
     progressMoreOther: "还有 {count} 项练习可用 — 在练习选项卡中尝试",
   },
   pl: {
+    "penColorDarkGreen":"Ciemnozielony",
+    "penColorBlack":"Czarny",
+    "penColorDarkBlue":"Ciemnoniebieski",
+    "penColorDarkRed":"Ciemnoczerwony",
     "restart_onb_btn":"Uruchom konfigurację ponownie",
     "restart_onb_desc":"Pokaż ponownie ekran wyboru języka.",
     "restart_onb_confirm":"Uruchomić konfigurację ponownie? Wybór języka pojawi się ponownie przy następnym uruchomieniu. Twoje postępy w pisaniu nie zostaną zmienione.",
@@ -5468,6 +5520,10 @@ const STRINGS = {
     progressMoreOther: "Dostępnych jeszcze {count} ćwiczeń — wypróbuj je w zakładce Ćwiczenia",
   },
   es_mx: {
+    "penColorDarkGreen":"Verde oscuro",
+    "penColorBlack":"Negro",
+    "penColorDarkBlue":"Azul oscuro",
+    "penColorDarkRed":"Rojo oscuro",
     "restart_onb_btn":"Reiniciar configuración inicial",
     "restart_onb_desc":"Volver a mostrar el selector de idioma inicial.",
     "restart_onb_confirm":"¿Reiniciar la configuración inicial? El selector de idioma aparecerá de nuevo en el próximo inicio. Tu progreso de escritura no se verá afectado.",
@@ -5582,6 +5638,10 @@ const STRINGS = {
     progressMoreOther: "{count} ejercicios más disponibles: pruébalos en la pestaña Ejercicios",
   },
   pt_br: {
+    "penColorDarkGreen":"Verde escuro",
+    "penColorBlack":"Preto",
+    "penColorDarkBlue":"Azul escuro",
+    "penColorDarkRed":"Vermelho escuro",
     "restart_onb_btn":"Reiniciar configuração",
     "restart_onb_desc":"Mostrar novamente o seletor de idioma inicial.",
     "restart_onb_confirm":"Reiniciar a configuração? O seletor de idioma aparecerá novamente na próxima inicialização. Seu progresso na escrita não será afetado.",
@@ -5696,6 +5756,10 @@ const STRINGS = {
     progressMoreOther: "Mais {count} exercícios disponíveis — experimente na aba Exercícios",
   },
   fr_ca: {
+    "penColorDarkGreen":"Vert foncé",
+    "penColorBlack":"Noir",
+    "penColorDarkBlue":"Bleu foncé",
+    "penColorDarkRed":"Rouge foncé",
     "restart_onb_btn":"Recommencer la configuration",
     "restart_onb_desc":"Afficher à nouveau l'écran de sélection de la langue.",
     "restart_onb_confirm":"Recommencer la configuration ? Le sélecteur de langue réapparaîtra au prochain lancement. Votre progression d'écriture ne sera pas affectée.",
@@ -5811,6 +5875,10 @@ const STRINGS = {
   },
 
   "ga": {
+    "penColorDarkGreen":"Glas dorcha",
+    "penColorBlack":"Dubh",
+    "penColorDarkBlue":"Gorm dorcha",
+    "penColorDarkRed":"Dearg dorcha",
     "restart_onb_btn":"Atosaigh ionduchtú",
     "restart_onb_desc":"Taispeáin an piocaire teanga chéad-lainseála arís.",
     "restart_onb_confirm":"Atosaigh an t-ionduchtú? Beidh an piocaire teanga le feiceáil arís ar an gcéad lainseáil eile. Ní bheidh tionchar ar do dhul chun cinn lámhscríbhneoireachta.",
@@ -6041,6 +6109,17 @@ function applyLanguage() {
   ids.forEach(id => {
     const el = document.getElementById(id);
     if (el && s[id] !== undefined) el.textContent = s[id];
+  });
+  // Pen-colour swatch aria-labels
+  const penSwatches = {
+    penSwatchDarkGreen: 'penColorDarkGreen',
+    penSwatchBlack: 'penColorBlack',
+    penSwatchDarkBlue: 'penColorDarkBlue',
+    penSwatchDarkRed: 'penColorDarkRed'
+  };
+  Object.entries(penSwatches).forEach(([elId, key]) => {
+    const el = document.getElementById(elId);
+    if (el && s[key]) el.setAttribute('aria-label', s[key]);
   });
   // Pen width option labels
   const penOpts = {penOptThin:'penThin', penOptMedium:'penMedium', penOptThick:'penThick'};
