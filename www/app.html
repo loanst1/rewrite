@@ -7167,26 +7167,44 @@ async function generateProgressPDF(){
   if(lbl) lbl.textContent=(s.pdf_generating||'Generating')+'…';
   if(btn) btn.disabled=true;
 
+  var container=null, overlay=null;
+  function cleanup(){
+    try{document.body.removeChild(container);}catch(e){}
+    try{document.body.removeChild(overlay);}catch(e){}
+    if(lbl) lbl.textContent=origLabel;
+    if(btn) btn.disabled=false;
+  }
+
   try{
     var sessions=await getAllSessions();
     if(!sessions||!sessions.length){
       alert(s.pdf_no_sessions||'No sessions yet — start practising to generate a report.');
-      if(lbl) lbl.textContent=origLabel;
-      if(btn) btn.disabled=false;
+      cleanup();
       return;
     }
     rwSavePersonalDetails();
     await __rwPreloadLogo();
 
-    var container=document.createElement('div');
+    // Re-render trend chart so its pixel buffer is fresh
+    try{if(typeof renderTrendChart==='function') renderTrendChart(sessions);}catch(e){console.warn('trend chart pre-render',e);}
+
+    // Loading overlay shown to user while PDF builds beneath
+    overlay=document.createElement('div');
+    overlay.id='pdfLoadingOverlay';
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(247,243,232,0.96);z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Inter,Arial,sans-serif;color:#1a4a3a;';
+    overlay.innerHTML='<div style="font-size:18px;font-weight:600;margin-bottom:10px">'+(s.pdf_generating||'Generating')+'…</div><div style="font-size:13px;color:#777">Preparing your progress report</div>';
+    document.body.appendChild(overlay);
+
+    // Container ON-SCREEN at full A4 width but BENEATH the overlay
+    container=document.createElement('div');
     container.id='pdfReportContainer';
-    container.style.cssText='position:absolute;left:0;top:0;width:794px;background:#ffffff;opacity:0.01;pointer-events:none;z-index:-1;overflow:hidden;';
-    container.innerHTML += rwBuildReportSection(sessions, currentLang, true);
+    container.style.cssText='position:fixed;left:0;top:0;width:794px;background:#ffffff;z-index:2147483646;color:#222;';
+    container.innerHTML = rwBuildReportSection(sessions, currentLang, true);
     if(currentLang!=='en'){
       container.innerHTML += rwBuildReportSection(sessions, 'en', false);
     }
     document.body.appendChild(container);
-    await new Promise(function(r){requestAnimationFrame(function(){requestAnimationFrame(r);});});
+    await new Promise(function(r){setTimeout(r,150);});
 
     var pd=rwSavePersonalDetails();
     var fullName=[pd.firstname,pd.lastname].filter(Boolean).join(' ');
@@ -7197,44 +7215,39 @@ async function generateProgressPDF(){
       margin:0,
       filename:fname,
       image:{type:'jpeg',quality:0.95},
-      html2canvas:{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',logging:false,windowWidth:794},
+      html2canvas:{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',logging:false,windowWidth:794,scrollX:0,scrollY:0},
       jsPDF:{unit:'mm',format:'a4',orientation:'portrait',compress:true},
       pagebreak:{mode:['css','legacy']}
     };
 
-    html2pdf().from(container).set(opt).toPdf().get('pdf').then(function(pdf){
-      var blob=pdf.output('blob');
-      document.body.removeChild(container);
-      if(lbl) lbl.textContent=origLabel;
-      if(btn) btn.disabled=false;
-      if(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem && window.Capacitor.Plugins.Share){
-        var FS=window.Capacitor.Plugins.Filesystem;
-        var SH=window.Capacitor.Plugins.Share;
-        var reader=new FileReader();
-        reader.onloadend=function(){
-          var base64=reader.result.split(',')[1];
-          FS.writeFile({path:fname,data:base64,directory:'CACHE',recursive:true}).then(function(r){
-            SH.share({title:s.pdf_share_title||'ReWrite Progress Report',url:r.uri,dialogTitle:s.pdf_share_title||'ReWrite Progress Report'}).catch(function(e){console.warn(e);});
-          }).catch(function(e){
-            console.warn('FS write',e);
-            rwDownloadBlob(blob,fname);
-          });
-        };
-        reader.readAsDataURL(blob);
-      } else {
-        rwDownloadBlob(blob,fname);
-      }
-    }).catch(function(err){
-      console.error('PDF gen failed',err);
-      try{document.body.removeChild(container);}catch(e){}
-      if(lbl) lbl.textContent=origLabel;
-      if(btn) btn.disabled=false;
-      alert(s.pdf_error||'Could not generate the PDF. Please try again.');
-    });
-  } catch(e){
-    console.error(e);
-    if(lbl) lbl.textContent=origLabel;
-    if(btn) btn.disabled=false;
+    var blob = await html2pdf().from(container).set(opt).output('blob');
+    cleanup();
+    if(!blob || blob.size < 1000){
+      alert('PDF was empty (size '+(blob?blob.size:0)+' bytes). Please try again or contact support.');
+      return;
+    }
+
+    if(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem && window.Capacitor.Plugins.Share){
+      var FS=window.Capacitor.Plugins.Filesystem;
+      var SH=window.Capacitor.Plugins.Share;
+      var reader=new FileReader();
+      reader.onloadend=function(){
+        var base64=reader.result.split(',')[1];
+        FS.writeFile({path:fname,data:base64,directory:'CACHE',recursive:true}).then(function(r){
+          SH.share({title:s.pdf_share_title||'ReWrite Progress Report',url:r.uri,dialogTitle:s.pdf_share_title||'ReWrite Progress Report'}).catch(function(e){console.warn(e);});
+        }).catch(function(e){
+          console.warn('FS write',e);
+          rwDownloadBlob(blob,fname);
+        });
+      };
+      reader.readAsDataURL(blob);
+    } else {
+      rwDownloadBlob(blob,fname);
+    }
+  }catch(err){
+    console.error('PDF gen failed',err);
+    cleanup();
+    alert((s.pdf_error||'Could not generate the PDF.')+'\n\n'+(err&&err.message?err.message:String(err)));
   }
 }
 
