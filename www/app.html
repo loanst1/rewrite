@@ -7095,7 +7095,10 @@ function __rwTextToImage(text, opts){
   if(widestLine === 0) widestLine = maxWidthPx;
 
   var lineHeightPx = Math.ceil(fontSizePx * 1.35);
-  var totalHeightPx = lineHeightPx * lines.length + 4;
+  // Tight canvas for single-line so it matches jsPDF native vertical metrics
+  var totalHeightPx = (lines.length === 1)
+    ? Math.ceil(fontSizePx * 1.2)
+    : lineHeightPx * lines.length + 4;
 
   var canvas = document.createElement('canvas');
   canvas.width = Math.ceil(widestLine * scale) + 8;
@@ -7191,8 +7194,12 @@ async function generateProgressPDF(){
         var xPos = x;
         if(align === 'center') xPos = x - widthMm/2;
         else if(align === 'right') xPos = x - widthMm;
-        try{ doc.addImage(img.dataURL, 'PNG', xPos, y - heightMm*0.85, widthMm, heightMm); }catch(e){console.warn('text image',e);}
-        return y + heightMm * 0.4;
+        // Place image so first-line baseline aligns with y (matches jsPDF native
+        // text behaviour). Constant ascent offset regardless of line count, so
+        // multi-line text extends DOWN from y instead of sliding up.
+        var ascentMm = size * 0.30;
+        try{ doc.addImage(img.dataURL, 'PNG', xPos, y - ascentMm, widthMm, heightMm); }catch(e){console.warn('text image',e);}
+        return y - ascentMm + heightMm;
       }
 
       var fontName = hasNoto ? 'NotoSans' : 'helvetica';
@@ -7375,7 +7382,7 @@ async function generateProgressPDF(){
       doc.line(margin, y, pageW-margin, y);
       y += 4;
       drawText(tt('disclaimerTitle') || 'Important', leadX, y, {lang:lang, size:8, weight:'bold', colour:MUTED, align:leadAlign});
-      y += 4;
+      y += 6;
       var disclaimer = tt('aboutDisclaimerText') || 'ReWrite is a wellness support tool, not a medical device.';
       drawText(disclaimer, leadX, y, {lang:lang, size:8, colour:MUTED, maxWidth: pageW-2*margin, align:leadAlign});
     }
