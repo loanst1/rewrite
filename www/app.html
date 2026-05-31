@@ -771,7 +771,29 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
     <div id="sessionLog"></div>
   </div>
 
-  <button class="btn btn-outline" style="margin-top:10px" onclick="exportForTherapist()" id="exportBtn">📋 Export for Therapist</button>
+  <!-- Personal Details (for PDF report) -->
+  <div class="card" id="personalDetailsCard" style="margin-top:14px">
+    <div class="card-title" id="personalDetailsTitle">Personal details</div>
+    <p style="font-size:12px;color:var(--text2);margin:-4px 0 10px" id="personalDetailsHint">All optional. Stored only on this device. Used to populate your PDF progress report.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px">
+      <input type="text" id="rwPdFirstname" class="input" placeholder="First name" autocomplete="given-name">
+      <input type="text" id="rwPdLastname" class="input" placeholder="Last name" autocomplete="family-name">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px">
+      <input type="date" id="rwPdDob" class="input" placeholder="Date of birth" autocomplete="bday">
+      <input type="text" id="rwPdPatientid" class="input" placeholder="NHS Number (optional)">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px">
+      <input type="text" id="rwPdClinician" class="input" placeholder="Clinician name (optional)">
+      <input type="email" id="rwPdClinicianEmail" class="input" placeholder="Clinician email (optional)" autocomplete="email">
+    </div>
+  </div>
+
+  <button class="btn btn-primary" style="margin-top:14px;width:100%" onclick="generateProgressPDF()" id="generatePdfBtn">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span id="generatePdfBtnLabel">Generate PDF report</span>
+  </button>
+  <p style="font-size:11px;color:var(--text3);text-align:center;margin-top:6px" id="generatePdfHint">Creates a bilingual PDF (your language and English) with your progress, charts and personal details. You can save it or share it via email.</p>
+  <button class="btn btn-outline" style="margin-top:10px;font-size:12px" onclick="exportForTherapist()" id="exportBtn">📋 Print preview</button>
 </div>
 
 <!-- ── About Tab ── -->
@@ -4017,7 +4039,7 @@ function toggleSounds() {
 
 // ══════════════ LANGUAGE ══════════════
 const STRINGS = {
-  en: {
+  en: {"personalDetailsTitle":"Personal details","personalDetailsHint":"All optional. Stored only on this device. Used to populate your PDF progress report.","pd_firstname":"First name","pd_lastname":"Last name","pd_dob":"Date of birth","pd_patientid":"NHS Number (optional)","pd_patientid_intl":"Patient ID (optional)","pd_clinician":"Clinician name (optional)","pd_clinician_email":"Clinician email (optional)","generatePdfBtnLabel":"Generate PDF report","generatePdfHint":"Creates a bilingual PDF (your language and English) with your progress, charts and personal details. You can save it or share it via email.","pdf_scroll_english":"Scroll down for English","pdf_title":"ReWrite Progress Report","pdf_patient":"Patient","pdf_dob":"Date of birth","pdf_clinician":"Clinician","pdf_date":"Date","pdf_exercise":"Exercise","pdf_avg":"Average","pdf_best":"Best","exercises_count":"exercises","exType_letter":"Letters","exType_word":"Words","exType_sentence":"Sentences","pdf_generating":"Generating","pdf_error":"Could not generate the PDF. Please try again.","pdf_no_sessions":"No sessions yet — start practising to generate a report.","pdf_share_title":"ReWrite Progress Report","disclaimerTitle":"Important","aboutDisclaimerText":"ReWrite is a wellness support tool, not a medical device. It is designed to supplement — not replace — occupational therapy. Always follow the guidance of your therapist or care team.",
     "penColorDarkGreen":"Dark green",
     "penColorBlack":"Black",
     "penColorDarkBlue":"Dark blue",
@@ -4139,7 +4161,7 @@ const STRINGS = {
     progressMoreOne: "1 more exercise available — try it on the Exercises tab",
     progressMoreOther: "{count} more exercises available — try them on the Exercises tab",
   },
-  es: {
+  es: {"personalDetailsTitle":"Datos personales","personalDetailsHint":"Todos opcionales. Almacenados solo en este dispositivo. Se usan para rellenar tu informe PDF de progreso.","pd_firstname":"Nombre","pd_lastname":"Apellido","pd_dob":"Fecha de nacimiento","pd_patientid":"Número NHS (opcional)","pd_patientid_intl":"ID de paciente (opcional)","pd_clinician":"Nombre del clínico (opcional)","pd_clinician_email":"Correo del clínico (opcional)","generatePdfBtnLabel":"Generar informe PDF","generatePdfHint":"Crea un PDF bilingüe (tu idioma e inglés) con tu progreso, gráficos y datos personales. Puedes guardarlo o compartirlo por correo.","pdf_scroll_english":"Desplázate hacia abajo para inglés","pdf_title":"Informe de Progreso de ReWrite","pdf_patient":"Paciente","pdf_dob":"Fecha de nacimiento","pdf_clinician":"Clínico","pdf_date":"Fecha","pdf_exercise":"Ejercicio","pdf_avg":"Promedio","pdf_best":"Mejor","exercises_count":"ejercicios","exType_letter":"Letras","exType_word":"Palabras","exType_sentence":"Frases","pdf_generating":"Generando","pdf_error":"No se pudo generar el PDF. Inténtalo de nuevo.","pdf_no_sessions":"Aún no hay sesiones — empieza a practicar para generar un informe.","pdf_share_title":"Informe de Progreso de ReWrite","disclaimerTitle":"Importante","aboutDisclaimerText":"ReWrite es una herramienta de apoyo al bienestar, no un dispositivo médico. Está diseñado para complementar — no sustituir — la terapia ocupacional. Sigue siempre la orientación de tu terapeuta o equipo de cuidados.",
     "penColorDarkGreen":"Verde oscuro",
     "penColorBlack":"Negro",
     "penColorDarkBlue":"Azul oscuro",
@@ -4251,7 +4273,7 @@ const STRINGS = {
     progressMoreOne: "1 ejercicio más disponible: pruébalo en la pestaña Ejercicios",
     progressMoreOther: "{count} ejercicios más disponibles: pruébalos en la pestaña Ejercicios",
   },
-  fr: {
+  fr: {"personalDetailsTitle":"Informations personnelles","personalDetailsHint":"Toutes facultatives. Stockées uniquement sur cet appareil. Utilisées pour remplir votre rapport PDF de progression.","pd_firstname":"Prénom","pd_lastname":"Nom","pd_dob":"Date de naissance","pd_patientid":"Numéro NHS (facultatif)","pd_patientid_intl":"ID patient (facultatif)","pd_clinician":"Nom du clinicien (facultatif)","pd_clinician_email":"E-mail du clinicien (facultatif)","generatePdfBtnLabel":"Générer le rapport PDF","generatePdfHint":"Crée un PDF bilingue (votre langue et anglais) avec votre progression, vos graphiques et vos informations personnelles. Vous pouvez l'enregistrer ou le partager par e-mail.","pdf_scroll_english":"Faites défiler pour l'anglais","pdf_title":"Rapport de Progression ReWrite","pdf_patient":"Patient","pdf_dob":"Date de naissance","pdf_clinician":"Clinicien","pdf_date":"Date","pdf_exercise":"Exercice","pdf_avg":"Moyenne","pdf_best":"Meilleur","exercises_count":"exercices","exType_letter":"Lettres","exType_word":"Mots","exType_sentence":"Phrases","pdf_generating":"Génération","pdf_error":"Impossible de générer le PDF. Veuillez réessayer.","pdf_no_sessions":"Aucune session pour le moment — commencez à vous entraîner pour générer un rapport.","pdf_share_title":"Rapport de Progression ReWrite","disclaimerTitle":"Important","aboutDisclaimerText":"ReWrite est un outil de soutien au bien-être, pas un dispositif médical. Il est conçu pour compléter — et non remplacer — l'ergothérapie. Suivez toujours les conseils de votre thérapeute ou de votre équipe soignante.",
     "penColorDarkGreen":"Vert foncé",
     "penColorBlack":"Noir",
     "penColorDarkBlue":"Bleu foncé",
@@ -4363,7 +4385,7 @@ const STRINGS = {
     progressMoreOne: "1 exercice supplémentaire disponible — essayez-le dans l'onglet Exercices",
     progressMoreOther: "{count} exercices supplémentaires disponibles — essayez-les dans l'onglet Exercices",
   },
-  de: {
+  de: {"personalDetailsTitle":"Persönliche Daten","personalDetailsHint":"Alle optional. Nur auf diesem Gerät gespeichert. Werden zum Ausfüllen Ihres PDF-Fortschrittsberichts verwendet.","pd_firstname":"Vorname","pd_lastname":"Nachname","pd_dob":"Geburtsdatum","pd_patientid":"NHS-Nummer (optional)","pd_patientid_intl":"Patienten-ID (optional)","pd_clinician":"Name des Klinikers (optional)","pd_clinician_email":"E-Mail des Klinikers (optional)","generatePdfBtnLabel":"PDF-Bericht erstellen","generatePdfHint":"Erstellt ein zweisprachiges PDF (Ihre Sprache und Englisch) mit Ihrem Fortschritt, Diagrammen und persönlichen Daten. Sie können es speichern oder per E-Mail teilen.","pdf_scroll_english":"Nach unten scrollen für Englisch","pdf_title":"ReWrite Fortschrittsbericht","pdf_patient":"Patient","pdf_dob":"Geburtsdatum","pdf_clinician":"Kliniker","pdf_date":"Datum","pdf_exercise":"Übung","pdf_avg":"Durchschnitt","pdf_best":"Beste","exercises_count":"Übungen","exType_letter":"Buchstaben","exType_word":"Wörter","exType_sentence":"Sätze","pdf_generating":"Wird erstellt","pdf_error":"Das PDF konnte nicht erstellt werden. Bitte erneut versuchen.","pdf_no_sessions":"Noch keine Sitzungen — beginnen Sie mit dem Üben, um einen Bericht zu erstellen.","pdf_share_title":"ReWrite Fortschrittsbericht","disclaimerTitle":"Wichtig","aboutDisclaimerText":"ReWrite ist ein Wellness-Hilfsmittel, kein Medizinprodukt. Es ist als Ergänzung — nicht als Ersatz — zur Ergotherapie konzipiert. Befolgen Sie immer die Anweisungen Ihres Therapeuten oder Pflegeteams.",
     "penColorDarkGreen":"Dunkelgrün",
     "penColorBlack":"Schwarz",
     "penColorDarkBlue":"Dunkelblau",
@@ -4475,7 +4497,7 @@ const STRINGS = {
     progressMoreOne: "1 weitere Übung verfügbar — probieren Sie sie im Tab Übungen aus",
     progressMoreOther: "{count} weitere Übungen verfügbar — probieren Sie sie im Tab Übungen aus",
   },
-  it: {
+  it: {"personalDetailsTitle":"Dati personali","personalDetailsHint":"Tutti facoltativi. Memorizzati solo su questo dispositivo. Usati per compilare il tuo rapporto PDF di progresso.","pd_firstname":"Nome","pd_lastname":"Cognome","pd_dob":"Data di nascita","pd_patientid":"Numero NHS (facoltativo)","pd_patientid_intl":"ID paziente (facoltativo)","pd_clinician":"Nome del clinico (facoltativo)","pd_clinician_email":"E-mail del clinico (facoltativo)","generatePdfBtnLabel":"Genera rapporto PDF","generatePdfHint":"Crea un PDF bilingue (la tua lingua e l'inglese) con i tuoi progressi, grafici e dati personali. Puoi salvarlo o condividerlo via e-mail.","pdf_scroll_english":"Scorri verso il basso per l'inglese","pdf_title":"Rapporto di Progresso ReWrite","pdf_patient":"Paziente","pdf_dob":"Data di nascita","pdf_clinician":"Clinico","pdf_date":"Data","pdf_exercise":"Esercizio","pdf_avg":"Media","pdf_best":"Migliore","exercises_count":"esercizi","exType_letter":"Lettere","exType_word":"Parole","exType_sentence":"Frasi","pdf_generating":"Generazione","pdf_error":"Impossibile generare il PDF. Riprova.","pdf_no_sessions":"Nessuna sessione ancora — inizia a esercitarti per generare un rapporto.","pdf_share_title":"Rapporto di Progresso ReWrite","disclaimerTitle":"Importante","aboutDisclaimerText":"ReWrite è uno strumento di supporto al benessere, non un dispositivo medico. È progettato per integrare — non sostituire — la terapia occupazionale. Segui sempre le indicazioni del tuo terapista o del team di cura.",
     "penColorDarkGreen":"Verde scuro",
     "penColorBlack":"Nero",
     "penColorDarkBlue":"Blu scuro",
@@ -4587,7 +4609,7 @@ const STRINGS = {
     progressMoreOne: "1 altro esercizio disponibile — provalo nella scheda Esercizi",
     progressMoreOther: "{count} altri esercizi disponibili — provali nella scheda Esercizi",
   },
-  pt: {
+  pt: {"personalDetailsTitle":"Dados pessoais","personalDetailsHint":"Todos opcionais. Armazenados apenas neste dispositivo. Usados para preencher o seu relatório PDF de progresso.","pd_firstname":"Nome próprio","pd_lastname":"Apelido","pd_dob":"Data de nascimento","pd_patientid":"Número NHS (opcional)","pd_patientid_intl":"ID do paciente (opcional)","pd_clinician":"Nome do clínico (opcional)","pd_clinician_email":"E-mail do clínico (opcional)","generatePdfBtnLabel":"Gerar relatório PDF","generatePdfHint":"Cria um PDF bilingue (a sua língua e inglês) com o seu progresso, gráficos e dados pessoais. Pode guardá-lo ou partilhá-lo por e-mail.","pdf_scroll_english":"Desça para o inglês","pdf_title":"Relatório de Progresso ReWrite","pdf_patient":"Paciente","pdf_dob":"Data de nascimento","pdf_clinician":"Clínico","pdf_date":"Data","pdf_exercise":"Exercício","pdf_avg":"Média","pdf_best":"Melhor","exercises_count":"exercícios","exType_letter":"Letras","exType_word":"Palavras","exType_sentence":"Frases","pdf_generating":"A gerar","pdf_error":"Não foi possível gerar o PDF. Tente novamente.","pdf_no_sessions":"Ainda sem sessões — comece a praticar para gerar um relatório.","pdf_share_title":"Relatório de Progresso ReWrite","disclaimerTitle":"Importante","aboutDisclaimerText":"ReWrite é uma ferramenta de apoio ao bem-estar, não um dispositivo médico. Foi concebido para complementar — não substituir — a terapia ocupacional. Siga sempre a orientação do seu terapeuta ou equipa de cuidados.",
     "penColorDarkGreen":"Verde escuro",
     "penColorBlack":"Preto",
     "penColorDarkBlue":"Azul escuro",
@@ -4699,7 +4721,7 @@ const STRINGS = {
     progressMoreOne: "Mais 1 exercício disponível — experimente-o no separador Exercícios",
     progressMoreOther: "Mais {count} exercícios disponíveis — experimente-os no separador Exercícios",
   },
-  cy: {
+  cy: {"personalDetailsTitle":"Manylion personol","personalDetailsHint":"Pob un yn ddewisol. Wedi'i storio ar y ddyfais hon yn unig. Defnyddir i lenwi eich adroddiad cynnydd PDF.","pd_firstname":"Enw cyntaf","pd_lastname":"Cyfenw","pd_dob":"Dyddiad geni","pd_patientid":"Rhif y GIG (dewisol)","pd_patientid_intl":"ID Claf (dewisol)","pd_clinician":"Enw'r clinigwr (dewisol)","pd_clinician_email":"E-bost y clinigwr (dewisol)","generatePdfBtnLabel":"Creu adroddiad PDF","generatePdfHint":"Yn creu PDF dwyieithog (eich iaith a Saesneg) gyda'ch cynnydd, siartiau a manylion personol. Gallwch ei gadw neu ei rannu trwy e-bost.","pdf_scroll_english":"Sgroliwch i lawr am Saesneg","pdf_title":"Adroddiad Cynnydd ReWrite","pdf_patient":"Claf","pdf_dob":"Dyddiad geni","pdf_clinician":"Clinigwr","pdf_date":"Dyddiad","pdf_exercise":"Ymarfer","pdf_avg":"Cyfartaledd","pdf_best":"Gorau","exercises_count":"ymarferion","exType_letter":"Llythrennau","exType_word":"Geiriau","exType_sentence":"Brawddegau","pdf_generating":"Yn creu","pdf_error":"Methu creu'r PDF. Rhowch gynnig arall arno.","pdf_no_sessions":"Dim sesiynau eto — dechreuwch ymarfer i greu adroddiad.","pdf_share_title":"Adroddiad Cynnydd ReWrite","disclaimerTitle":"Pwysig","aboutDisclaimerText":"Mae ReWrite yn offeryn cefnogi lles, nid dyfais feddygol. Mae wedi'i gynllunio i ategu — nid disodli — therapi galwedigaethol. Dilynwch arweiniad eich therapydd neu dîm gofal bob amser.",
     "penColorDarkGreen":"Gwyrdd tywyll",
     "penColorBlack":"Du",
     "penColorDarkBlue":"Glas tywyll",
@@ -4811,7 +4833,7 @@ const STRINGS = {
     progressMoreOne: "1 ymarfer arall ar gael — rhowch gynnig arno yn y tab Ymarferion",
     progressMoreOther: "{count} ymarfer arall ar gael — rhowch gynnig arnyn nhw yn y tab Ymarferion",
   },
-  ja: {
+  ja: {"personalDetailsTitle":"個人情報","personalDetailsHint":"すべて任意。このデバイスにのみ保存されます。PDF進捗レポートの作成に使用されます。","pd_firstname":"名","pd_lastname":"姓","pd_dob":"生年月日","pd_patientid":"NHS番号(任意)","pd_patientid_intl":"患者ID(任意)","pd_clinician":"臨床医名(任意)","pd_clinician_email":"臨床医のメール(任意)","generatePdfBtnLabel":"PDFレポートを作成","generatePdfHint":"お使いの言語と英語の2言語のPDFを作成し、進捗、グラフ、個人情報を含めます。保存またはメールで共有できます。","pdf_scroll_english":"英語版は下にスクロール","pdf_title":"ReWrite 進捗レポート","pdf_patient":"患者","pdf_dob":"生年月日","pdf_clinician":"臨床医","pdf_date":"日付","pdf_exercise":"エクササイズ","pdf_avg":"平均","pdf_best":"ベスト","exercises_count":"エクササイズ","exType_letter":"文字","exType_word":"単語","exType_sentence":"文","pdf_generating":"作成中","pdf_error":"PDFを作成できませんでした。もう一度お試しください。","pdf_no_sessions":"まだセッションがありません — レポートを作成するには練習を始めてください。","pdf_share_title":"ReWrite 進捗レポート","disclaimerTitle":"重要","aboutDisclaimerText":"ReWriteはウェルネスサポートツールであり、医療機器ではありません。作業療法を補うものとして — 置き換えるものではなく — 設計されています。常に療法士や医療チームの指導に従ってください。",
     "penColorDarkGreen":"ダークグリーン",
     "penColorBlack":"黒",
     "penColorDarkBlue":"ダークブルー",
@@ -4929,7 +4951,7 @@ const STRINGS = {
     progressMoreOne: "他に1つの練習があります — エクササイズタブからお試しください",
     progressMoreOther: "他に{count}つの練習があります — エクササイズタブからお試しください",
   },
-  ko: {
+  ko: {"personalDetailsTitle":"개인정보","personalDetailsHint":"모두 선택사항. 이 기기에만 저장됩니다. PDF 진행 리포트 작성에 사용됩니다.","pd_firstname":"이름","pd_lastname":"성","pd_dob":"생년월일","pd_patientid":"NHS 번호 (선택)","pd_patientid_intl":"환자 ID (선택)","pd_clinician":"임상의 이름 (선택)","pd_clinician_email":"임상의 이메일 (선택)","generatePdfBtnLabel":"PDF 리포트 만들기","generatePdfHint":"내 언어와 영어 2개 언어의 PDF를 만들며, 진행 상황, 차트, 개인정보를 포함합니다. 저장하거나 이메일로 공유할 수 있습니다.","pdf_scroll_english":"영어 보려면 아래로 스크롤","pdf_title":"ReWrite 진행 리포트","pdf_patient":"환자","pdf_dob":"생년월일","pdf_clinician":"임상의","pdf_date":"날짜","pdf_exercise":"운동","pdf_avg":"평균","pdf_best":"최고","exercises_count":"운동","exType_letter":"글자","exType_word":"단어","exType_sentence":"문장","pdf_generating":"생성 중","pdf_error":"PDF를 만들 수 없습니다. 다시 시도해 주세요.","pdf_no_sessions":"아직 세션이 없습니다 — 리포트를 만들려면 연습을 시작하세요.","pdf_share_title":"ReWrite 진행 리포트","disclaimerTitle":"중요","aboutDisclaimerText":"ReWrite는 웰빙 지원 도구이며 의료기기가 아닙니다. 작업치료를 보완 — 대체가 아닌 — 하도록 설계되었습니다. 항상 치료사 또는 의료팀의 지침을 따르세요.",
     "penColorDarkGreen":"진녹색",
     "penColorBlack":"검정",
     "penColorDarkBlue":"진청색",
@@ -5047,7 +5069,7 @@ const STRINGS = {
     progressMoreOne: "1개의 운동을 더 사용할 수 있습니다 — 운동 탭에서 시도해 보세요",
     progressMoreOther: "{count}개의 운동을 더 사용할 수 있습니다 — 운동 탭에서 시도해 보세요",
   },
-  hi: {
+  hi: {"personalDetailsTitle":"व्यक्तिगत विवरण","personalDetailsHint":"सभी वैकल्पिक। केवल इस डिवाइस पर संग्रहीत। आपकी PDF प्रगति रिपोर्ट भरने के लिए उपयोग किए जाते हैं।","pd_firstname":"पहला नाम","pd_lastname":"अंतिम नाम","pd_dob":"जन्म तिथि","pd_patientid":"NHS नंबर (वैकल्पिक)","pd_patientid_intl":"रोगी ID (वैकल्पिक)","pd_clinician":"चिकित्सक का नाम (वैकल्पिक)","pd_clinician_email":"चिकित्सक का ईमेल (वैकल्पिक)","generatePdfBtnLabel":"PDF रिपोर्ट बनाएं","generatePdfHint":"आपकी भाषा और अंग्रेज़ी की द्विभाषी PDF बनाता है जिसमें प्रगति, चार्ट और व्यक्तिगत विवरण होते हैं। आप इसे सहेज या ईमेल से साझा कर सकते हैं।","pdf_scroll_english":"अंग्रेज़ी के लिए नीचे स्क्रॉल करें","pdf_title":"ReWrite प्रगति रिपोर्ट","pdf_patient":"रोगी","pdf_dob":"जन्म तिथि","pdf_clinician":"चिकित्सक","pdf_date":"तारीख","pdf_exercise":"व्यायाम","pdf_avg":"औसत","pdf_best":"सर्वश्रेष्ठ","exercises_count":"व्यायाम","exType_letter":"अक्षर","exType_word":"शब्द","exType_sentence":"वाक्य","pdf_generating":"बनाया जा रहा है","pdf_error":"PDF नहीं बन सकी। कृपया फिर से कोशिश करें।","pdf_no_sessions":"अभी तक कोई सत्र नहीं — रिपोर्ट बनाने के लिए अभ्यास शुरू करें।","pdf_share_title":"ReWrite प्रगति रिपोर्ट","disclaimerTitle":"महत्वपूर्ण","aboutDisclaimerText":"ReWrite एक स्वास्थ्य सहायक उपकरण है, चिकित्सा उपकरण नहीं। यह व्यावसायिक चिकित्सा को बदलने के लिए नहीं — पूरक के लिए — डिज़ाइन किया गया है। हमेशा अपने चिकित्सक या देखभाल टीम के मार्गदर्शन का पालन करें।",
     "penColorDarkGreen":"गहरा हरा",
     "penColorBlack":"काला",
     "penColorDarkBlue":"गहरा नीला",
@@ -5165,7 +5187,7 @@ const STRINGS = {
     progressMoreOne: "1 और व्यायाम उपलब्ध है — इसे व्यायाम टैब में आज़माएं",
     progressMoreOther: "{count} और व्यायाम उपलब्ध हैं — इन्हें व्यायाम टैब में आज़माएं",
   },
-  ar: {
+  ar: {"personalDetailsTitle":"البيانات الشخصية","personalDetailsHint":"كلها اختيارية. مخزنة على هذا الجهاز فقط. تُستخدم لتعبئة تقرير التقدم بصيغة PDF.","pd_firstname":"الاسم الأول","pd_lastname":"اسم العائلة","pd_dob":"تاريخ الميلاد","pd_patientid":"رقم NHS (اختياري)","pd_patientid_intl":"معرّف المريض (اختياري)","pd_clinician":"اسم الطبيب (اختياري)","pd_clinician_email":"بريد الطبيب الإلكتروني (اختياري)","generatePdfBtnLabel":"إنشاء تقرير PDF","generatePdfHint":"يُنشئ ملف PDF ثنائي اللغة (لغتك والإنجليزية) يتضمن تقدمك ومخططاتك وبياناتك الشخصية. يمكنك حفظه أو مشاركته عبر البريد الإلكتروني.","pdf_scroll_english":"مرّر للأسفل لقراءة النسخة الإنجليزية","pdf_title":"تقرير تقدم ReWrite","pdf_patient":"المريض","pdf_dob":"تاريخ الميلاد","pdf_clinician":"الطبيب","pdf_date":"التاريخ","pdf_exercise":"التمرين","pdf_avg":"المتوسط","pdf_best":"الأفضل","exercises_count":"تمارين","exType_letter":"حروف","exType_word":"كلمات","exType_sentence":"جمل","pdf_generating":"جارٍ الإنشاء","pdf_error":"تعذّر إنشاء ملف PDF. يُرجى المحاولة مرة أخرى.","pdf_no_sessions":"لا توجد جلسات بعد — ابدأ التدريب لإنشاء تقرير.","pdf_share_title":"تقرير تقدم ReWrite","disclaimerTitle":"هام","aboutDisclaimerText":"ReWrite أداة لدعم الصحة، وليست جهازًا طبيًا. مصممة لتكمل — وليس لتحل محل — العلاج الوظيفي. اتبع دائمًا إرشادات معالجك أو فريق الرعاية.",
     "penColorDarkGreen":"أخضر داكن",
     "penColorBlack":"أسود",
     "penColorDarkBlue":"أزرق داكن",
@@ -5283,7 +5305,7 @@ const STRINGS = {
     progressMoreOne: "يتوفر تمرين واحد آخر — جربه من علامة تبويب التمارين",
     progressMoreOther: "يتوفر {count} تمارين أخرى — جربها من علامة تبويب التمارين",
   },
-  zh: {
+  zh: {"personalDetailsTitle":"个人详细信息","personalDetailsHint":"全部为可选。仅存储在此设备上。用于填写您的PDF进度报告。","pd_firstname":"名","pd_lastname":"姓","pd_dob":"出生日期","pd_patientid":"NHS号码(可选)","pd_patientid_intl":"患者ID(可选)","pd_clinician":"临床医师姓名(可选)","pd_clinician_email":"临床医师邮箱(可选)","generatePdfBtnLabel":"生成PDF报告","generatePdfHint":"生成包含您的进度、图表和个人详细信息的双语PDF(您的语言和英语)。您可以保存它或通过电子邮件分享。","pdf_scroll_english":"向下滚动查看英文版","pdf_title":"ReWrite 进度报告","pdf_patient":"患者","pdf_dob":"出生日期","pdf_clinician":"临床医师","pdf_date":"日期","pdf_exercise":"练习","pdf_avg":"平均","pdf_best":"最佳","exercises_count":"练习","exType_letter":"字母","exType_word":"单词","exType_sentence":"句子","pdf_generating":"生成中","pdf_error":"无法生成PDF。请重试。","pdf_no_sessions":"尚无练习记录 — 开始练习以生成报告。","pdf_share_title":"ReWrite 进度报告","disclaimerTitle":"重要","aboutDisclaimerText":"ReWrite 是健康支持工具，不是医疗器械。它旨在补充 — 而非替代 — 职业治疗。请始终遵循治疗师或护理团队的指导。",
     "penColorDarkGreen":"深绿色",
     "penColorBlack":"黑色",
     "penColorDarkBlue":"深蓝色",
@@ -5401,7 +5423,7 @@ const STRINGS = {
     progressMoreOne: "还有 1 项练习可用 — 在练习选项卡中尝试",
     progressMoreOther: "还有 {count} 项练习可用 — 在练习选项卡中尝试",
   },
-  pl: {
+  pl: {"personalDetailsTitle":"Dane osobowe","personalDetailsHint":"Wszystkie pola opcjonalne. Przechowywane tylko na tym urządzeniu. Używane do wypełnienia raportu PDF postępów.","pd_firstname":"Imię","pd_lastname":"Nazwisko","pd_dob":"Data urodzenia","pd_patientid":"Numer NHS (opcjonalny)","pd_patientid_intl":"ID pacjenta (opcjonalny)","pd_clinician":"Imię klinicysty (opcjonalne)","pd_clinician_email":"E-mail klinicysty (opcjonalny)","generatePdfBtnLabel":"Wygeneruj raport PDF","generatePdfHint":"Tworzy dwujęzyczny PDF (Twój język i angielski) z postępami, wykresami i danymi osobowymi. Możesz go zapisać lub udostępnić e-mailem.","pdf_scroll_english":"Przewiń w dół, aby zobaczyć angielski","pdf_title":"Raport Postępów ReWrite","pdf_patient":"Pacjent","pdf_dob":"Data urodzenia","pdf_clinician":"Klinicysta","pdf_date":"Data","pdf_exercise":"Ćwiczenie","pdf_avg":"Średnia","pdf_best":"Najlepszy","exercises_count":"ćwiczenia","exType_letter":"Litery","exType_word":"Słowa","exType_sentence":"Zdania","pdf_generating":"Generowanie","pdf_error":"Nie udało się wygenerować PDF. Spróbuj ponownie.","pdf_no_sessions":"Brak sesji — zacznij ćwiczyć, aby wygenerować raport.","pdf_share_title":"Raport Postępów ReWrite","disclaimerTitle":"Ważne","aboutDisclaimerText":"ReWrite to narzędzie wspierające dobre samopoczucie, a nie wyrób medyczny. Jest zaprojektowane jako uzupełnienie — nie zamiennik — terapii zajęciowej. Zawsze stosuj się do wskazówek terapeuty lub zespołu opieki.",
     "penColorDarkGreen":"Ciemnozielony",
     "penColorBlack":"Czarny",
     "penColorDarkBlue":"Ciemnoniebieski",
@@ -5519,7 +5541,7 @@ const STRINGS = {
     progressMoreOne: "Dostępne jeszcze 1 ćwiczenie — wypróbuj je w zakładce Ćwiczenia",
     progressMoreOther: "Dostępnych jeszcze {count} ćwiczeń — wypróbuj je w zakładce Ćwiczenia",
   },
-  es_mx: {
+  es_mx: {"personalDetailsTitle":"Datos personales","personalDetailsHint":"Todos opcionales. Almacenados solo en este dispositivo. Se usan para llenar tu informe PDF de progreso.","pd_firstname":"Nombre","pd_lastname":"Apellido","pd_dob":"Fecha de nacimiento","pd_patientid":"Número NHS (opcional)","pd_patientid_intl":"ID de paciente (opcional)","pd_clinician":"Nombre del médico (opcional)","pd_clinician_email":"Correo del médico (opcional)","generatePdfBtnLabel":"Generar informe PDF","generatePdfHint":"Crea un PDF bilingüe (tu idioma e inglés) con tu progreso, gráficas y datos personales. Puedes guardarlo o compartirlo por correo.","pdf_scroll_english":"Desplázate hacia abajo para inglés","pdf_title":"Informe de Progreso de ReWrite","pdf_patient":"Paciente","pdf_dob":"Fecha de nacimiento","pdf_clinician":"Médico","pdf_date":"Fecha","pdf_exercise":"Ejercicio","pdf_avg":"Promedio","pdf_best":"Mejor","exercises_count":"ejercicios","exType_letter":"Letras","exType_word":"Palabras","exType_sentence":"Oraciones","pdf_generating":"Generando","pdf_error":"No se pudo generar el PDF. Inténtalo de nuevo.","pdf_no_sessions":"Aún no hay sesiones — empieza a practicar para generar un informe.","pdf_share_title":"Informe de Progreso de ReWrite","disclaimerTitle":"Importante","aboutDisclaimerText":"ReWrite es una herramienta de apoyo al bienestar, no un dispositivo médico. Está diseñada para complementar — no sustituir — la terapia ocupacional. Sigue siempre la orientación de tu terapeuta o equipo de cuidados.",
     "penColorDarkGreen":"Verde oscuro",
     "penColorBlack":"Negro",
     "penColorDarkBlue":"Azul oscuro",
@@ -5637,7 +5659,7 @@ const STRINGS = {
     progressMoreOne: "1 ejercicio más disponible: pruébalo en la pestaña Ejercicios",
     progressMoreOther: "{count} ejercicios más disponibles: pruébalos en la pestaña Ejercicios",
   },
-  pt_br: {
+  pt_br: {"personalDetailsTitle":"Dados pessoais","personalDetailsHint":"Todos opcionais. Armazenados apenas neste dispositivo. Usados para preencher seu relatório PDF de progresso.","pd_firstname":"Nome","pd_lastname":"Sobrenome","pd_dob":"Data de nascimento","pd_patientid":"Número NHS (opcional)","pd_patientid_intl":"ID do paciente (opcional)","pd_clinician":"Nome do médico (opcional)","pd_clinician_email":"E-mail do médico (opcional)","generatePdfBtnLabel":"Gerar relatório PDF","generatePdfHint":"Cria um PDF bilíngue (seu idioma e inglês) com seu progresso, gráficos e dados pessoais. Você pode salvá-lo ou compartilhá-lo por e-mail.","pdf_scroll_english":"Role para baixo para inglês","pdf_title":"Relatório de Progresso ReWrite","pdf_patient":"Paciente","pdf_dob":"Data de nascimento","pdf_clinician":"Médico","pdf_date":"Data","pdf_exercise":"Exercício","pdf_avg":"Média","pdf_best":"Melhor","exercises_count":"exercícios","exType_letter":"Letras","exType_word":"Palavras","exType_sentence":"Frases","pdf_generating":"Gerando","pdf_error":"Não foi possível gerar o PDF. Tente novamente.","pdf_no_sessions":"Ainda sem sessões — comece a praticar para gerar um relatório.","pdf_share_title":"Relatório de Progresso ReWrite","disclaimerTitle":"Importante","aboutDisclaimerText":"ReWrite é uma ferramenta de apoio ao bem-estar, não um dispositivo médico. Foi projetado para complementar — não substituir — a terapia ocupacional. Sempre siga a orientação do seu terapeuta ou equipe de cuidados.",
     "penColorDarkGreen":"Verde escuro",
     "penColorBlack":"Preto",
     "penColorDarkBlue":"Azul escuro",
@@ -5755,7 +5777,7 @@ const STRINGS = {
     progressMoreOne: "Mais 1 exercício disponível — experimente na aba Exercícios",
     progressMoreOther: "Mais {count} exercícios disponíveis — experimente na aba Exercícios",
   },
-  fr_ca: {
+  fr_ca: {"personalDetailsTitle":"Renseignements personnels","personalDetailsHint":"Tous facultatifs. Stockés uniquement sur cet appareil. Utilisés pour remplir votre rapport PDF de progression.","pd_firstname":"Prénom","pd_lastname":"Nom","pd_dob":"Date de naissance","pd_patientid":"Numéro NHS (facultatif)","pd_patientid_intl":"ID patient (facultatif)","pd_clinician":"Nom du clinicien (facultatif)","pd_clinician_email":"Courriel du clinicien (facultatif)","generatePdfBtnLabel":"Générer le rapport PDF","generatePdfHint":"Crée un PDF bilingue (votre langue et anglais) avec votre progression, vos graphiques et vos renseignements personnels. Vous pouvez l'enregistrer ou le partager par courriel.","pdf_scroll_english":"Faites défiler pour l'anglais","pdf_title":"Rapport de Progression ReWrite","pdf_patient":"Patient","pdf_dob":"Date de naissance","pdf_clinician":"Clinicien","pdf_date":"Date","pdf_exercise":"Exercice","pdf_avg":"Moyenne","pdf_best":"Meilleur","exercises_count":"exercices","exType_letter":"Lettres","exType_word":"Mots","exType_sentence":"Phrases","pdf_generating":"Génération","pdf_error":"Impossible de générer le PDF. Veuillez réessayer.","pdf_no_sessions":"Aucune session pour le moment — commencez à vous entraîner pour générer un rapport.","pdf_share_title":"Rapport de Progression ReWrite","disclaimerTitle":"Important","aboutDisclaimerText":"ReWrite est un outil de soutien au bien-être, pas un dispositif médical. Il est conçu pour compléter — et non remplacer — l'ergothérapie. Suivez toujours les conseils de votre thérapeute ou de votre équipe soignante.",
     "penColorDarkGreen":"Vert foncé",
     "penColorBlack":"Noir",
     "penColorDarkBlue":"Bleu foncé",
@@ -5874,7 +5896,7 @@ const STRINGS = {
     progressMoreOther: "{count} exercices supplémentaires disponibles — essayez-les dans l'onglet Exercices",
   },
 
-  "ga": {
+  "ga": {"personalDetailsTitle":"Sonraí pearsanta","personalDetailsHint":"Roghnach ar fad. Stóráilte ar an ngléas seo amháin. Úsáidte chun do thuarascáil dul chun cinn PDF a líonadh.","pd_firstname":"Ainm baiste","pd_lastname":"Sloinne","pd_dob":"Dáta breithe","pd_patientid":"Uimhir NHS (roghnach)","pd_patientid_intl":"ID Othair (roghnach)","pd_clinician":"Ainm an chliniceora (roghnach)","pd_clinician_email":"Ríomhphost an chliniceora (roghnach)","generatePdfBtnLabel":"Cruthaigh tuarascáil PDF","generatePdfHint":"Cruthaíonn sé PDF dátheangach (do theanga féin agus Béarla) le do dhul chun cinn, cairteacha agus sonraí pearsanta. Is féidir é a shábháil nó a roinnt trí ríomhphost.","pdf_scroll_english":"Scrollaigh síos don Bhéarla","pdf_title":"Tuarascáil Dul Chun Cinn ReWrite","pdf_patient":"Othar","pdf_dob":"Dáta breithe","pdf_clinician":"Cliniceoir","pdf_date":"Dáta","pdf_exercise":"Cleachtadh","pdf_avg":"Meán","pdf_best":"Is fearr","exercises_count":"cleachtaí","exType_letter":"Litreacha","exType_word":"Focail","exType_sentence":"Abairtí","pdf_generating":"Á chruthú","pdf_error":"Níorbh fhéidir an PDF a chruthú. Bain triail eile as.","pdf_no_sessions":"Gan seisiúin go fóill — tosaigh ag cleachtadh chun tuarascáil a chruthú.","pdf_share_title":"Tuarascáil Dul Chun Cinn ReWrite","disclaimerTitle":"Tábhachtach","aboutDisclaimerText":"Is uirlis tacaíochta folláine é ReWrite, ní gléas leighis. Tá sé deartha chun teiripe ghairme a chomhlánú — ní chun é a chur in ionad. Lean treoir do theiripeoir nó do fhoireann cúraim i gcónaí.",
     "penColorDarkGreen":"Glas dorcha",
     "penColorBlack":"Dubh",
     "penColorDarkBlue":"Gorm dorcha",
@@ -6104,12 +6126,26 @@ function applyLanguage() {
     // Tab bar
     'tabExercises','tabProgress','tabAbout','tabSettings',
     // Session summary
-    'sumExLabel','sumBestLabel','sumBackBtn','sumNewBtn'
+    'sumExLabel','sumBestLabel','sumBackBtn','sumNewBtn',
+    // PDF report feature
+    'personalDetailsTitle','personalDetailsHint','generatePdfBtnLabel','generatePdfHint'
   ];
   ids.forEach(id => {
     const el = document.getElementById(id);
     if (el && s[id] !== undefined) el.textContent = s[id];
   });
+  // PDF input placeholders
+  const pdInputs = {rwPdFirstname:'pd_firstname',rwPdLastname:'pd_lastname',rwPdDob:'pd_dob',rwPdClinician:'pd_clinician',rwPdClinicianEmail:'pd_clinician_email'};
+  Object.entries(pdInputs).forEach(([elId,key])=>{
+    const el=document.getElementById(elId);
+    if(el && s[key]) el.placeholder=s[key];
+  });
+  // NHS vs Patient ID swap
+  const pidEl=document.getElementById('rwPdPatientid');
+  if(pidEl){
+    const isUK=['en','cy','ga'].indexOf(currentLang)>=0;
+    pidEl.placeholder = isUK ? (s.pd_patientid||'NHS Number (optional)') : (s.pd_patientid_intl||'Patient ID (optional)');
+  }
   // Pen-colour swatch aria-labels
   const penSwatches = {
     penSwatchDarkGreen: 'penColorDarkGreen',
@@ -6933,6 +6969,258 @@ async function refreshProgress() {
 
 function exportForTherapist() {
   window.print();
+}
+
+// ── Personal Details (stored locally) ───────────────────────────────────────
+function rwLoadPersonalDetails(){
+  try{var pd=JSON.parse(localStorage.getItem('rewrite_pd')||'{}');
+    var fields=['firstname','lastname','dob','patientid','clinician','clinicianEmail'];
+    var ids={firstname:'rwPdFirstname',lastname:'rwPdLastname',dob:'rwPdDob',patientid:'rwPdPatientid',clinician:'rwPdClinician',clinicianEmail:'rwPdClinicianEmail'};
+    fields.forEach(function(k){
+      var el=document.getElementById(ids[k]);
+      if(el && pd[k]) el.value=pd[k];
+    });
+  }catch(e){}
+  // NHS field swap based on locale
+  var pdId=document.getElementById('rwPdPatientid');
+  if(pdId){
+    var lang=currentLang||(window.STRINGS?Object.keys(window.STRINGS)[0]:'en');
+    var s=(window.STRINGS&&window.STRINGS[lang])||(window.STRINGS&&window.STRINGS.en)||{};
+    var isUK=['en','cy','ga'].indexOf(lang)>=0;
+    pdId.placeholder=isUK?(s.pd_patientid||'NHS Number (optional)'):(s.pd_patientid_intl||'Patient ID (optional)');
+  }
+}
+function rwSavePersonalDetails(){
+  var pd={};
+  var ids={firstname:'rwPdFirstname',lastname:'rwPdLastname',dob:'rwPdDob',patientid:'rwPdPatientid',clinician:'rwPdClinician',clinicianEmail:'rwPdClinicianEmail'};
+  Object.keys(ids).forEach(function(k){
+    var el=document.getElementById(ids[k]);
+    if(el) pd[k]=el.value.trim();
+  });
+  localStorage.setItem('rewrite_pd',JSON.stringify(pd));
+  return pd;
+}
+// Auto-save personal details on change
+document.addEventListener('DOMContentLoaded',function(){
+  ['rwPdFirstname','rwPdLastname','rwPdDob','rwPdPatientid','rwPdClinician','rwPdClinicianEmail'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.addEventListener('change',rwSavePersonalDetails);
+  });
+  rwLoadPersonalDetails();
+});
+
+// ── PDF report generation ─────────────────────────────────────────────────────
+function rwGetTrendChartImage(){
+  try{
+    var c=document.getElementById('trendChart');
+    if(!c) return null;
+    return c.toDataURL('image/png');
+  }catch(e){return null;}
+}
+
+function rwBuildReportSection(sessions, lang, isFirst){
+  var s=(window.STRINGS&&window.STRINGS[lang])||(window.STRINGS&&window.STRINGS.en)||{};
+  function tt(k){return s[k] || (window.STRINGS&&window.STRINGS.en&&window.STRINGS.en[k]) || k;}
+  var pd=rwSavePersonalDetails();
+  var fullName=[pd.firstname,pd.lastname].filter(Boolean).join(' ');
+  var total=sessions.length;
+  var html='';
+  var isRTL=['ar','he','fa','ur'].indexOf(lang)>=0;
+  var dirAttr=isRTL?' dir="rtl"':'';
+
+  html+='<section'+dirAttr+' style="font-family:Inter,Arial,sans-serif;color:#222;padding:18mm 16mm;'+(isFirst?'':'page-break-before:always;')+'min-height:240mm;position:relative;background:#fff;">';
+
+  if(isFirst){
+    html+='<img src="./icons/icon-192x192.png" alt="ReWrite" style="position:absolute;top:14mm;right:16mm;width:18mm;height:18mm;border-radius:4mm;"/>';
+  }
+
+  if(isFirst && lang!=='en'){
+    html+='<div style="font-size:9pt;color:#777;margin-bottom:8mm;">'+tt('pdf_scroll_english')+' ↓</div>';
+  }
+
+  html+='<div style="font-family:Georgia,serif;font-size:24pt;color:#1a4a3a;margin-bottom:2mm;font-weight:700;">'+tt('pdf_title')+'</div>';
+  html+='<div style="font-size:10pt;color:#666;margin-bottom:8mm;">'+new Date().toLocaleDateString(lang==='en'?'en-GB':lang.replace('_','-'),{day:'numeric',month:'long',year:'numeric'})+'</div>';
+
+  // Patient block
+  if(fullName||pd.dob||pd.patientid){
+    html+='<div style="border:1px solid #d4d1ca;border-radius:3mm;padding:5mm;margin-bottom:6mm;background:#faf7f0;">';
+    html+='<div style="font-size:8pt;color:#777;letter-spacing:0.5pt;text-transform:uppercase;margin-bottom:2mm;">'+tt('pdf_patient')+'</div>';
+    if(fullName) html+='<div style="font-size:14pt;font-weight:600;margin-bottom:1mm;">'+fullName+'</div>';
+    var meta=[];
+    if(pd.dob) meta.push(tt('pdf_dob')+': '+new Date(pd.dob).toLocaleDateString(lang==='en'?'en-GB':lang.replace('_','-'),{day:'numeric',month:'long',year:'numeric'}));
+    if(pd.patientid){
+      var idLabel=['en','cy','ga'].indexOf(lang)>=0?tt('pd_patientid'):tt('pd_patientid_intl');
+      meta.push(idLabel+': '+pd.patientid);
+    }
+    if(meta.length) html+='<div style="font-size:10pt;color:#444;">'+meta.join(' · ')+'</div>';
+    html+='</div>';
+  }
+
+  if(pd.clinician||pd.clinicianEmail){
+    html+='<div style="font-size:10pt;color:#444;margin-bottom:6mm;">';
+    html+='<span style="color:#777;">'+tt('pdf_clinician')+': </span>';
+    if(pd.clinician) html+=pd.clinician;
+    if(pd.clinicianEmail) html+=(pd.clinician?' · ':'')+pd.clinicianEmail;
+    html+='</div>';
+  }
+
+  // KPIs — sessions, exercises, avg, best
+  var totalSessions=total;
+  var totalEx=sessions.reduce(function(a,sn){return a+(sn.count||0);},0);
+  var allScores=sessions.reduce(function(a,sn){
+    return a.concat((sn.exercises||[]).map(function(e){return e.score;}));
+  },[]);
+  var avgScore=allScores.length?Math.round(allScores.reduce(function(a,b){return a+b;},0)/allScores.length):0;
+  var bestScore=allScores.length?Math.max.apply(null,allScores):0;
+
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:3mm;margin-bottom:6mm;">';
+  function kpi(label,val){return '<div style="border:1px solid #d4d1ca;border-radius:2mm;padding:4mm;text-align:center;background:#fff;"><div style="font-size:18pt;font-weight:700;color:#1a4a3a;">'+val+'</div><div style="font-size:7pt;color:#777;letter-spacing:0.5pt;text-transform:uppercase;margin-top:1mm;">'+label+'</div></div>';}
+  html+=kpi(tt('statSessionsLabel')||'Sessions',totalSessions);
+  html+=kpi(tt('statExercisesLabel')||'Exercises',totalEx);
+  html+=kpi(tt('statAvgLabel')||'Avg Score',avgScore?avgScore+'%':'—');
+  html+=kpi(tt('statBestLabel')||'Best Score',bestScore?bestScore+'%':'—');
+  html+='</div>';
+
+  // Chart
+  var chartImg=rwGetTrendChartImage();
+  if(chartImg && total>=2){
+    html+='<div style="margin-bottom:6mm;">';
+    html+='<div style="font-size:11pt;font-weight:600;color:#1a4a3a;margin-bottom:3mm;">'+(tt('trendChartTitle')||'Your Progress Over Time')+'</div>';
+    html+='<img src="'+chartImg+'" style="width:100%;border:1px solid #d4d1ca;border-radius:2mm;"/>';
+    html+='</div>';
+  }
+
+  // Per-exercise breakdown
+  var byType={letter:[],word:[],sentence:[]};
+  sessions.forEach(function(sn){
+    var t=sn.type || (sn.exercises&&sn.exercises[0]&&sn.exercises[0].type) || 'letter';
+    if(!byType[t]) byType[t]=[];
+    byType[t]=byType[t].concat(sn.exercises||[]);
+  });
+  html+='<div style="font-size:11pt;font-weight:600;color:#1a4a3a;margin-bottom:3mm;margin-top:4mm;">'+(tt('perExTitle')||'Per-Exercise Breakdown')+'</div>';
+  ['letter','word','sentence'].forEach(function(typ){
+    var arr=byType[typ]||[];
+    if(!arr.length) return;
+    var scores=arr.map(function(e){return e.score;});
+    var best=Math.max.apply(null,scores);
+    var avg=Math.round(scores.reduce(function(a,b){return a+b;},0)/scores.length);
+    var label=tt('exType_'+typ)|| (typ.charAt(0).toUpperCase()+typ.slice(1)+'s');
+    html+='<div style="border-top:1px solid #ede3cb;padding:3mm 0;font-size:10pt;">';
+    html+='<div style="font-weight:600;color:#222;margin-bottom:1mm;">'+label+' <span style="color:#777;font-weight:400;">('+arr.length+' '+(tt('exercises_count')||'exercises')+')</span></div>';
+    html+='<div style="color:#444;font-size:9pt;">'+(tt('pdf_best')||'Best')+': '+best+'% · '+(tt('pdf_avg')||'Average')+': '+avg+'%</div>';
+    html+='</div>';
+  });
+
+  // Recent sessions table
+  if(sessions.length){
+    html+='<div style="font-size:11pt;font-weight:600;color:#1a4a3a;margin-bottom:3mm;margin-top:5mm;">'+(tt('sessionLogTitle')||'Session History')+'</div>';
+    html+='<table style="width:100%;border-collapse:collapse;font-size:9pt;">';
+    html+='<thead><tr style="background:#ede3cb;"><th style="text-align:left;padding:2mm 3mm;">'+tt('pdf_date')+'</th><th style="text-align:left;padding:2mm 3mm;">'+tt('pdf_exercise')+'</th><th style="text-align:right;padding:2mm 3mm;">'+(tt('pdf_avg')||'Average')+'</th></tr></thead><tbody>';
+    sessions.slice(-10).reverse().forEach(function(sn,i){
+      var d=new Date(sn.date||Date.now());
+      var dateStr=d.toLocaleDateString(lang==='en'?'en-GB':lang.replace('_','-'),{day:'numeric',month:'short',year:'numeric'});
+      var typeLabel=tt('exType_'+sn.type)|| (sn.type?(sn.type.charAt(0).toUpperCase()+sn.type.slice(1)+'s'):'—');
+      html+='<tr style="border-bottom:1px solid #ede3cb;'+(i%2?'background:#faf7f0;':'')+'">';
+      html+='<td style="padding:2mm 3mm;">'+dateStr+'</td>';
+      html+='<td style="padding:2mm 3mm;">'+typeLabel+'</td>';
+      html+='<td style="padding:2mm 3mm;text-align:right;font-variant-numeric:tabular-nums;">'+(sn.averageScore||0)+'%</td>';
+      html+='</tr>';
+    });
+    html+='</tbody></table>';
+  }
+
+  // Footer disclaimer
+  html+='<div style="margin-top:8mm;padding-top:4mm;border-top:1px solid #d4d1ca;font-size:8pt;color:#777;line-height:1.4;">';
+  html+='<strong>'+(tt('disclaimerTitle')||'Important')+':</strong> '+(tt('aboutDisclaimerText')||'ReWrite is a wellness support tool, not a medical device. It is designed to supplement — not replace — occupational therapy. Always follow the guidance of your therapist or care team.');
+  html+='</div>';
+
+  html+='</section>';
+  return html;
+}
+
+async function generateProgressPDF(){
+  if(typeof html2pdf==='undefined'){alert('PDF library not loaded');return;}
+  var btn=document.getElementById('generatePdfBtn');
+  var lbl=document.getElementById('generatePdfBtnLabel');
+  var origLabel=lbl?lbl.textContent:'';
+  var s=(window.STRINGS&&window.STRINGS[currentLang])||(window.STRINGS&&window.STRINGS.en)||{};
+  if(lbl) lbl.textContent=(s.pdf_generating||'Generating')+'…';
+  if(btn) btn.disabled=true;
+
+  try{
+    var sessions=await getAllSessions();
+    if(!sessions||!sessions.length){
+      alert(s.pdf_no_sessions||'No sessions yet — start practising to generate a report.');
+      if(lbl) lbl.textContent=origLabel;
+      if(btn) btn.disabled=false;
+      return;
+    }
+    rwSavePersonalDetails();
+
+    var container=document.createElement('div');
+    container.style.cssText='position:fixed;top:-9999px;left:-9999px;width:210mm;background:#fff;';
+    container.innerHTML += rwBuildReportSection(sessions, currentLang, true);
+    if(currentLang!=='en'){
+      container.innerHTML += rwBuildReportSection(sessions, 'en', false);
+    }
+    document.body.appendChild(container);
+
+    var pd=rwSavePersonalDetails();
+    var fullName=[pd.firstname,pd.lastname].filter(Boolean).join(' ');
+    var dateStr=new Date().toISOString().slice(0,10);
+    var fname='ReWrite-Progress-'+(fullName?fullName.replace(/[^A-Za-z0-9]+/g,'-')+'-':'')+dateStr+'.pdf';
+
+    var opt={
+      margin:0,
+      filename:fname,
+      image:{type:'jpeg',quality:0.95},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait',compress:true},
+      pagebreak:{mode:['css','legacy']}
+    };
+
+    html2pdf().from(container).set(opt).toPdf().get('pdf').then(function(pdf){
+      var blob=pdf.output('blob');
+      document.body.removeChild(container);
+      if(lbl) lbl.textContent=origLabel;
+      if(btn) btn.disabled=false;
+      if(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem && window.Capacitor.Plugins.Share){
+        var FS=window.Capacitor.Plugins.Filesystem;
+        var SH=window.Capacitor.Plugins.Share;
+        var reader=new FileReader();
+        reader.onloadend=function(){
+          var base64=reader.result.split(',')[1];
+          FS.writeFile({path:fname,data:base64,directory:'CACHE',recursive:true}).then(function(r){
+            SH.share({title:s.pdf_share_title||'ReWrite Progress Report',url:r.uri,dialogTitle:s.pdf_share_title||'ReWrite Progress Report'}).catch(function(e){console.warn(e);});
+          }).catch(function(e){
+            console.warn('FS write',e);
+            rwDownloadBlob(blob,fname);
+          });
+        };
+        reader.readAsDataURL(blob);
+      } else {
+        rwDownloadBlob(blob,fname);
+      }
+    }).catch(function(err){
+      console.error('PDF gen failed',err);
+      try{document.body.removeChild(container);}catch(e){}
+      if(lbl) lbl.textContent=origLabel;
+      if(btn) btn.disabled=false;
+      alert(s.pdf_error||'Could not generate the PDF. Please try again.');
+    });
+  } catch(e){
+    console.error(e);
+    if(lbl) lbl.textContent=origLabel;
+    if(btn) btn.disabled=false;
+  }
+}
+
+function rwDownloadBlob(blob,fname){
+  var a=document.createElement('a');
+  var url=URL.createObjectURL(blob);
+  a.href=url; a.download=fname;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},100);
 }
 
 function renderTrendChart(sessions) {
@@ -7886,6 +8174,9 @@ if (document.readyState === 'loading') {
   relabelButton();
 })();
 </script>
+
+<!-- PDF generation library (html2pdf.js — bundles html2canvas + jsPDF) -->
+<script src="./lib/html2pdf.bundle.min.js"></script>
 
 </body>
 </html>
