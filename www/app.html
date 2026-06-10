@@ -6238,15 +6238,32 @@ function setDifficulty(type, diff, btn) {
 }
 
 function startExerciseType(type) {
-  currentType = type;
-  currentDifficulty = difficultyPerType[type] || 'easy';
-  const ex = getExercises();
-  const pool = ex[type][currentDifficulty] || ex[type].easy;
-  const len = settings.sessionLength || 8;
-  sessionExercises = shuffle([...pool]).slice(0, Math.min(len, pool.length));
-  currentIndex = 0;
-  scores = [];
-  showExerciseScreen();
+  // 1.0.18 defensive wrapper — if pool generation, shuffle, or screen setup
+  // throws on an unexpected device state we surface a friendly message
+  // instead of leaving the user on a frozen screen.
+  try {
+    currentType = type;
+    currentDifficulty = difficultyPerType[type] || 'easy';
+    const ex = getExercises();
+    const pool = ex[type][currentDifficulty] || ex[type].easy;
+    const len = settings.sessionLength || 8;
+    sessionExercises = shuffle([...pool]).slice(0, Math.min(len, pool.length));
+    currentIndex = 0;
+    scores = [];
+    showExerciseScreen();
+  } catch (err) {
+    // Log to the diagnostic ring buffer if available
+    try {
+      if (typeof _rwErrorLog !== 'undefined') {
+        _rwErrorLog.push({ time: new Date().toISOString(), msg: 'startExerciseType(' + type + ') failed: ' + (err && err.message), src: 'startExerciseType', line: 0 });
+        if (_rwErrorLog.length > 20) _rwErrorLog = _rwErrorLog.slice(-20);
+        try { localStorage.setItem('rewrite_errorLog', JSON.stringify(_rwErrorLog)); } catch (e2) {}
+      }
+    } catch (_e) {}
+    var s = (typeof STRINGS !== 'undefined' && typeof currentLang !== 'undefined') ? (STRINGS[currentLang] || STRINGS.en) : null;
+    var msg = (s && s.exercise_error) || 'Something went wrong starting this exercise. Please tap Back and try again.';
+    try { alert(msg); } catch (_e) {}
+  }
 }
 
 function shuffle(arr) {
@@ -6997,7 +7014,8 @@ function rwSavePersonalDetails(){
     var el=document.getElementById(ids[k]);
     if(el) pd[k]=el.value.trim();
   });
-  localStorage.setItem('rewrite_pd',JSON.stringify(pd));
+  // 1.0.18 defensive: swallow QuotaExceededError / Private Mode
+  try { localStorage.setItem('rewrite_pd',JSON.stringify(pd)); } catch (e) {}
   return pd;
 }
 // Auto-save personal details on change
@@ -7813,6 +7831,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ── Trace mode ──
 function startMpTrace(idx) {
+  // 1.0.18 defensive wrapper — protect My Practice trace entry path
+  try {
   var items = mpLoadItems();
   if (!items[idx]) return;
   mpCurrentItem = { item: items[idx], idx: idx };
@@ -7834,6 +7854,18 @@ function startMpTrace(idx) {
     : (s.mpTraceFreestyle || 'Trace only');
   setTimeout(function() { mpTraceSetupCanvas(items[idx].text, bold); }, 50);
   mpTraceStrokes = [];
+  } catch (err) {
+    try {
+      if (typeof _rwErrorLog !== 'undefined') {
+        _rwErrorLog.push({ time: new Date().toISOString(), msg: 'startMpTrace(' + idx + ') failed: ' + (err && err.message), src: 'startMpTrace', line: 0 });
+        if (_rwErrorLog.length > 20) _rwErrorLog = _rwErrorLog.slice(-20);
+        try { localStorage.setItem('rewrite_errorLog', JSON.stringify(_rwErrorLog)); } catch (e2) {}
+      }
+    } catch (_e) {}
+    var s = (typeof STRINGS !== 'undefined' && typeof currentLang !== 'undefined') ? (STRINGS[currentLang] || STRINGS.en) : null;
+    var msg = (s && s.exercise_error) || 'Something went wrong starting this exercise. Please tap Back and try again.';
+    try { alert(msg); } catch (_e) {}
+  }
 }
 
 function exitMpTrace() {
@@ -8073,7 +8105,7 @@ window.addEventListener('error', function(e) {
 try {
   if (!localStorage.getItem('rewrite_log_cleared_v1_0_11')) {
     localStorage.removeItem('rewrite_errorLog');
-    localStorage.setItem('rewrite_log_cleared_v1_0_11', '1');
+    try { localStorage.setItem('rewrite_log_cleared_v1_0_11', '1'); } catch (e) {}
     _rwErrorLog = [];
   }
 } catch (e) {}
