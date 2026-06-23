@@ -20,7 +20,7 @@
 /* ── Reset & Base ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#fbf8f1;--bg2:#f5f1e8;--card:#fff;--text:#2a2a28;--text2:#6b6b68;--text3:#8a9a8c;
+  --bg:#fbf8f1;--bg2:#f5f1e8;--card:#fff;--text:#2a2a28;--text2:#6b6b68;--text3:#5C5852;
   --accent:#b85c38;--accent-light:#f6e9e0;--accent-dark:#d27650;
   --success:#2e6e58;--warning:#c48a2a;--danger:#c45a4a;
   --border:rgba(42,42,40,0.12);--shadow:0 2px 12px rgba(0,0,0,.06);
@@ -48,7 +48,7 @@ canvas{display:block;touch-action:none}
   box-shadow:0 2px 8px rgba(0,0,0,.12);
 }
 .app-header h1{font-size:18px;font-weight:600;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;font-family:var(--serif)}
-.app-header .subtitle{font-size:11px;font-weight:400;opacity:.8;display:block}
+.app-header .subtitle{font-size:11px;font-weight:600;color:#fff;background:rgba(0,0,0,.45);padding:2px 8px;border-radius:10px;display:inline-block;margin-left:6px;letter-spacing:.2px}
 .header-right{display:flex;align-items:center;gap:8px}
 .header-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;transition:background .15s}
 .header-btn:hover{background:rgba(255,255,255,.15)}
@@ -269,7 +269,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 
 /* ── Dark Mode ── */
 [data-theme="dark"]{
-  --bg:#1a1a18;--bg2:#252320;--card:#2e2b28;--text:#d4d4d0;--text2:#9a9a96;--text3:#6a6a68;
+  --bg:#1a1a18;--bg2:#252320;--card:#2e2b28;--text:#d4d4d0;--text2:#9a9a96;--text3:#9a9a96;
   --accent:#d27650;--accent-light:#3a2820;--accent-dark:#e8956a;
   --success:#4a9a7a;--warning:#daa04a;--danger:#da7a6a;
   --border:rgba(245,241,232,0.12);--shadow:0 2px 12px rgba(0,0,0,.2);
@@ -488,13 +488,13 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 <header class="app-header">
   <h1>
     <svg width="28" height="28" viewBox="0 0 512 512" fill="none"><rect width="512" height="512" rx="96" fill="rgba(255,255,255,.2)"/><g transform="translate(70,140)"><path d="M10 160 Q40 40,100 110 T200 140 Q250 160,290 100 T360 120" fill="none" stroke="white" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/><circle cx="360" cy="120" r="11" fill="white"/></g></svg>
-    <span>ReWrite<span class="subtitle" id="headerSubtitle">Handwriting Rehab</span></span>
+    <span>ReWrite<span class="subtitle" id="headerSubtitle" aria-hidden="true">Handwriting Rehab</span></span>
   </h1>
   <div class="header-right">
     <button class="header-btn" id="themeToggle" aria-label="Toggle dark mode">
       <svg id="themeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
     </button>
-    <select id="langSelect" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:4px 8px;font-size:12px;cursor:pointer" aria-label="Language">
+    <select id="langSelect" style="background:rgba(0,0,0,.45);color:#fff;border:1px solid rgba(255,255,255,.45);border-radius:8px;padding:4px 8px;font-size:12px;font-weight:500;cursor:pointer" aria-label="Language">
       <option value="en">EN</option><option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option><option value="it">IT</option><option value="pt">PT</option><option value="cy">CY</option><option value="ga">GA</option><option value="ja">JA</option><option value="ko">KO</option><option value="hi">HI</option><option value="ar">AR</option><option value="zh">ZH</option><option value="pl">PL</option><option value="es_mx">ES-MX</option><option value="pt_br">PT-BR</option><option value="fr_ca">FR-CA</option>
     </select>
   </div>
@@ -516,7 +516,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   <div class="exercise-grid">
     <div class="exercise-card-group">
       <button class="exercise-card" onclick="startExerciseType('letters')">
-        <div class="exercise-icon" style="background:#f6e9e0;color:#b85c38">Aa</div>
+        <div class="exercise-icon" style="background:#f6e9e0;color:#8B3A2E">Aa</div>
         <div>
           <h3 id="exLettersTitle">Individual Letters</h3>
           <p id="exLettersDesc">Trace uppercase and lowercase letters. Focus on form, size and proportion.</p>
@@ -538,7 +538,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
     </div>
     <div class="exercise-card-group">
       <button class="exercise-card" onclick="startExerciseType('words')">
-        <div class="exercise-icon" style="background:#faf0e8;color:#8a6a3a">cat</div>
+        <div class="exercise-icon" style="background:#faf0e8;color:#6B4F25">cat</div>
         <div>
           <h3 id="exWordsTitle">Common Words</h3>
           <p id="exWordsDesc">Trace short everyday words. Connect letters smoothly.</p>
@@ -6089,6 +6089,7 @@ const STRINGS = {
 };
 
 function setLanguage(lang) {
+      document.documentElement.lang = lang.replace('_','-');
   currentLang = lang;
   document.getElementById('langSelect').value = lang;
   document.getElementById('langOverlay').classList.add('hidden');
