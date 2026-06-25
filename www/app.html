@@ -523,7 +523,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 <header class="app-header">
   <h1>
     <svg width="28" height="28" viewBox="0 0 512 512" fill="none"><rect width="512" height="512" rx="96" fill="rgba(255,255,255,.2)"/><g transform="translate(70,140)"><path d="M10 160 Q40 40,100 110 T200 140 Q250 160,290 100 T360 120" fill="none" stroke="white" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/><circle cx="360" cy="120" r="11" fill="white"/></g></svg>
-    <span>ReWrite<span class="subtitle" id="headerSubtitle" aria-hidden="true">Handwriting Rehab</span></span>
+    <span>ReWrite</span>
   </h1>
   <div class="header-right">
     <button class="header-btn" id="themeToggle" aria-label="Toggle dark mode">
@@ -6204,7 +6204,6 @@ function applyLanguage() {
   const s = STRINGS[currentLang] || STRINGS.en;
   const ids = [
     // Header
-    'headerSubtitle',
     // Exercises tab
     'exercisesTitle','exercisesSubtitle',
     'exLettersTitle','exLettersDesc',
@@ -8827,18 +8826,23 @@ if (document.readyState === 'loading') {
 <!-- Noto Sans Regular + Bold base64 — covers all Latin-script locales -->
 <script src="./lib/noto-sans-fonts.js"></script>
 
-</body>
-</html>
 
 
-// Restore BIG mode toggle on load
+<script>
+// Restore BIG mode toggle on load (1.0.20)
 (function(){
   function _initBigToggle() {
     try {
-      var t = document.getElementById('bigModeToggle');
-      if (t && settings && settings.bigMode) t.checked = true;
+      var t = document.getElementById('settingBigMode');
+      if (t && typeof settings !== 'undefined' && settings && settings.bigMode) t.classList.add('on');
+      var nt = document.getElementById('settingShowNumeric');
+      if (nt && typeof settings !== 'undefined' && settings && settings.showNumeric) nt.classList.add('on');
     } catch(_e){}
   }
   if (document.readyState === 'complete') _initBigToggle();
   else window.addEventListener('load', _initBigToggle);
 })();
+</script>
+
+</body>
+</html>
