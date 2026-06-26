@@ -6418,11 +6418,12 @@ function showWordBuilderSelection() {
   var item = _wbCurrentItem();
   if (!item || !item.stem) return;
   document.getElementById('wbPrompt').textContent = s.wbPrompt || 'Pick an ending to make a word';
-  document.getElementById('wbStemText').textContent = item.stem;
   // Use first ending length to choose blanks (visual hint only)
   var blanks = _wbBlankSpans(Math.max.apply(null, item.endings.map(function(e){return Math.max(1, [...e].length);})));
   var stemEl = document.getElementById('wbStemDisplay');
-  stemEl.innerHTML = '<span>' + item.stem + '</span>' + blanks;
+  // Rebuild markup but preserve id="wbStemText" so subsequent entries work
+  stemEl.innerHTML = '<span id="wbStemText"></span>' + blanks;
+  document.getElementById('wbStemText').textContent = item.stem;
   // Build choices
   var ch = document.getElementById('wbChoices');
   ch.innerHTML = '';
