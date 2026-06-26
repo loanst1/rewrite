@@ -113,9 +113,19 @@ canvas{display:block;touch-action:none}
 .canvas-container{
   position:relative;border-radius:var(--radius);overflow:hidden;
   background:var(--card);border:2px solid var(--border);
-  margin-bottom:14px;
+  margin:0 auto 14px;
+  width:100%;max-width:720px;
 }
 .canvas-container canvas{width:100%;height:auto;cursor:crosshair}
+/* On wider screens (iPad landscape, desktop), keep a comfortable focused writing pad */
+@media(min-width:900px){
+  .canvas-container{max-width:760px}
+  .target-display,.exercise-progress,.drawing-controls,#scoreFeedback,.effort-chips,.score-narrative,.exercise-top-bar{max-width:760px;margin-left:auto;margin-right:auto}
+}
+@media(min-width:1100px){
+  .canvas-container{max-width:820px}
+  .target-display,.exercise-progress,.drawing-controls,#scoreFeedback,.effort-chips,.score-narrative,.exercise-top-bar{max-width:820px;margin-left:auto;margin-right:auto}
+}
 .canvas-hint{
   position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
   font-size:12px;color:var(--text3);background:rgba(255,255,255,.85);
@@ -6552,6 +6562,47 @@ function bigModeScoreAdjust(baseScore, drawBB, guideBB) {
 var sessionAmplitudes = [];
 
 
+// ══════════════ Canvas resize on rotation (1.0.20) ══════════════
+let _canvasResizeTimer = null;
+function handleCanvasResize() {
+  // Only re-render if we're currently in an exercise screen and have a target
+  const exActive = document.getElementById('exerciseActive');
+  if (!exActive || !exActive.classList.contains('active')) return;
+  if (typeof sessionExercises === 'undefined' || !sessionExercises[currentIndex]) return;
+  let exercise = sessionExercises[currentIndex];
+  // Word builder unchosen objects are skipped
+  if (typeof exercise === 'object' && !exercise.chosen) return;
+  if (typeof exercise === 'object') exercise = exercise.stem + (exercise.chosen || '');
+  // Capture current strokes so we can restore after re-setup
+  const savedStrokes = (typeof strokes !== 'undefined' && strokes) ? strokes.slice() : [];
+  setupCanvas(exercise);
+  // Re-render saved strokes onto the new canvas
+  if (savedStrokes.length && typeof drawCtx !== 'undefined' && drawCtx) {
+    drawCtx.lineCap = 'round'; drawCtx.lineJoin = 'round';
+    drawCtx.lineWidth = settings.penWidth || 5;
+    drawCtx.strokeStyle = getActivePenColor(document.documentElement.getAttribute('data-theme') === 'dark');
+    for (const stroke of savedStrokes) {
+      if (!stroke || stroke.length < 2) continue;
+      drawCtx.beginPath();
+      drawCtx.moveTo(stroke[0].x, stroke[0].y);
+      for (let i = 1; i < stroke.length; i++) drawCtx.lineTo(stroke[i].x, stroke[i].y);
+      drawCtx.stroke();
+    }
+    strokes = savedStrokes;
+    hasStrokes = true;
+    const sb = document.getElementById('submitBtn'); if (sb) sb.disabled = false;
+  }
+}
+window.addEventListener('resize', () => {
+  clearTimeout(_canvasResizeTimer);
+  _canvasResizeTimer = setTimeout(handleCanvasResize, 200);
+});
+window.addEventListener('orientationchange', () => {
+  // Wait longer for iOS to settle layout
+  clearTimeout(_canvasResizeTimer);
+  _canvasResizeTimer = setTimeout(handleCanvasResize, 400);
+});
+
 // ══════════════ EFFORT-FIRST SCORING (1.0.20) ══════════════
 function computeEffortChips(rawScore, drawBB, guideBB, strokeCount, durationMs) {
   // EFFORT
@@ -6720,11 +6771,14 @@ function loadExercise() {
   document.getElementById('targetHint').textContent = getHints()[currentType] || '';
   document.getElementById('tracePrompt').textContent = s.tracePrompt || 'Trace this carefully:';
 
-  // Reset canvas
-  setupCanvas(exercise);
-  document.getElementById('scoreFeedback').style.display = 'none';
-  // 1.0.20: exit score mode when loading a new exercise
+  // 1.0.20: exit score mode BEFORE setupCanvas so the container has its final size
   var es = document.getElementById('exerciseActive'); if (es) es.classList.remove('score-mode');
+  document.getElementById('scoreFeedback').style.display = 'none';
+  document.getElementById('canvasContainer').style.display = '';
+  // Force a layout flush so getBoundingClientRect returns the real size
+  void document.getElementById('canvasContainer').offsetWidth;
+  // Reset canvas (now measures the correct container width)
+  setupCanvas(exercise);
   document.getElementById('drawingControls').style.display = 'block';
   document.getElementById('submitBtn').disabled = true;
   const hint = document.getElementById('canvasHint');
@@ -6792,8 +6846,18 @@ function setupCanvas(text) {
   // Match canvas to container size × devicePixelRatio for crisp rendering
   const dpr = window.devicePixelRatio || 1;
   const rect = container.getBoundingClientRect();
-  const cssW = rect.width || 360;
-  const cssH = Math.round(cssW * 0.4); // 2.5:1 aspect ratio
+  // Defer setup if container hasn't laid out yet — retry on next frame
+  if (!rect.width) {
+    if (!setupCanvas._retried) {
+      setupCanvas._retried = true;
+      requestAnimationFrame(() => { setupCanvas._retried = false; setupCanvas(text); });
+    }
+    return;
+  }
+  const cssW = rect.width;
+  // 2.5:1 aspect on phones, 2:1 on wider screens (gives more vertical room for writing)
+  const aspectRatio = cssW > 600 ? 0.5 : 0.4;
+  const cssH = Math.round(cssW * aspectRatio);
   const w = Math.round(cssW * dpr);
   const h = Math.round(cssH * dpr);
 
