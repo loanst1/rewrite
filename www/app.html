@@ -22,7 +22,13 @@
 :root{
   --bg:#fbf8f1;--bg2:#f5f1e8;--card:#fff;--text:#2a2a28;--text2:#6b6b68;--text3:#5C5852;
   --accent:#b85c38;--accent-light:#f6e9e0;--accent-dark:#d27650;
-  --success:#2e6e58;--warning:#c48a2a;--danger:#c45a4a;
+  /* v1.0.21 a11y: darker for text usage so small headings/labels pass WCAG AA on --bg. */
+  --accent-text:#a54f2f;
+  /* On-accent is the text/icon color used on solid --accent backgrounds. */
+  --on-accent:#ffffff;
+  color-scheme: light;
+  --success:#2e6e58;--warning:#c48a2a;--danger:#a83a2a;
+  --btn-primary-bg:#a54f2f;--btn-primary-text:#ffffff;
   --border:rgba(42,42,40,0.12);--shadow:0 2px 12px rgba(0,0,0,.06);
   --radius:16px;--radius-sm:10px;
   --font:'Inter',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
@@ -68,7 +74,7 @@ canvas{display:block;touch-action:none}
   gap:3px;font-size:10px;font-weight:600;color:var(--text3);
   transition:color .15s;min-height:var(--min-touch);
 }
-.tab-btn.active{color:var(--accent)}
+.tab-btn.active{color:var(--accent-text)}
 .tab-btn svg{width:22px;height:22px;transition:transform .15s}
 .tab-btn.active svg{transform:scale(1.08)}
 
@@ -107,7 +113,7 @@ canvas{display:block;touch-action:none}
   background:var(--bg2);color:var(--text2);border:2px solid transparent;
   transition:all .15s;min-height:var(--min-touch);
 }
-.level-btn.active{background:var(--accent-light);color:var(--accent);border-color:var(--accent)}
+.level-btn.active{background:var(--accent-light);color:var(--accent-text);border-color:var(--accent)}
 
 /* ── Canvas ── */
 .canvas-container{
@@ -145,8 +151,8 @@ canvas{display:block;touch-action:none}
   padding:14px 24px;border-radius:var(--radius-sm);font-size:15px;font-weight:600;
   transition:all .15s;min-height:var(--min-touch);
 }
-.btn-primary{background:var(--accent);color:#fff;width:100%}
-.btn-primary:hover{background:var(--accent-dark)}
+.btn-primary{background:var(--btn-primary-bg);color:var(--btn-primary-text);width:100%}
+.btn-primary:hover{filter:brightness(.92)}
 .btn-primary:active{transform:scale(.97)}
 .btn-outline{background:var(--bg2);color:var(--text);border:1px solid var(--border);width:100%}
 .btn-outline:hover{background:var(--border)}
@@ -172,7 +178,7 @@ canvas{display:block;touch-action:none}
 /* ── Progress Stats ── */
 .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
 .stat-card{background:var(--card);border-radius:var(--radius-sm);padding:14px;text-align:center;border:1px solid var(--border)}
-.stat-value{font-size:22px;font-weight:800;color:var(--accent)}
+.stat-value{font-size:22px;font-weight:800;color:var(--accent-text)}
 .stat-label{font-size:11px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
 
 /* ── Session Log ── */
@@ -196,7 +202,7 @@ canvas{display:block;touch-action:none}
 
 /* ── About ── */
 .about-section{margin-bottom:20px}
-.about-section h3{font-size:15px;font-weight:700;margin-bottom:6px;color:var(--accent)}
+.about-section h3{font-size:15px;font-weight:700;margin-bottom:6px;color:var(--accent-text)}
 .about-section p,.about-section li{font-size:13px;color:var(--text2);line-height:1.6}
 .about-section ul{padding-left:18px;margin-top:4px}
 .disclaimer{background:#fef3cd;border:1px solid #f0d78a;border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;font-size:12px;line-height:1.5;color:#7a6520}
@@ -219,7 +225,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   padding:24px;gap:16px;
 }
 .lang-overlay.hidden{display:none}
-.lang-overlay h2{font-size:20px;font-weight:700;color:var(--accent);text-align:center}
+.lang-overlay h2{font-size:20px;font-weight:700;color:var(--accent-text);text-align:center}
 .lang-overlay p{font-size:13px;color:var(--text2);text-align:center;margin-bottom:8px}
 .lang-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;max-width:340px}
 .lang-btn{
@@ -249,8 +255,13 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 .exercise-card-group{margin-bottom:0}
 .difficulty-toggle{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0 12px 60px}
 .diff-btn{padding:10px 14px;border-radius:14px;font-size:12px;font-weight:600;border:1.5px solid var(--border);background:var(--bg);color:var(--text2);cursor:pointer;transition:all .15s;min-height:44px;min-width:44px}
-.diff-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.diff-btn:hover:not(.active){border-color:var(--accent);color:var(--accent)}
+/* v1.0.21 a11y: use --accent-dark for active-button background so white text passes
+   WCAG AA on both themes (light accent-dark is a lighter orange for hover; dark uses
+   the deeper orange which we already have via --accent). Simpler: force a slightly
+   darker background for the active state that keeps white legible everywhere. */
+.diff-btn.active{background:#a54f2f;color:var(--on-accent);border-color:#a54f2f}
+[data-theme="dark"] .diff-btn.active{background:#b85c38;border-color:#b85c38}
+.diff-btn:hover:not(.active){border-color:var(--accent);color:var(--accent-text)}
 
 /* ── Trend Chart ── */
 .trend-chart-container{position:relative;width:100%;height:180px;margin:8px 0}
@@ -281,7 +292,12 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 [data-theme="dark"]{
   --bg:#1a1a18;--bg2:#252320;--card:#2e2b28;--text:#d4d4d0;--text2:#9a9a96;--text3:#9a9a96;
   --accent:#d27650;--accent-light:#3a2820;--accent-dark:#e8956a;
-  --success:#4a9a7a;--warning:#daa04a;--danger:#da7a6a;
+  /* v1.0.21 a11y: brighter for text on dark surfaces, so headings/tab labels pass WCAG AA. */
+  --accent-text:#f4a37a;
+  --on-accent:#ffffff;
+  color-scheme: dark;
+  --success:#4a9a7a;--warning:#daa04a;--danger:#e8968a;
+  --btn-primary-bg:#a24a2b;--btn-primary-text:#ffffff;
   --border:rgba(245,241,232,0.12);--shadow:0 2px 12px rgba(0,0,0,.2);
 }
 [data-theme="dark"] .app-header{background:#8a3e22}
@@ -959,7 +975,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
         <div class="setting-label" id="setExPerSession">Exercises per session</div>
         <div class="setting-desc" id="setExPerSessionDesc">How many exercises in each session</div>
       </div>
-      <select class="setting-select" id="settingSessionLength" onchange="saveSetting('sessionLength',this.value)">
+      <select class="setting-select" id="settingSessionLength" aria-labelledby="setExPerSession setExPerSessionDesc" onchange="saveSetting('sessionLength',this.value)">
         <option value="5">5</option><option value="8" selected>8</option><option value="10">10</option><option value="12">12</option>
       </select>
     </div>
@@ -968,7 +984,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
         <div class="setting-label" id="setPenWidth">Pen thickness</div>
         <div class="setting-desc" id="setPenWidthDesc">Adjusts the drawing line width</div>
       </div>
-      <select class="setting-select" id="settingPenWidth" onchange="saveSetting('penWidth',this.value)">
+      <select class="setting-select" id="settingPenWidth" aria-labelledby="setPenWidth setPenWidthDesc" onchange="saveSetting('penWidth',this.value)">
         <option value="3" id="penOptThin">Thin</option><option value="5" selected id="penOptMedium">Medium</option><option value="8" id="penOptThick">Thick</option>
       </select>
     </div>
@@ -1019,7 +1035,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   <div class="card" id="settings-card-about">
     <div class="card-title" id="settingsAboutSection">ABOUT</div>
     <p style="font-size:13px;color:var(--text2);margin-bottom:8px">
-      <span id="settingsAppVersion">App version</span>: <strong id="app-version-display" style="cursor:pointer;user-select:none;-webkit-user-select:none">1.0.20</strong>
+      <span id="settingsAppVersion">App version</span>: <strong id="app-version-display" style="cursor:pointer;user-select:none;-webkit-user-select:none">1.0.21</strong>
     </p>
     <p style="font-size:13px;margin-top:6px">
       <a id="contact-support-link" href="#" style="color:var(--primary,#3a7a5a);text-decoration:underline;font-weight:500" id="settingsContactSupport">Contact support</a>
@@ -1054,6 +1070,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 </nav>
 
 <script>
+
 /* ═══ BEGIN stroke-guides/all-guides-combined.js (inlined) ═══ */
 // Latin alphabet stroke paths for handwriting rehabilitation.
 //
