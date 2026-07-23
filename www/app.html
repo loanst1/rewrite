@@ -34,9 +34,11 @@
   --font:'Inter',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
   --serif:'Fraunces',Georgia,serif;
   --min-touch:48px;
+  /* v1.0.21: shared nav height so body padding stays in lockstep. */
+  --nav-height:64px;
 }
 html{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;scroll-behavior:smooth;font-size:16px;height:100%;overflow:hidden;overscroll-behavior:none}
-body{min-;display:flex;flex-direction:column;overflow-x:hidden;height:100dvh;margin:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+body{min-;display:flex;flex-direction:column;overflow-x:hidden;height:100dvh;margin:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
 button{font:inherit;cursor:pointer;border:none;background:none;color:inherit;-webkit-tap-highlight-color:transparent}
 input,select,textarea{font:inherit}
 canvas{display:block;touch-action:none}
@@ -63,7 +65,7 @@ canvas{display:block;touch-action:none}
 .tab-bar{
   position:fixed;bottom:0;left:0;right:0;z-index:50;
   background:var(--card);border-top:1px solid var(--border);
-  display:flex;height:64px;
+  display:flex;min-height:var(--nav-height);
   padding-bottom:env(safe-area-inset-bottom);
   padding-left:env(safe-area-inset-left);
   padding-right:env(safe-area-inset-right);
@@ -79,7 +81,7 @@ canvas{display:block;touch-action:none}
 .tab-btn.active svg{transform:scale(1.08)}
 
 /* ── Panels ── */
-.panel{display:none;padding:16px 16px 80px;max-width:600px;margin:0 auto;width:100%}
+.panel{display:none;padding:16px 16px calc(var(--nav-height) + 16px + env(safe-area-inset-bottom));max-width:600px;margin:0 auto;width:100%}
 .panel.active{display:block}
 
 /* ── Cards ── */
@@ -509,6 +511,55 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 .score-ring-container.show{display:block}
 .score-narrative{font-size:13.5px;color:var(--text2);text-align:center;max-width:420px;margin:6px auto 0;line-height:1.5}
 @media(prefers-reduced-motion:reduce){.effort-chip{transition:none}}
+
+/* ══════════════ v1.0.21 Simple/Detailed Progress ══════════════ */
+
+/* View toggle segmented control */
+.view-toggle{display:flex;background:var(--bg2);border-radius:12px;padding:4px;margin-bottom:16px;gap:2px}
+.view-toggle-btn{flex:1;padding:10px 12px;border-radius:8px;font-size:14px;font-weight:600;color:var(--text2);background:transparent;transition:all .2s;min-height:var(--min-touch)}
+.view-toggle-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+/* Streak strip — one dot per day of the last 14 days */
+.streak-strip{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.streak-strip-title{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px;letter-spacing:.02em;text-transform:uppercase}
+.streak-strip-dots{display:flex;gap:6px;justify-content:space-between}
+.streak-dot{flex:1;aspect-ratio:1;max-width:20px;border-radius:50%;background:var(--bg2);border:1.5px solid var(--border)}
+.streak-dot.active{background:var(--accent);border-color:var(--accent)}
+.streak-dot.today{box-shadow:0 0 0 3px rgba(184,92,56,.18)}
+
+/* Trend cards — one per exercise */
+.trend-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.trend-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px}
+.trend-card-title{font-size:16px;font-weight:700;color:var(--text);margin:0}
+.trend-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:600;line-height:1;white-space:nowrap}
+.trend-badge.up{background:rgba(46,110,88,.14);color:#245542}
+[data-theme="dark"] .trend-badge.up{background:rgba(74,168,132,.18);color:#7fceac}
+.trend-badge.steady{background:rgba(196,138,42,.14);color:#8a5f14}
+[data-theme="dark"] .trend-badge.steady{background:rgba(220,158,58,.18);color:#e9c574}
+.trend-badge.down{background:rgba(107,107,104,.14);color:var(--text2)}
+
+/* Trend graph — filled-gradient sparkline with endpoint dots */
+.trend-graph-wrap{position:relative;width:100%;height:88px;margin:0 -4px}
+.trend-graph{width:100%;height:100%;display:block}
+.trend-endpoints{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none}
+.trend-endpoint-label{position:absolute;font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.04em;text-transform:uppercase;line-height:1;padding:2px 4px;background:var(--card);border-radius:4px}
+.trend-endpoint-label.start{top:6px;left:2px}
+.trend-endpoint-label.end{top:6px;right:2px}
+[dir="rtl"] .trend-endpoint-label.start{left:auto;right:2px}
+[dir="rtl"] .trend-endpoint-label.end{right:auto;left:2px}
+
+.trend-sentence{font-size:14px;line-height:1.5;color:var(--text2);margin-top:10px}
+.trend-sentence strong{color:var(--text);font-weight:600}
+
+/* Small-multiples grid for Detailed view */
+.smallmult-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.smallmult{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;box-shadow:var(--shadow)}
+.smallmult-title{font-size:12px;font-weight:700;color:var(--text);margin:0 0 6px}
+.smallmult-canvas-wrap{position:relative;height:80px;width:100%}
+.smallmult canvas{width:100%;height:100%}
+.smallmult-meta{font-size:10px;color:var(--text3);margin-top:6px;display:flex;justify-content:space-between}
+@media (max-width:380px){.smallmult-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -856,11 +907,24 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   <div class="print-header"><h2 id="printHeaderTitle">ReWrite — Handwriting Rehabilitation</h2><p id="printHeaderSub">Progress Report</p></div>
   <h2 style="font-size:20px;font-weight:800;margin-bottom:14px" id="progressTitle">Your Progress</h2>
 
+  <!-- v1.0.21 Simple/Detailed view toggle. Simple is the default for the user;
+       Detailed is preserved verbatim for clinicians and carers. Toggle persists
+       per-device via rewrite_progressView localStorage key. -->
+  <div class="view-toggle" id="progressViewToggle">
+    <button class="view-toggle-btn active" data-view="simple" id="viewToggleSimple">Simple</button>
+    <button class="view-toggle-btn" data-view="detailed" id="viewToggleDetailed">Detailed</button>
+  </div>
+
   <div class="progress-empty-state" id="progressEmptyState" style="display:none; text-align:center; padding:48px 20px; color:var(--text2)">
     <div style="font-size:16px; font-weight:700; color:var(--text); margin-bottom:8px" id="progressEmptyTitle">No sessions yet</div>
     <div style="font-size:13px; line-height:1.5; max-width:30rem; margin:0 auto" id="progressEmptyBody">Start an exercise from the Exercises tab to begin tracking your progress.</div>
   </div>
 
+  <!-- v1.0.21 Simple view: trend card per exercise + streak strip -->
+  <div id="simpleViewContainer"></div>
+
+  <!-- Detailed view (existing content) wrapped so we can toggle it -->
+  <div id="detailedViewContainer">
   <div class="stat-grid" id="statsGrid">
     <div class="stat-card"><div class="stat-value" id="statSessions">0</div><div class="stat-label" id="statSessionsLabel">Sessions</div></div>
     <div class="stat-card"><div class="stat-value" id="statExercises">0</div><div class="stat-label" id="statExercisesLabel">Exercises</div></div>
@@ -883,6 +947,8 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
     <div class="card-title" id="sessionLogTitle">Session History</div>
     <div id="sessionLog"></div>
   </div>
+
+  </div><!-- /#detailedViewContainer -->
 
   <!-- Personal Details (for PDF report) -->
   <div class="card" id="personalDetailsCard" style="margin-top:14px">
@@ -1035,7 +1101,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   <div class="card" id="settings-card-about">
     <div class="card-title" id="settingsAboutSection">ABOUT</div>
     <p style="font-size:13px;color:var(--text2);margin-bottom:8px">
-      <span id="settingsAppVersion">App version</span>: <strong id="app-version-display" style="cursor:pointer;user-select:none;-webkit-user-select:none">1.0.20</strong>
+      <span id="settingsAppVersion">App version</span>: <strong id="app-version-display" style="cursor:pointer;user-select:none;-webkit-user-select:none">1.0.21</strong>
     </p>
     <p style="font-size:13px;margin-top:6px">
       <a id="contact-support-link" href="#" style="color:var(--primary,#3a7a5a);text-decoration:underline;font-weight:500" id="settingsContactSupport">Contact support</a>
@@ -4306,6 +4372,20 @@ const STRINGS = {
     progressEmptyBody: "Start an exercise from the Exercises tab to begin tracking your progress.",
     progressMoreOne: "1 more exercise available — try it on the Exercises tab",
     progressMoreOther: "{count} more exercises available — try them on the Exercises tab",
+  
+    view_simple: "Simple",
+    view_detailed: "Detailed",
+    trend_improving: "Improving",
+    trend_steady: "Steady",
+    trend_needs_practice: "Practise more",
+    trend_started: "Started",
+    trend_now: "Now",
+    trend_need_two_sessions: "Complete two sessions to see your trend",
+    trend_first_session: "You've done your first {name} session — one more will show your trend.",
+    trend_sentence_up: "You're getting better at {name}.",
+    trend_sentence_steady: "You're holding steady at {name}.",
+    trend_sentence_down: "A bit more practice with {name} should help.",
+    streak_last_14_days: "Practised {n} of the last 14 days"
   },
   es: {
       exercise_error: 'Algo salió mal al iniciar este ejercicio. Toca Atrás e inténtalo de nuevo.', chipEffortLabel: "Esfuerzo", chipSizeLabel: "Tamaño", chipFluencyLabel: "Fluidez", chipFluencyAria: "Fluidez", chipEffortNone: "Sin intento", chipEffortAttempt: "Intentado", chipEffortCompleted: "Completado", chipEffortMulti: "Varios intentos", chipSizeSmall: "Pequeño", chipSizeMedium: "Mediano", chipSizeLarge: "Grande", narrCompleted: "Letras intentadas y reconocibles.", narrMulti: "Varios intentos — sigue así.", narrAttempt: "Buen comienzo — prueba una forma más completa la próxima vez.", narrNone: "Tómate tu tiempo y prueba.", narrFluencyHigh: "Bonita fluidez.", narrFluencyLow: "Ir más despacio ayuda a la fluidez.", narrSizeBigGood: "Excelente amplitud.", narrSizeBigLow: "Intenta escribir más grande.", setShowNumericLabel: "Mostrar puntuaciones numéricas", setShowNumericDesc: "Muestra el anillo de puntuación 0–100% heredado junto a las nuevas fichas de esfuerzo. Desactivado por defecto.", exBigTitle: "Práctica GRANDE", exBigDesc: "Entrena una amplitud de escritura mayor. Útil para la micrografía del Parkinson y para letra que se vuelve cada vez más pequeña.", exerciseTypeBigPractice: "Práctica GRANDE", setBigModeLabel: "Modo GRANDE", setBigModeDesc: "Muestra un cuadro objetivo más grande y puntuación por amplitud para todos los ejercicios. Diseñado para la micrografía del Parkinson o para quienes su letra se vuelve más pequeña con el tiempo.", shrinkWarn: "Tus letras se están haciendo más pequeñas. Intenta escribir GRANDE.", bigBadge: "GRANDE", exWordBuilderTitle: "Constructor de Palabras", exWordBuilderDesc: "Elige un final para completar una palabra y trázala. Ideal para recuperación léxica.", exerciseTypeWordBuilder: "Constructor de Palabras", wbPrompt: "Elige un final para formar una palabra", wbChoiceAria: "Elegir final","personalDetailsTitle":"Datos personales","personalDetailsHint":"Todos opcionales. Almacenados solo en este dispositivo. Se usan para rellenar tu informe PDF de progreso.","pd_firstname":"Nombre","pd_lastname":"Apellido","pd_dob":"Fecha de nacimiento","pd_patientid":"Número NHS (opcional)","pd_patientid_intl":"ID de paciente (opcional)","pd_clinician":"Nombre del clínico (opcional)","pd_clinician_email":"Correo del clínico (opcional)","generatePdfBtnLabel":"Generar informe PDF","generatePdfHint":"Crea un PDF bilingüe (tu idioma e inglés) con tu progreso, gráficos y datos personales. Puedes guardarlo o compartirlo por correo.","pdf_scroll_english":"Desplázate hacia abajo para inglés","pdf_title":"Informe de Progreso de ReWrite","pdf_patient":"Paciente","pdf_dob":"Fecha de nacimiento","pdf_clinician":"Clínico","pdf_date":"Fecha","pdf_exercise":"Ejercicio","pdf_avg":"Promedio","pdf_best":"Mejor","exercises_count":"ejercicios","exType_letter":"Letras","exType_word":"Palabras","exType_sentence":"Frases","pdf_generating":"Generando","pdf_error":"No se pudo generar el PDF. Inténtalo de nuevo.","pdf_no_sessions":"Aún no hay sesiones — empieza a practicar para generar un informe.","pdf_share_title":"Informe de Progreso de ReWrite","disclaimerTitle":"Importante","aboutDisclaimerText":"ReWrite es una herramienta de apoyo al bienestar, no un dispositivo médico. Está diseñado para complementar — no sustituir — la terapia ocupacional. Sigue siempre la orientación de tu terapeuta o equipo de cuidados.",
@@ -4419,6 +4499,20 @@ const STRINGS = {
     progressEmptyBody: "Comienza un ejercicio desde la pestaña Ejercicios para empezar a registrar tu progreso.",
     progressMoreOne: "1 ejercicio más disponible: pruébalo en la pestaña Ejercicios",
     progressMoreOther: "{count} ejercicios más disponibles: pruébalos en la pestaña Ejercicios",
+  
+    view_simple: "Simple",
+    view_detailed: "Detallado",
+    trend_improving: "Mejorando",
+    trend_steady: "Estable",
+    trend_needs_practice: "Practica más",
+    trend_started: "Inicio",
+    trend_now: "Ahora",
+    trend_need_two_sessions: "Completa dos sesiones para ver tu tendencia",
+    trend_first_session: "Has completado tu primera sesión de {name} — una más mostrará tu progreso.",
+    trend_sentence_up: "Estás mejorando en {name}.",
+    trend_sentence_steady: "Mantienes tu nivel en {name}.",
+    trend_sentence_down: "Un poco más de práctica en {name} ayudará.",
+    streak_last_14_days: "Has practicado {n} de los últimos 14 días"
   },
   fr: {
       exercise_error: 'Une erreur s\'est produite au démarrage de cet exercice. Appuyez sur Retour et réessayez.', chipEffortLabel: "Effort", chipSizeLabel: "Taille", chipFluencyLabel: "Fluidité", chipFluencyAria: "Fluidité", chipEffortNone: "Aucune tentative", chipEffortAttempt: "Essayé", chipEffortCompleted: "Terminé", chipEffortMulti: "Plusieurs essais", chipSizeSmall: "Petit", chipSizeMedium: "Moyen", chipSizeLarge: "Grand", narrCompleted: "Lettres tentées et reconnaissables.", narrMulti: "Quelques essais — continuez.", narrAttempt: "Bon début — essayez une forme plus complète la prochaine fois.", narrNone: "Prenez votre temps et essayez.", narrFluencyHigh: "Belle fluidité.", narrFluencyLow: "Plus lentement aide à la fluidité.", narrSizeBigGood: "Excellente amplitude.", narrSizeBigLow: "Essayez d'écrire plus grand.", setShowNumericLabel: "Afficher les scores numériques", setShowNumericDesc: "Affiche l'anneau de score 0–100% hérité à côté des nouvelles puces d'effort. Désactivé par défaut.", exBigTitle: "Pratique GRANDE", exBigDesc: "Entraînez une plus grande amplitude d'écriture. Utile pour la micrographie de Parkinson et pour l'écriture qui rétrécit avec le temps.", exerciseTypeBigPractice: "Pratique GRANDE", setBigModeLabel: "Mode GRAND", setBigModeDesc: "Affiche une zone cible plus grande et un score d'amplitude pour tous les exercices. Conçu pour la micrographie de Parkinson ou pour quiconque dont l'écriture rétrécit avec le temps.", shrinkWarn: "Vos lettres rétrécissent. Essayez d'écrire GRAND.", bigBadge: "GRAND", exWordBuilderTitle: "Constructeur de Mots", exWordBuilderDesc: "Choisissez une fin pour compléter un mot, puis tracez-le. Idéal pour la récupération lexicale.", exerciseTypeWordBuilder: "Constructeur de Mots", wbPrompt: "Choisissez une fin pour former un mot", wbChoiceAria: "Choisir une fin","personalDetailsTitle":"Informations personnelles","personalDetailsHint":"Toutes facultatives. Stockées uniquement sur cet appareil. Utilisées pour remplir votre rapport PDF de progression.","pd_firstname":"Prénom","pd_lastname":"Nom","pd_dob":"Date de naissance","pd_patientid":"Numéro NHS (facultatif)","pd_patientid_intl":"ID patient (facultatif)","pd_clinician":"Nom du clinicien (facultatif)","pd_clinician_email":"E-mail du clinicien (facultatif)","generatePdfBtnLabel":"Générer le rapport PDF","generatePdfHint":"Crée un PDF bilingue (votre langue et anglais) avec votre progression, vos graphiques et vos informations personnelles. Vous pouvez l'enregistrer ou le partager par e-mail.","pdf_scroll_english":"Faites défiler pour l'anglais","pdf_title":"Rapport de Progression ReWrite","pdf_patient":"Patient","pdf_dob":"Date de naissance","pdf_clinician":"Clinicien","pdf_date":"Date","pdf_exercise":"Exercice","pdf_avg":"Moyenne","pdf_best":"Meilleur","exercises_count":"exercices","exType_letter":"Lettres","exType_word":"Mots","exType_sentence":"Phrases","pdf_generating":"Génération","pdf_error":"Impossible de générer le PDF. Veuillez réessayer.","pdf_no_sessions":"Aucune session pour le moment — commencez à vous entraîner pour générer un rapport.","pdf_share_title":"Rapport de Progression ReWrite","disclaimerTitle":"Important","aboutDisclaimerText":"ReWrite est un outil de soutien au bien-être, pas un dispositif médical. Il est conçu pour compléter — et non remplacer — l'ergothérapie. Suivez toujours les conseils de votre thérapeute ou de votre équipe soignante.",
@@ -4532,6 +4626,20 @@ const STRINGS = {
     progressEmptyBody: "Commencez un exercice depuis l'onglet Exercices pour suivre votre progression.",
     progressMoreOne: "1 exercice supplémentaire disponible — essayez-le dans l'onglet Exercices",
     progressMoreOther: "{count} exercices supplémentaires disponibles — essayez-les dans l'onglet Exercices",
+  
+    view_simple: "Simple",
+    view_detailed: "Détaillé",
+    trend_improving: "En progrès",
+    trend_steady: "Stable",
+    trend_needs_practice: "Encore un peu",
+    trend_started: "Début",
+    trend_now: "Aujourd'hui",
+    trend_need_two_sessions: "Terminez deux séances pour voir votre évolution",
+    trend_first_session: "Vous avez terminé votre première séance de {name} — une de plus révélera votre évolution.",
+    trend_sentence_up: "Vous progressez en {name}.",
+    trend_sentence_steady: "Vous maintenez votre niveau en {name}.",
+    trend_sentence_down: "Un peu plus d'entraînement en {name} vous aidera.",
+    streak_last_14_days: "{n} des 14 derniers jours pratiqués"
   },
   de: {
       exercise_error: 'Beim Starten dieser Übung ist etwas schiefgelaufen. Tippen Sie auf Zurück und versuchen Sie es erneut.', chipEffortLabel: "Aufwand", chipSizeLabel: "Größe", chipFluencyLabel: "Flüssigkeit", chipFluencyAria: "Flüssigkeit", chipEffortNone: "Kein Versuch", chipEffortAttempt: "Versucht", chipEffortCompleted: "Abgeschlossen", chipEffortMulti: "Mehrere Versuche", chipSizeSmall: "Klein", chipSizeMedium: "Mittel", chipSizeLarge: "Groß", narrCompleted: "Buchstaben versucht und erkennbar.", narrMulti: "Ein paar Versuche — weiter so.", narrAttempt: "Guter Anfang — versuche das nächste Mal eine vollere Form.", narrNone: "Lassen Sie sich Zeit und probieren Sie.", narrFluencyHigh: "Schöner Fluss.", narrFluencyLow: "Langsamer hilft der Flüssigkeit.", narrSizeBigGood: "Großartige Amplitude.", narrSizeBigLow: "Versuchen Sie, größer zu schreiben.", setShowNumericLabel: "Numerische Punktzahlen anzeigen", setShowNumericDesc: "Zeigt den älteren 0–100%-Punktzahl-Ring neben den neuen Aufwands-Chips an. Standardmäßig aus.", exBigTitle: "GROSS-Übung", exBigDesc: "Trainieren Sie eine größere Handschriftamplitude. Hilfreich bei Parkinson-Mikrographie und bei Handschrift, die mit der Zeit kleiner wird.", exerciseTypeBigPractice: "GROSS-Übung", setBigModeLabel: "GROSS-Modus", setBigModeDesc: "Zeigt einen größeren Zielrahmen und Amplitudenbewertung für alle Übungen. Entwickelt für Parkinson-Mikrographie oder für jeden, dessen Handschrift mit der Zeit kleiner wird.", shrinkWarn: "Ihre Buchstaben werden kleiner. Versuchen Sie GROSS zu schreiben.", bigBadge: "GROSS", exWordBuilderTitle: "Wortbaukasten", exWordBuilderDesc: "Wählen Sie eine Endung, um ein Wort zu bilden, und zeichnen Sie es nach. Hilft beim Wortabruf.", exerciseTypeWordBuilder: "Wortbaukasten", wbPrompt: "Wählen Sie eine Endung, um ein Wort zu bilden", wbChoiceAria: "Endung wählen","personalDetailsTitle":"Persönliche Daten","personalDetailsHint":"Alle optional. Nur auf diesem Gerät gespeichert. Werden zum Ausfüllen Ihres PDF-Fortschrittsberichts verwendet.","pd_firstname":"Vorname","pd_lastname":"Nachname","pd_dob":"Geburtsdatum","pd_patientid":"NHS-Nummer (optional)","pd_patientid_intl":"Patienten-ID (optional)","pd_clinician":"Name des Klinikers (optional)","pd_clinician_email":"E-Mail des Klinikers (optional)","generatePdfBtnLabel":"PDF-Bericht erstellen","generatePdfHint":"Erstellt ein zweisprachiges PDF (Ihre Sprache und Englisch) mit Ihrem Fortschritt, Diagrammen und persönlichen Daten. Sie können es speichern oder per E-Mail teilen.","pdf_scroll_english":"Nach unten scrollen für Englisch","pdf_title":"ReWrite Fortschrittsbericht","pdf_patient":"Patient","pdf_dob":"Geburtsdatum","pdf_clinician":"Kliniker","pdf_date":"Datum","pdf_exercise":"Übung","pdf_avg":"Durchschnitt","pdf_best":"Beste","exercises_count":"Übungen","exType_letter":"Buchstaben","exType_word":"Wörter","exType_sentence":"Sätze","pdf_generating":"Wird erstellt","pdf_error":"Das PDF konnte nicht erstellt werden. Bitte erneut versuchen.","pdf_no_sessions":"Noch keine Sitzungen — beginnen Sie mit dem Üben, um einen Bericht zu erstellen.","pdf_share_title":"ReWrite Fortschrittsbericht","disclaimerTitle":"Wichtig","aboutDisclaimerText":"ReWrite ist ein Wellness-Hilfsmittel, kein Medizinprodukt. Es ist als Ergänzung — nicht als Ersatz — zur Ergotherapie konzipiert. Befolgen Sie immer die Anweisungen Ihres Therapeuten oder Pflegeteams.",
@@ -4645,6 +4753,20 @@ const STRINGS = {
     progressEmptyBody: "Starten Sie eine Übung im Tab Übungen, um Ihren Fortschritt zu verfolgen.",
     progressMoreOne: "1 weitere Übung verfügbar — probieren Sie sie im Tab Übungen aus",
     progressMoreOther: "{count} weitere Übungen verfügbar — probieren Sie sie im Tab Übungen aus",
+  
+    view_simple: "Einfach",
+    view_detailed: "Detailliert",
+    trend_improving: "Verbessert sich",
+    trend_steady: "Gleichbleibend",
+    trend_needs_practice: "Mehr üben",
+    trend_started: "Anfang",
+    trend_now: "Jetzt",
+    trend_need_two_sessions: "Zwei Sitzungen abschließen, um deinen Verlauf zu sehen",
+    trend_first_session: "Erste {name}-Sitzung abgeschlossen — eine weitere zeigt deinen Verlauf.",
+    trend_sentence_up: "Du wirst besser bei {name}.",
+    trend_sentence_steady: "Du hältst dein Niveau bei {name}.",
+    trend_sentence_down: "Etwas mehr Übung bei {name} hilft.",
+    streak_last_14_days: "{n} von den letzten 14 Tagen geübt"
   },
   it: {
       exercise_error: 'Si è verificato un errore all\'avvio di questo esercizio. Tocca Indietro e riprova.', chipEffortLabel: "Sforzo", chipSizeLabel: "Dimensione", chipFluencyLabel: "Fluidità", chipFluencyAria: "Fluidità", chipEffortNone: "Nessun tentativo", chipEffortAttempt: "Tentato", chipEffortCompleted: "Completato", chipEffortMulti: "Più tentativi", chipSizeSmall: "Piccolo", chipSizeMedium: "Medio", chipSizeLarge: "Grande", narrCompleted: "Lettere tentate e riconoscibili.", narrMulti: "Alcuni tentativi — continua così.", narrAttempt: "Buon inizio — prova una forma più completa la prossima volta.", narrNone: "Prenditi il tuo tempo e prova.", narrFluencyHigh: "Bella fluidità.", narrFluencyLow: "Più lentamente aiuta la fluidità.", narrSizeBigGood: "Ottima ampiezza.", narrSizeBigLow: "Prova a scrivere più grande.", setShowNumericLabel: "Mostra punteggi numerici", setShowNumericDesc: "Mostra l'anello del punteggio 0–100% precedente accanto ai nuovi chip di sforzo. Disattivato per impostazione predefinita.", exBigTitle: "Pratica GRANDE", exBigDesc: "Allena un'ampiezza di scrittura maggiore. Utile per la micrografia da Parkinson e per la scrittura che diventa sempre più piccola.", exerciseTypeBigPractice: "Pratica GRANDE", setBigModeLabel: "Modalità GRANDE", setBigModeDesc: "Mostra un riquadro obiettivo più grande e punteggio di ampiezza per tutti gli esercizi. Progettato per la micrografia da Parkinson o per chi vede la propria scrittura rimpicciolirsi nel tempo.", shrinkWarn: "Le tue lettere stanno diventando più piccole. Prova a scrivere GRANDE.", bigBadge: "GRANDE", exWordBuilderTitle: "Costruttore di Parole", exWordBuilderDesc: "Scegli un finale per completare una parola, poi tracciala. Ottimo per il recupero lessicale.", exerciseTypeWordBuilder: "Costruttore di Parole", wbPrompt: "Scegli un finale per formare una parola", wbChoiceAria: "Scegli finale","personalDetailsTitle":"Dati personali","personalDetailsHint":"Tutti facoltativi. Memorizzati solo su questo dispositivo. Usati per compilare il tuo rapporto PDF di progresso.","pd_firstname":"Nome","pd_lastname":"Cognome","pd_dob":"Data di nascita","pd_patientid":"Numero NHS (facoltativo)","pd_patientid_intl":"ID paziente (facoltativo)","pd_clinician":"Nome del clinico (facoltativo)","pd_clinician_email":"E-mail del clinico (facoltativo)","generatePdfBtnLabel":"Genera rapporto PDF","generatePdfHint":"Crea un PDF bilingue (la tua lingua e l'inglese) con i tuoi progressi, grafici e dati personali. Puoi salvarlo o condividerlo via e-mail.","pdf_scroll_english":"Scorri verso il basso per l'inglese","pdf_title":"Rapporto di Progresso ReWrite","pdf_patient":"Paziente","pdf_dob":"Data di nascita","pdf_clinician":"Clinico","pdf_date":"Data","pdf_exercise":"Esercizio","pdf_avg":"Media","pdf_best":"Migliore","exercises_count":"esercizi","exType_letter":"Lettere","exType_word":"Parole","exType_sentence":"Frasi","pdf_generating":"Generazione","pdf_error":"Impossibile generare il PDF. Riprova.","pdf_no_sessions":"Nessuna sessione ancora — inizia a esercitarti per generare un rapporto.","pdf_share_title":"Rapporto di Progresso ReWrite","disclaimerTitle":"Importante","aboutDisclaimerText":"ReWrite è uno strumento di supporto al benessere, non un dispositivo medico. È progettato per integrare — non sostituire — la terapia occupazionale. Segui sempre le indicazioni del tuo terapista o del team di cura.",
@@ -4758,6 +4880,20 @@ const STRINGS = {
     progressEmptyBody: "Inizia un esercizio dalla scheda Esercizi per iniziare a monitorare i tuoi progressi.",
     progressMoreOne: "1 altro esercizio disponibile — provalo nella scheda Esercizi",
     progressMoreOther: "{count} altri esercizi disponibili — provali nella scheda Esercizi",
+  
+    view_simple: "Semplice",
+    view_detailed: "Dettagliato",
+    trend_improving: "In miglioramento",
+    trend_steady: "Costante",
+    trend_needs_practice: "Continua a praticare",
+    trend_started: "Inizio",
+    trend_now: "Ora",
+    trend_need_two_sessions: "Completa due sessioni per vedere il tuo andamento",
+    trend_first_session: "Hai completato la tua prima sessione di {name} — un'altra mostrerà il tuo andamento.",
+    trend_sentence_up: "Stai migliorando in {name}.",
+    trend_sentence_steady: "Mantieni il tuo livello in {name}.",
+    trend_sentence_down: "Un po' più di pratica con {name} aiuterà.",
+    streak_last_14_days: "Praticato {n} degli ultimi 14 giorni"
   },
   pt: {
       exercise_error: 'Algo correu mal ao iniciar este exercício. Toque em Voltar e tente novamente.', chipEffortLabel: "Esforço", chipSizeLabel: "Tamanho", chipFluencyLabel: "Fluência", chipFluencyAria: "Fluência", chipEffortNone: "Sem tentativa", chipEffortAttempt: "Tentado", chipEffortCompleted: "Concluído", chipEffortMulti: "Várias tentativas", chipSizeSmall: "Pequeno", chipSizeMedium: "Médio", chipSizeLarge: "Grande", narrCompleted: "Letras tentadas e reconhecíveis.", narrMulti: "Algumas tentativas — continue.", narrAttempt: "Bom começo — tente uma forma mais completa da próxima vez.", narrNone: "Tenha calma e tente.", narrFluencyHigh: "Bela fluência.", narrFluencyLow: "Mais devagar ajuda a fluência.", narrSizeBigGood: "Excelente amplitude.", narrSizeBigLow: "Tente escrever maior.", setShowNumericLabel: "Mostrar pontuações numéricas", setShowNumericDesc: "Mostra o anel de pontuação 0–100% antigo ao lado dos novos chips de esforço. Desativado por padrão.", exBigTitle: "Prática GRANDE", exBigDesc: "Treine uma amplitude de escrita maior. Útil para a micrografia de Parkinson e para escrita que vai ficando cada vez mais pequena.", exerciseTypeBigPractice: "Prática GRANDE", setBigModeLabel: "Modo GRANDE", setBigModeDesc: "Mostra uma caixa-alvo maior e pontuação de amplitude para todos os exercícios. Concebido para a micrografia de Parkinson ou para quem vê a sua escrita ficar cada vez mais pequena.", shrinkWarn: "As suas letras estão a ficar mais pequenas. Tente escrever GRANDE.", bigBadge: "GRANDE", exWordBuilderTitle: "Construtor de Palavras", exWordBuilderDesc: "Escolha uma terminação para completar uma palavra e depois trace-a. Ótimo para recuperação lexical.", exerciseTypeWordBuilder: "Construtor de Palavras", wbPrompt: "Escolha uma terminação para formar uma palavra", wbChoiceAria: "Escolher terminação","personalDetailsTitle":"Dados pessoais","personalDetailsHint":"Todos opcionais. Armazenados apenas neste dispositivo. Usados para preencher o seu relatório PDF de progresso.","pd_firstname":"Nome próprio","pd_lastname":"Apelido","pd_dob":"Data de nascimento","pd_patientid":"Número NHS (opcional)","pd_patientid_intl":"ID do paciente (opcional)","pd_clinician":"Nome do clínico (opcional)","pd_clinician_email":"E-mail do clínico (opcional)","generatePdfBtnLabel":"Gerar relatório PDF","generatePdfHint":"Cria um PDF bilingue (a sua língua e inglês) com o seu progresso, gráficos e dados pessoais. Pode guardá-lo ou partilhá-lo por e-mail.","pdf_scroll_english":"Desça para o inglês","pdf_title":"Relatório de Progresso ReWrite","pdf_patient":"Paciente","pdf_dob":"Data de nascimento","pdf_clinician":"Clínico","pdf_date":"Data","pdf_exercise":"Exercício","pdf_avg":"Média","pdf_best":"Melhor","exercises_count":"exercícios","exType_letter":"Letras","exType_word":"Palavras","exType_sentence":"Frases","pdf_generating":"A gerar","pdf_error":"Não foi possível gerar o PDF. Tente novamente.","pdf_no_sessions":"Ainda sem sessões — comece a praticar para gerar um relatório.","pdf_share_title":"Relatório de Progresso ReWrite","disclaimerTitle":"Importante","aboutDisclaimerText":"ReWrite é uma ferramenta de apoio ao bem-estar, não um dispositivo médico. Foi concebido para complementar — não substituir — a terapia ocupacional. Siga sempre a orientação do seu terapeuta ou equipa de cuidados.",
@@ -4871,6 +5007,20 @@ const STRINGS = {
     progressEmptyBody: "Inicie um exercício no separador Exercícios para começar a registar o seu progresso.",
     progressMoreOne: "Mais 1 exercício disponível — experimente-o no separador Exercícios",
     progressMoreOther: "Mais {count} exercícios disponíveis — experimente-os no separador Exercícios",
+  
+    view_simple: "Simples",
+    view_detailed: "Detalhado",
+    trend_improving: "A melhorar",
+    trend_steady: "Estável",
+    trend_needs_practice: "Pratique mais",
+    trend_started: "Início",
+    trend_now: "Agora",
+    trend_need_two_sessions: "Complete duas sessões para ver a sua evolução",
+    trend_first_session: "Concluiu a sua primeira sessão de {name} — mais uma mostrará a sua evolução.",
+    trend_sentence_up: "Está a melhorar em {name}.",
+    trend_sentence_steady: "Mantém o seu nível em {name}.",
+    trend_sentence_down: "Um pouco mais de prática em {name} vai ajudar.",
+    streak_last_14_days: "Praticou {n} dos últimos 14 dias"
   },
   cy: {
       exercise_error: 'Aeth rhywbeth o\'i le wrth gychwyn yr ymarfer hwn. Tapiwch Yn ôl a rhoi cynnig arall arni.', chipEffortLabel: "Ymdrech", chipSizeLabel: "Maint", chipFluencyLabel: "Llithrigrwydd", chipFluencyAria: "Llithrigrwydd", chipEffortNone: "Dim ymgais", chipEffortAttempt: "Wedi rhoi cynnig", chipEffortCompleted: "Wedi cwblhau", chipEffortMulti: "Sawl cynnig", chipSizeSmall: "Bach", chipSizeMedium: "Canolig", chipSizeLarge: "Mawr", narrCompleted: "Llythrennau wedi'u rhoi a gellir eu hadnabod.", narrMulti: "Ychydig o gynigion — daliwch ati.", narrAttempt: "Dechrau da — ceisiwch siâp llawnach y tro nesaf.", narrNone: "Cymerwch eich amser a rhoi cynnig.", narrFluencyHigh: "Llif hyfryd.", narrFluencyLow: "Gall arafach helpu llithrigrwydd.", narrSizeBigGood: "Ehangder gwych.", narrSizeBigLow: "Ceisiwch ysgrifennu'n fwy.", setShowNumericLabel: "Dangos sgoriau rhifol", setShowNumericDesc: "Dangos y cylch sgôr 0–100% etifeddol ochr yn ochr â'r sglodion ymdrech newydd. Wedi'i ddiffodd yn ddiofyn — mae'r rhan fwyaf o ddefnyddwyr yn ffafrio'r sglodion.", exBigTitle: "Ymarfer MAWR", exBigDesc: "Hyfforddi ehangder llawysgrifen fwy. Yn ddefnyddiol ar gyfer micrografia Parkinson a llawysgrifen sy'n mynd yn llai dros amser.", exerciseTypeBigPractice: "Ymarfer MAWR", setBigModeLabel: "Modd MAWR", setBigModeDesc: "Dangos blwch targed mwy a sgorio ehangder ar gyfer pob ymarfer. Wedi'i gynllunio ar gyfer micrografia Parkinson neu unrhyw un y mae ei lawysgrifen yn mynd yn llai dros amser.", shrinkWarn: "Mae'ch llythrennau'n mynd yn llai. Ceisiwch ysgrifennu'n FAWR.", bigBadge: "MAWR", exWordBuilderTitle: "Adeiladwr Geiriau", exWordBuilderDesc: "Dewiswch ddiwedd i orffen y gair, yna olrhewch e. Da i adfer geiriau.", exerciseTypeWordBuilder: "Adeiladwr Geiriau", wbPrompt: "Dewiswch ddiwedd i wneud gair", wbChoiceAria: "Dewiswch ddiwedd","personalDetailsTitle":"Manylion personol","personalDetailsHint":"Pob un yn ddewisol. Wedi'i storio ar y ddyfais hon yn unig. Defnyddir i lenwi eich adroddiad cynnydd PDF.","pd_firstname":"Enw cyntaf","pd_lastname":"Cyfenw","pd_dob":"Dyddiad geni","pd_patientid":"Rhif y GIG (dewisol)","pd_patientid_intl":"ID Claf (dewisol)","pd_clinician":"Enw'r clinigwr (dewisol)","pd_clinician_email":"E-bost y clinigwr (dewisol)","generatePdfBtnLabel":"Creu adroddiad PDF","generatePdfHint":"Yn creu PDF dwyieithog (eich iaith a Saesneg) gyda'ch cynnydd, siartiau a manylion personol. Gallwch ei gadw neu ei rannu trwy e-bost.","pdf_scroll_english":"Sgroliwch i lawr am Saesneg","pdf_title":"Adroddiad Cynnydd ReWrite","pdf_patient":"Claf","pdf_dob":"Dyddiad geni","pdf_clinician":"Clinigwr","pdf_date":"Dyddiad","pdf_exercise":"Ymarfer","pdf_avg":"Cyfartaledd","pdf_best":"Gorau","exercises_count":"ymarferion","exType_letter":"Llythrennau","exType_word":"Geiriau","exType_sentence":"Brawddegau","pdf_generating":"Yn creu","pdf_error":"Methu creu'r PDF. Rhowch gynnig arall arno.","pdf_no_sessions":"Dim sesiynau eto — dechreuwch ymarfer i greu adroddiad.","pdf_share_title":"Adroddiad Cynnydd ReWrite","disclaimerTitle":"Pwysig","aboutDisclaimerText":"Mae ReWrite yn offeryn cefnogi lles, nid dyfais feddygol. Mae wedi'i gynllunio i ategu — nid disodli — therapi galwedigaethol. Dilynwch arweiniad eich therapydd neu dîm gofal bob amser.",
@@ -4984,6 +5134,20 @@ const STRINGS = {
     progressEmptyBody: "Dechreuwch ymarfer o'r tab Ymarferion i ddechrau olrhain eich cynnydd.",
     progressMoreOne: "1 ymarfer arall ar gael — rhowch gynnig arno yn y tab Ymarferion",
     progressMoreOther: "{count} ymarfer arall ar gael — rhowch gynnig arnyn nhw yn y tab Ymarferion",
+  
+    view_simple: "Syml",
+    view_detailed: "Manwl",
+    trend_improving: "Yn gwella",
+    trend_steady: "Cyson",
+    trend_needs_practice: "Ymarfer mwy",
+    trend_started: "Dechreuad",
+    trend_now: "Nawr",
+    trend_need_two_sessions: "Cwblhewch ddwy sesiwn i weld eich tuedd",
+    trend_first_session: "Rydych chi wedi cwblhau'ch sesiwn {name} gyntaf — bydd un arall yn dangos eich tuedd.",
+    trend_sentence_up: "Rydych chi'n gwella yn {name}.",
+    trend_sentence_steady: "Rydych chi'n cadw'n gyson yn {name}.",
+    trend_sentence_down: "Bydd ychydig mwy o ymarfer gyda {name} yn helpu.",
+    streak_last_14_days: "Wedi ymarfer {n} o'r 14 diwrnod diwethaf"
   },
   ja: {
       exercise_error: 'この練習を開始する際に問題が発生しました。「戻る」をタップしてもう一度お試しください。', chipEffortLabel: "努力", chipSizeLabel: "サイズ", chipFluencyLabel: "流暢さ", chipFluencyAria: "流暢さ", chipEffortNone: "試行なし", chipEffortAttempt: "試行", chipEffortCompleted: "完了", chipEffortMulti: "複数回試行", chipSizeSmall: "小", chipSizeMedium: "中", chipSizeLarge: "大", narrCompleted: "文字を試み、認識できます。", narrMulti: "何度か試行 — 続けましょう。", narrAttempt: "良いスタート — 次はもっと完全な形を試しましょう。", narrNone: "ゆっくり試してみましょう。", narrFluencyHigh: "素晴らしい流れ。", narrFluencyLow: "ゆっくり書くと流暢さが上がります。", narrSizeBigGood: "素晴らしい振幅。", narrSizeBigLow: "もっと大きく書いてみましょう。", setShowNumericLabel: "数値スコアを表示", setShowNumericDesc: "新しい努力チップと一緒に従来の0〜100%スコアリングを表示します。既定ではオフ。", exBigTitle: "おおきく書く練習", exBigDesc: "大きな振幅の書字を訓練します。パーキンソン病の小字症や、時間とともに字が小さくなる方に役立ちます。", exerciseTypeBigPractice: "おおきく書く練習", setBigModeLabel: "おおきくモード", setBigModeDesc: "すべてのエクササイズで大きな目標枠と振幅スコアを表示します。パーキンソン病の小字症や、時間とともに字が小さくなる方向けに設計されています。", shrinkWarn: "字が小さくなっています。おおきく書きましょう。", bigBadge: "おおきく", exWordBuilderTitle: "ことばづくり", exWordBuilderDesc: "語尾を選んでことばを完成させ、なぞりましょう。語彙回想に最適。", exerciseTypeWordBuilder: "ことばづくり", wbPrompt: "語尾を選んでことばを作ろう", wbChoiceAria: "語尾を選ぶ","personalDetailsTitle":"個人情報","personalDetailsHint":"すべて任意。このデバイスにのみ保存されます。PDF進捗レポートの作成に使用されます。","pd_firstname":"名","pd_lastname":"姓","pd_dob":"生年月日","pd_patientid":"NHS番号(任意)","pd_patientid_intl":"患者ID(任意)","pd_clinician":"臨床医名(任意)","pd_clinician_email":"臨床医のメール(任意)","generatePdfBtnLabel":"PDFレポートを作成","generatePdfHint":"お使いの言語と英語の2言語のPDFを作成し、進捗、グラフ、個人情報を含めます。保存またはメールで共有できます。","pdf_scroll_english":"英語版は下にスクロール","pdf_title":"ReWrite 進捗レポート","pdf_patient":"患者","pdf_dob":"生年月日","pdf_clinician":"臨床医","pdf_date":"日付","pdf_exercise":"エクササイズ","pdf_avg":"平均","pdf_best":"ベスト","exercises_count":"エクササイズ","exType_letter":"文字","exType_word":"単語","exType_sentence":"文","pdf_generating":"作成中","pdf_error":"PDFを作成できませんでした。もう一度お試しください。","pdf_no_sessions":"まだセッションがありません — レポートを作成するには練習を始めてください。","pdf_share_title":"ReWrite 進捗レポート","disclaimerTitle":"重要","aboutDisclaimerText":"ReWriteはウェルネスサポートツールであり、医療機器ではありません。作業療法を補うものとして — 置き換えるものではなく — 設計されています。常に療法士や医療チームの指導に従ってください。",
@@ -5103,6 +5267,20 @@ const STRINGS = {
     progressEmptyBody: "進行状況の記録を始めるには、エクササイズタブから練習を開始してください。",
     progressMoreOne: "他に1つの練習があります — エクササイズタブからお試しください",
     progressMoreOther: "他に{count}つの練習があります — エクササイズタブからお試しください",
+  
+    view_simple: "シンプル",
+    view_detailed: "詳細",
+    trend_improving: "改善中",
+    trend_steady: "安定中",
+    trend_needs_practice: "もう少し練習",
+    trend_started: "開始",
+    trend_now: "現在",
+    trend_need_two_sessions: "傾向を確認するには2つのセッションを完了してください",
+    trend_first_session: "初めての{name}セッションが完了しました。もう1回で傾向が表示されます。",
+    trend_sentence_up: "{name}が上達しています。",
+    trend_sentence_steady: "{name}の調子を維持しています。",
+    trend_sentence_down: "{name}をもう少し練習すると効果的です。",
+    streak_last_14_days: "過去14日のうち{n}日練習しました"
   },
   ko: {
       exercise_error: '이 운동을 시작하는 중에 문제가 발생했습니다. 뒤로 가기를 탭한 후 다시 시도해 주세요.', chipEffortLabel: "노력", chipSizeLabel: "크기", chipFluencyLabel: "유창성", chipFluencyAria: "유창성", chipEffortNone: "시도 없음", chipEffortAttempt: "시도함", chipEffortCompleted: "완료", chipEffortMulti: "여러 시도", chipSizeSmall: "작음", chipSizeMedium: "중간", chipSizeLarge: "큼", narrCompleted: "글자를 시도했고 알아볼 수 있어요.", narrMulti: "몇 번의 시도 — 계속해요.", narrAttempt: "좋은 시작 — 다음엔 더 완성된 모양을 시도해 보세요.", narrNone: "천천히 해 보세요.", narrFluencyHigh: "멋진 흐름.", narrFluencyLow: "천천히 쓰면 유창성에 도움이 돼요.", narrSizeBigGood: "훌륭한 진폭.", narrSizeBigLow: "더 크게 써 보세요.", setShowNumericLabel: "숫자 점수 표시", setShowNumericDesc: "새 노력 칩과 함께 기존 0–100% 점수 링을 표시합니다. 기본값은 끔.", exBigTitle: "크게 쓰기 연습", exBigDesc: "더 큰 글씨 진폭을 훈련합니다. 파킨슨병의 미세필체와 시간이 지나면서 글씨가 작아지는 경우에 유용합니다.", exerciseTypeBigPractice: "크게 쓰기 연습", setBigModeLabel: "크게 쓰기 모드", setBigModeDesc: "모든 운동에서 더 큰 목표 상자와 진폭 점수를 표시합니다. 파킨슨병의 미세필체나 시간이 지나면서 글씨가 작아지는 분들을 위해 설계되었습니다.", shrinkWarn: "글자가 작아지고 있어요. 크게 써 보세요.", bigBadge: "크게", exWordBuilderTitle: "단어 만들기", exWordBuilderDesc: "끝부분을 골라 단어를 완성하고 따라 써 보세요. 단어 회상에 좋아요.", exerciseTypeWordBuilder: "단어 만들기", wbPrompt: "끝부분을 골라 단어를 만들어 보세요", wbChoiceAria: "끝부분 선택","personalDetailsTitle":"개인정보","personalDetailsHint":"모두 선택사항. 이 기기에만 저장됩니다. PDF 진행 리포트 작성에 사용됩니다.","pd_firstname":"이름","pd_lastname":"성","pd_dob":"생년월일","pd_patientid":"NHS 번호 (선택)","pd_patientid_intl":"환자 ID (선택)","pd_clinician":"임상의 이름 (선택)","pd_clinician_email":"임상의 이메일 (선택)","generatePdfBtnLabel":"PDF 리포트 만들기","generatePdfHint":"내 언어와 영어 2개 언어의 PDF를 만들며, 진행 상황, 차트, 개인정보를 포함합니다. 저장하거나 이메일로 공유할 수 있습니다.","pdf_scroll_english":"영어 보려면 아래로 스크롤","pdf_title":"ReWrite 진행 리포트","pdf_patient":"환자","pdf_dob":"생년월일","pdf_clinician":"임상의","pdf_date":"날짜","pdf_exercise":"운동","pdf_avg":"평균","pdf_best":"최고","exercises_count":"운동","exType_letter":"글자","exType_word":"단어","exType_sentence":"문장","pdf_generating":"생성 중","pdf_error":"PDF를 만들 수 없습니다. 다시 시도해 주세요.","pdf_no_sessions":"아직 세션이 없습니다 — 리포트를 만들려면 연습을 시작하세요.","pdf_share_title":"ReWrite 진행 리포트","disclaimerTitle":"중요","aboutDisclaimerText":"ReWrite는 웰빙 지원 도구이며 의료기기가 아닙니다. 작업치료를 보완 — 대체가 아닌 — 하도록 설계되었습니다. 항상 치료사 또는 의료팀의 지침을 따르세요.",
@@ -5222,6 +5400,20 @@ const STRINGS = {
     progressEmptyBody: "운동 탭에서 운동을 시작하여 진행 상황 추적을 시작하세요.",
     progressMoreOne: "1개의 운동을 더 사용할 수 있습니다 — 운동 탭에서 시도해 보세요",
     progressMoreOther: "{count}개의 운동을 더 사용할 수 있습니다 — 운동 탭에서 시도해 보세요",
+  
+    view_simple: "간단히",
+    view_detailed: "자세히",
+    trend_improving: "향상 중",
+    trend_steady: "유지 중",
+    trend_needs_practice: "더 연습해요",
+    trend_started: "시작",
+    trend_now: "지금",
+    trend_need_two_sessions: "추세를 보려면 두 세션을 완료하세요",
+    trend_first_session: "{name} 첫 세션을 마쳤습니다. 한 번 더 하면 추세가 표시됩니다.",
+    trend_sentence_up: "{name} 능력이 좋아지고 있어요.",
+    trend_sentence_steady: "{name} 실력을 유지하고 있어요.",
+    trend_sentence_down: "{name} 연습을 조금 더 하면 도움이 될 거예요.",
+    streak_last_14_days: "지난 14일 중 {n}일 연습했습니다"
   },
   hi: {
       exercise_error: 'इस अभ्यास को शुरू करने में कुछ गलत हुआ। कृपया वापस टैप करें और पुनः प्रयास करें।', chipEffortLabel: "प्रयास", chipSizeLabel: "आकार", chipFluencyLabel: "प्रवाह", chipFluencyAria: "प्रवाह", chipEffortNone: "कोई प्रयास नहीं", chipEffortAttempt: "प्रयास किया", chipEffortCompleted: "पूर्ण", chipEffortMulti: "कई प्रयास", chipSizeSmall: "छोटा", chipSizeMedium: "मध्यम", chipSizeLarge: "बड़ा", narrCompleted: "अक्षर लिखे गए और पहचाने जा सकते हैं।", narrMulti: "कुछ प्रयास — जारी रखें।", narrAttempt: "अच्छी शुरुआत — अगली बार और पूरा आकार आज़माएं।", narrNone: "समय लें और प्रयास करें।", narrFluencyHigh: "सुंदर प्रवाह।", narrFluencyLow: "धीरे लिखने से प्रवाह बेहतर होता है।", narrSizeBigGood: "शानदार आकार।", narrSizeBigLow: "बड़ा लिखने की कोशिश करें।", setShowNumericLabel: "संख्यात्मक स्कोर दिखाएं", setShowNumericDesc: "नए प्रयास चिप्स के साथ पुराने 0–100% स्कोर रिंग दिखाता है। डिफ़ॉल्ट रूप से बंद।", exBigTitle: "बड़ा अभ्यास", exBigDesc: "बड़े आकार में लिखने का अभ्यास। पार्किंसन की माइक्रोग्राफिया और समय के साथ छोटे होते अक्षरों के लिए उपयोगी।", exerciseTypeBigPractice: "बड़ा अभ्यास", setBigModeLabel: "बड़ा मोड", setBigModeDesc: "सभी अभ्यासों के लिए बड़ा लक्ष्य बॉक्स और आकार स्कोरिंग दिखाएं। पार्किंसन की माइक्रोग्राफिया या जिनके अक्षर समय के साथ छोटे होते जाते हैं उनके लिए डिज़ाइन किया गया।", shrinkWarn: "आपके अक्षर छोटे होते जा रहे हैं। बड़ा लिखने की कोशिश करें।", bigBadge: "बड़ा", exWordBuilderTitle: "शब्द निर्माता", exWordBuilderDesc: "शब्द पूरा करने के लिए अंत चुनें और फिर उसे ट्रेस करें। शब्द-स्मरण के लिए उत्तम।", exerciseTypeWordBuilder: "शब्द निर्माता", wbPrompt: "शब्द बनाने के लिए अंत चुनें", wbChoiceAria: "अंत चुनें","personalDetailsTitle":"व्यक्तिगत विवरण","personalDetailsHint":"सभी वैकल्पिक। केवल इस डिवाइस पर संग्रहीत। आपकी PDF प्रगति रिपोर्ट भरने के लिए उपयोग किए जाते हैं।","pd_firstname":"पहला नाम","pd_lastname":"अंतिम नाम","pd_dob":"जन्म तिथि","pd_patientid":"NHS नंबर (वैकल्पिक)","pd_patientid_intl":"रोगी ID (वैकल्पिक)","pd_clinician":"चिकित्सक का नाम (वैकल्पिक)","pd_clinician_email":"चिकित्सक का ईमेल (वैकल्पिक)","generatePdfBtnLabel":"PDF रिपोर्ट बनाएं","generatePdfHint":"आपकी भाषा और अंग्रेज़ी की द्विभाषी PDF बनाता है जिसमें प्रगति, चार्ट और व्यक्तिगत विवरण होते हैं। आप इसे सहेज या ईमेल से साझा कर सकते हैं।","pdf_scroll_english":"अंग्रेज़ी के लिए नीचे स्क्रॉल करें","pdf_title":"ReWrite प्रगति रिपोर्ट","pdf_patient":"रोगी","pdf_dob":"जन्म तिथि","pdf_clinician":"चिकित्सक","pdf_date":"तारीख","pdf_exercise":"व्यायाम","pdf_avg":"औसत","pdf_best":"सर्वश्रेष्ठ","exercises_count":"व्यायाम","exType_letter":"अक्षर","exType_word":"शब्द","exType_sentence":"वाक्य","pdf_generating":"बनाया जा रहा है","pdf_error":"PDF नहीं बन सकी। कृपया फिर से कोशिश करें।","pdf_no_sessions":"अभी तक कोई सत्र नहीं — रिपोर्ट बनाने के लिए अभ्यास शुरू करें।","pdf_share_title":"ReWrite प्रगति रिपोर्ट","disclaimerTitle":"महत्वपूर्ण","aboutDisclaimerText":"ReWrite एक स्वास्थ्य सहायक उपकरण है, चिकित्सा उपकरण नहीं। यह व्यावसायिक चिकित्सा को बदलने के लिए नहीं — पूरक के लिए — डिज़ाइन किया गया है। हमेशा अपने चिकित्सक या देखभाल टीम के मार्गदर्शन का पालन करें।",
@@ -5341,6 +5533,20 @@ const STRINGS = {
     progressEmptyBody: "अपनी प्रगति को ट्रैक करना शुरू करने के लिए व्यायाम टैब से एक व्यायाम शुरू करें।",
     progressMoreOne: "1 और व्यायाम उपलब्ध है — इसे व्यायाम टैब में आज़माएं",
     progressMoreOther: "{count} और व्यायाम उपलब्ध हैं — इन्हें व्यायाम टैब में आज़माएं",
+  
+    view_simple: "सरल",
+    view_detailed: "विस्तृत",
+    trend_improving: "सुधार हो रहा है",
+    trend_steady: "स्थिर",
+    trend_needs_practice: "और अभ्यास",
+    trend_started: "शुरुआत",
+    trend_now: "अभी",
+    trend_need_two_sessions: "अपना ट्रेंड देखने के लिए दो सत्र पूरे करें",
+    trend_first_session: "आपने अपना पहला {name} सत्र पूरा किया — एक और सत्र से आपका ट्रेंड दिखेगा।",
+    trend_sentence_up: "आप {name} में बेहतर हो रहे हैं।",
+    trend_sentence_steady: "आप {name} में स्थिर हैं।",
+    trend_sentence_down: "{name} में थोड़ा और अभ्यास मदद करेगा।",
+    streak_last_14_days: "पिछले 14 दिनों में {n} दिन अभ्यास किया"
   },
   ar: {
       exercise_error: 'حدث خطأ ما أثناء بدء هذا التمرين. الرجاء الضغط على رجوع والمحاولة مرة أخرى.', chipEffortLabel: "الجهد", chipSizeLabel: "الحجم", chipFluencyLabel: "الطلاقة", chipFluencyAria: "الطلاقة", chipEffortNone: "لا توجد محاولة", chipEffortAttempt: "تمت المحاولة", chipEffortCompleted: "مكتمل", chipEffortMulti: "محاولات متعددة", chipSizeSmall: "صغير", chipSizeMedium: "متوسط", chipSizeLarge: "كبير", narrCompleted: "حروف تمت محاولتها ويمكن التعرف عليها.", narrMulti: "بضع محاولات — استمر.", narrAttempt: "بداية جيدة — جرب شكلًا أكثر اكتمالًا في المرة القادمة.", narrNone: "خذ وقتك وحاول.", narrFluencyHigh: "تدفق رائع.", narrFluencyLow: "الكتابة أبطأ تساعد الطلاقة.", narrSizeBigGood: "سعة ممتازة.", narrSizeBigLow: "حاول الكتابة أكبر.", setShowNumericLabel: "إظهار الدرجات الرقمية", setShowNumericDesc: "يعرض حلقة الدرجة القديمة 0–100% بجانب رقائق الجهد الجديدة. مُعطّل افتراضيًا.", exBigTitle: "تمرين الكتابة الكبيرة", exBigDesc: "تدرّب على كتابة بحجم أكبر. مفيد لصغر الخط في باركنسون وللكتابة التي تصغر مع الوقت.", exerciseTypeBigPractice: "تمرين الكتابة الكبيرة", setBigModeLabel: "وضع كبير", setBigModeDesc: "يعرض صندوقًا مستهدفًا أكبر ودرجة سعة لجميع التمارين. مُصمَّم لصغر الخط في باركنسون أو لأي شخص تصغر كتابته مع الوقت.", shrinkWarn: "حروفك تصغر. حاول الكتابة كبيرًا.", bigBadge: "كبير", exWordBuilderTitle: "مُنشئ الكلمات", exWordBuilderDesc: "اختر نهاية لإكمال الكلمة ثم تتبّعها. ممتاز لاستذكار المفردات.", exerciseTypeWordBuilder: "مُنشئ الكلمات", wbPrompt: "اختر نهاية لتكوين كلمة", wbChoiceAria: "اختر النهاية","personalDetailsTitle":"البيانات الشخصية","personalDetailsHint":"كلها اختيارية. مخزنة على هذا الجهاز فقط. تُستخدم لتعبئة تقرير التقدم بصيغة PDF.","pd_firstname":"الاسم الأول","pd_lastname":"اسم العائلة","pd_dob":"تاريخ الميلاد","pd_patientid":"رقم NHS (اختياري)","pd_patientid_intl":"معرّف المريض (اختياري)","pd_clinician":"اسم الطبيب (اختياري)","pd_clinician_email":"بريد الطبيب الإلكتروني (اختياري)","generatePdfBtnLabel":"إنشاء تقرير PDF","generatePdfHint":"يُنشئ ملف PDF ثنائي اللغة (لغتك والإنجليزية) يتضمن تقدمك ومخططاتك وبياناتك الشخصية. يمكنك حفظه أو مشاركته عبر البريد الإلكتروني.","pdf_scroll_english":"مرّر للأسفل لقراءة النسخة الإنجليزية","pdf_title":"تقرير تقدم ReWrite","pdf_patient":"المريض","pdf_dob":"تاريخ الميلاد","pdf_clinician":"الطبيب","pdf_date":"التاريخ","pdf_exercise":"التمرين","pdf_avg":"المتوسط","pdf_best":"الأفضل","exercises_count":"تمارين","exType_letter":"حروف","exType_word":"كلمات","exType_sentence":"جمل","pdf_generating":"جارٍ الإنشاء","pdf_error":"تعذّر إنشاء ملف PDF. يُرجى المحاولة مرة أخرى.","pdf_no_sessions":"لا توجد جلسات بعد — ابدأ التدريب لإنشاء تقرير.","pdf_share_title":"تقرير تقدم ReWrite","disclaimerTitle":"هام","aboutDisclaimerText":"ReWrite أداة لدعم الصحة، وليست جهازًا طبيًا. مصممة لتكمل — وليس لتحل محل — العلاج الوظيفي. اتبع دائمًا إرشادات معالجك أو فريق الرعاية.",
@@ -5460,6 +5666,20 @@ const STRINGS = {
     progressEmptyBody: "ابدأ تمرينًا من علامة تبويب التمارين لبدء تتبع تقدمك.",
     progressMoreOne: "يتوفر تمرين واحد آخر — جربه من علامة تبويب التمارين",
     progressMoreOther: "يتوفر {count} تمارين أخرى — جربها من علامة تبويب التمارين",
+  
+    view_simple: "بسيط",
+    view_detailed: "مفصّل",
+    trend_improving: "يتحسّن",
+    trend_steady: "ثابت",
+    trend_needs_practice: "المزيد من التمرين",
+    trend_started: "البداية",
+    trend_now: "الآن",
+    trend_need_two_sessions: "أكمل جلستين لعرض تقدّمك",
+    trend_first_session: "أكملت جلستك الأولى من {name} — واحدة أخرى ستُظهر تقدّمك.",
+    trend_sentence_up: "أنت تتحسّن في {name}.",
+    trend_sentence_steady: "أنت تحافظ على مستواك في {name}.",
+    trend_sentence_down: "المزيد من التمرين على {name} سيساعدك.",
+    streak_last_14_days: "تدرّبت {n} من آخر 14 يومًا"
   },
   zh: {
       exercise_error: '启动此练习时出现问题。请点击返回并重试。', chipEffortLabel: "努力", chipSizeLabel: "大小", chipFluencyLabel: "流畅度", chipFluencyAria: "流畅度", chipEffortNone: "未尝试", chipEffortAttempt: "已尝试", chipEffortCompleted: "已完成", chipEffortMulti: "多次尝试", chipSizeSmall: "小", chipSizeMedium: "中", chipSizeLarge: "大", narrCompleted: "字母已尝试且可辨认。", narrMulti: "多次尝试 — 继续。", narrAttempt: "好的开始 — 下次试试更完整的形状。", narrNone: "慢慢来，试一试。", narrFluencyHigh: "流畅自然。", narrFluencyLow: "慢一些有助于流畅度。", narrSizeBigGood: "幅度很棒。", narrSizeBigLow: "试着写大一点。", setShowNumericLabel: "显示数字分数", setShowNumericDesc: "在新的努力芯片旁显示传统 0–100% 分数环。默认关闭。", exBigTitle: "大字练习", exBigDesc: "训练更大的书写幅度。适合帕金森小字症和字越写越小的情况。", exerciseTypeBigPractice: "大字练习", setBigModeLabel: "大字模式", setBigModeDesc: "为所有练习显示更大的目标框和幅度评分。专为帕金森小字症或字迹随时间变小的人士设计。", shrinkWarn: "你的字越来越小了。试着写大一点。", bigBadge: "大", exWordBuilderTitle: "造词练习", exWordBuilderDesc: "选择一个字组成词语，然后描摹。非常适合词汇唤起。", exerciseTypeWordBuilder: "造词练习", wbPrompt: "选择一个字来组成词语", wbChoiceAria: "选择字","personalDetailsTitle":"个人详细信息","personalDetailsHint":"全部为可选。仅存储在此设备上。用于填写您的PDF进度报告。","pd_firstname":"名","pd_lastname":"姓","pd_dob":"出生日期","pd_patientid":"NHS号码(可选)","pd_patientid_intl":"患者ID(可选)","pd_clinician":"临床医师姓名(可选)","pd_clinician_email":"临床医师邮箱(可选)","generatePdfBtnLabel":"生成PDF报告","generatePdfHint":"生成包含您的进度、图表和个人详细信息的双语PDF(您的语言和英语)。您可以保存它或通过电子邮件分享。","pdf_scroll_english":"向下滚动查看英文版","pdf_title":"ReWrite 进度报告","pdf_patient":"患者","pdf_dob":"出生日期","pdf_clinician":"临床医师","pdf_date":"日期","pdf_exercise":"练习","pdf_avg":"平均","pdf_best":"最佳","exercises_count":"练习","exType_letter":"字母","exType_word":"单词","exType_sentence":"句子","pdf_generating":"生成中","pdf_error":"无法生成PDF。请重试。","pdf_no_sessions":"尚无练习记录 — 开始练习以生成报告。","pdf_share_title":"ReWrite 进度报告","disclaimerTitle":"重要","aboutDisclaimerText":"ReWrite 是健康支持工具，不是医疗器械。它旨在补充 — 而非替代 — 职业治疗。请始终遵循治疗师或护理团队的指导。",
@@ -5579,6 +5799,20 @@ const STRINGS = {
     progressEmptyBody: "在练习选项卡中开始一项练习以开始追踪您的进度。",
     progressMoreOne: "还有 1 项练习可用 — 在练习选项卡中尝试",
     progressMoreOther: "还有 {count} 项练习可用 — 在练习选项卡中尝试",
+  
+    view_simple: "简易",
+    view_detailed: "详细",
+    trend_improving: "在进步",
+    trend_steady: "保持稳定",
+    trend_needs_practice: "多加练习",
+    trend_started: "开始",
+    trend_now: "现在",
+    trend_need_two_sessions: "完成两次训练即可查看趋势",
+    trend_first_session: "已完成第一次 {name} 训练——再做一次即可查看趋势。",
+    trend_sentence_up: "你在 {name} 上有进步。",
+    trend_sentence_steady: "你在 {name} 上保持稳定。",
+    trend_sentence_down: "多练一点 {name} 会有帮助。",
+    streak_last_14_days: "过去 14 天中练习了 {n} 天"
   },
   pl: {
       exercise_error: 'Coś poszło nie tak podczas uruchamiania tego ćwiczenia. Stuknij Wstecz i spróbuj ponownie.', chipEffortLabel: "Wysiłek", chipSizeLabel: "Rozmiar", chipFluencyLabel: "Płynność", chipFluencyAria: "Płynność", chipEffortNone: "Brak próby", chipEffortAttempt: "Spróbowano", chipEffortCompleted: "Ukończono", chipEffortMulti: "Wiele prób", chipSizeSmall: "Mały", chipSizeMedium: "Średni", chipSizeLarge: "Duży", narrCompleted: "Litery podjęte i rozpoznawalne.", narrMulti: "Kilka prób — kontynuuj.", narrAttempt: "Dobry początek — spróbuj pełniejszego kształtu następnym razem.", narrNone: "Nie spiesz się i spróbuj.", narrFluencyHigh: "Piękna płynność.", narrFluencyLow: "Wolniej pomaga płynności.", narrSizeBigGood: "Świetna amplituda.", narrSizeBigLow: "Spróbuj pisać większy.", setShowNumericLabel: "Pokaż wyniki liczbowe", setShowNumericDesc: "Wyświetla starszy pierścień wyniku 0–100% obok nowych chipów wysiłku. Domyślnie wyłączone.", exBigTitle: "DUŻE Ćwiczenie", exBigDesc: "Trenuj większą amplitudę pisma. Pomocne przy mikrografii Parkinsona i piśmie, które z czasem staje się coraz mniejsze.", exerciseTypeBigPractice: "DUŻE Ćwiczenie", setBigModeLabel: "Tryb DUŻY", setBigModeDesc: "Pokazuje większe pole docelowe i ocenę amplitudy dla wszystkich ćwiczeń. Zaprojektowany dla mikrografii Parkinsona lub dla osób, których pismo z czasem staje się coraz mniejsze.", shrinkWarn: "Twoje litery stają się mniejsze. Spróbuj pisać DUŻO.", bigBadge: "DUŻY", exWordBuilderTitle: "Konstruktor Słów", exWordBuilderDesc: "Wybierz końcówkę, aby ułożyć słowo, a następnie je obrysuj. Świetne do przypominania słów.", exerciseTypeWordBuilder: "Konstruktor Słów", wbPrompt: "Wybierz końcówkę, aby utworzyć słowo", wbChoiceAria: "Wybierz końcówkę","personalDetailsTitle":"Dane osobowe","personalDetailsHint":"Wszystkie pola opcjonalne. Przechowywane tylko na tym urządzeniu. Używane do wypełnienia raportu PDF postępów.","pd_firstname":"Imię","pd_lastname":"Nazwisko","pd_dob":"Data urodzenia","pd_patientid":"Numer NHS (opcjonalny)","pd_patientid_intl":"ID pacjenta (opcjonalny)","pd_clinician":"Imię klinicysty (opcjonalne)","pd_clinician_email":"E-mail klinicysty (opcjonalny)","generatePdfBtnLabel":"Wygeneruj raport PDF","generatePdfHint":"Tworzy dwujęzyczny PDF (Twój język i angielski) z postępami, wykresami i danymi osobowymi. Możesz go zapisać lub udostępnić e-mailem.","pdf_scroll_english":"Przewiń w dół, aby zobaczyć angielski","pdf_title":"Raport Postępów ReWrite","pdf_patient":"Pacjent","pdf_dob":"Data urodzenia","pdf_clinician":"Klinicysta","pdf_date":"Data","pdf_exercise":"Ćwiczenie","pdf_avg":"Średnia","pdf_best":"Najlepszy","exercises_count":"ćwiczenia","exType_letter":"Litery","exType_word":"Słowa","exType_sentence":"Zdania","pdf_generating":"Generowanie","pdf_error":"Nie udało się wygenerować PDF. Spróbuj ponownie.","pdf_no_sessions":"Brak sesji — zacznij ćwiczyć, aby wygenerować raport.","pdf_share_title":"Raport Postępów ReWrite","disclaimerTitle":"Ważne","aboutDisclaimerText":"ReWrite to narzędzie wspierające dobre samopoczucie, a nie wyrób medyczny. Jest zaprojektowane jako uzupełnienie — nie zamiennik — terapii zajęciowej. Zawsze stosuj się do wskazówek terapeuty lub zespołu opieki.",
@@ -5698,6 +5932,20 @@ const STRINGS = {
     progressEmptyBody: "Rozpocznij ćwiczenie z zakładki Ćwiczenia, aby śledzić swoje postępy.",
     progressMoreOne: "Dostępne jeszcze 1 ćwiczenie — wypróbuj je w zakładce Ćwiczenia",
     progressMoreOther: "Dostępnych jeszcze {count} ćwiczeń — wypróbuj je w zakładce Ćwiczenia",
+  
+    view_simple: "Prosty",
+    view_detailed: "Szczegółowy",
+    trend_improving: "Postępy",
+    trend_steady: "Stabilnie",
+    trend_needs_practice: "Ćwicz więcej",
+    trend_started: "Start",
+    trend_now: "Teraz",
+    trend_need_two_sessions: "Ukończ dwie sesje, aby zobaczyć trend",
+    trend_first_session: "Pierwsza sesja {name} ukończona — kolejna pokaże Twój trend.",
+    trend_sentence_up: "Robisz postępy w {name}.",
+    trend_sentence_steady: "Utrzymujesz poziom w {name}.",
+    trend_sentence_down: "Trochę więcej ćwiczeń z {name} pomoże.",
+    streak_last_14_days: "Ćwiczono {n} z ostatnich 14 dni"
   },
   es_mx: {
       exercise_error: 'Algo salió mal al iniciar este ejercicio. Toca Atrás e inténtalo de nuevo.', chipEffortLabel: "Esfuerzo", chipSizeLabel: "Tamaño", chipFluencyLabel: "Fluidez", chipFluencyAria: "Fluidez", chipEffortNone: "Sin intento", chipEffortAttempt: "Intentado", chipEffortCompleted: "Completado", chipEffortMulti: "Varios intentos", chipSizeSmall: "Pequeño", chipSizeMedium: "Mediano", chipSizeLarge: "Grande", narrCompleted: "Letras intentadas y reconocibles.", narrMulti: "Varios intentos — sigue así.", narrAttempt: "Buen comienzo — prueba una forma más completa la próxima vez.", narrNone: "Tómate tu tiempo y prueba.", narrFluencyHigh: "Bonita fluidez.", narrFluencyLow: "Ir más despacio ayuda a la fluidez.", narrSizeBigGood: "Excelente amplitud.", narrSizeBigLow: "Intenta escribir más grande.", setShowNumericLabel: "Mostrar puntuaciones numéricas", setShowNumericDesc: "Muestra el anillo de puntuación 0–100% heredado junto a las nuevas fichas de esfuerzo. Desactivado por defecto.", exBigTitle: "Práctica GRANDE", exBigDesc: "Entrena una amplitud de escritura mayor. Útil para la micrografía del Parkinson y para letra que se hace cada vez más pequeña.", exerciseTypeBigPractice: "Práctica GRANDE", setBigModeLabel: "Modo GRANDE", setBigModeDesc: "Muestra un cuadro objetivo más grande y puntuación por amplitud para todos los ejercicios. Diseñado para la micrografía del Parkinson o para quienes su letra se hace más pequeña con el tiempo.", shrinkWarn: "Tus letras se están haciendo más pequeñas. Intenta escribir GRANDE.", bigBadge: "GRANDE", exWordBuilderTitle: "Constructor de Palabras", exWordBuilderDesc: "Elige un final para completar una palabra y trázala. Ideal para recuperación léxica.", exerciseTypeWordBuilder: "Constructor de Palabras", wbPrompt: "Elige un final para formar una palabra", wbChoiceAria: "Elegir final","personalDetailsTitle":"Datos personales","personalDetailsHint":"Todos opcionales. Almacenados solo en este dispositivo. Se usan para llenar tu informe PDF de progreso.","pd_firstname":"Nombre","pd_lastname":"Apellido","pd_dob":"Fecha de nacimiento","pd_patientid":"Número NHS (opcional)","pd_patientid_intl":"ID de paciente (opcional)","pd_clinician":"Nombre del médico (opcional)","pd_clinician_email":"Correo del médico (opcional)","generatePdfBtnLabel":"Generar informe PDF","generatePdfHint":"Crea un PDF bilingüe (tu idioma e inglés) con tu progreso, gráficas y datos personales. Puedes guardarlo o compartirlo por correo.","pdf_scroll_english":"Desplázate hacia abajo para inglés","pdf_title":"Informe de Progreso de ReWrite","pdf_patient":"Paciente","pdf_dob":"Fecha de nacimiento","pdf_clinician":"Médico","pdf_date":"Fecha","pdf_exercise":"Ejercicio","pdf_avg":"Promedio","pdf_best":"Mejor","exercises_count":"ejercicios","exType_letter":"Letras","exType_word":"Palabras","exType_sentence":"Oraciones","pdf_generating":"Generando","pdf_error":"No se pudo generar el PDF. Inténtalo de nuevo.","pdf_no_sessions":"Aún no hay sesiones — empieza a practicar para generar un informe.","pdf_share_title":"Informe de Progreso de ReWrite","disclaimerTitle":"Importante","aboutDisclaimerText":"ReWrite es una herramienta de apoyo al bienestar, no un dispositivo médico. Está diseñada para complementar — no sustituir — la terapia ocupacional. Sigue siempre la orientación de tu terapeuta o equipo de cuidados.",
@@ -5817,6 +6065,20 @@ const STRINGS = {
     progressEmptyBody: "Inicia un ejercicio desde la pestaña Ejercicios para comenzar a registrar tu progreso.",
     progressMoreOne: "1 ejercicio más disponible: pruébalo en la pestaña Ejercicios",
     progressMoreOther: "{count} ejercicios más disponibles: pruébalos en la pestaña Ejercicios",
+  
+    view_simple: "Sencillo",
+    view_detailed: "Detallado",
+    trend_improving: "Mejorando",
+    trend_steady: "Estable",
+    trend_needs_practice: "Practica más",
+    trend_started: "Inicio",
+    trend_now: "Ahora",
+    trend_need_two_sessions: "Completa dos sesiones para ver tu tendencia",
+    trend_first_session: "Completaste tu primera sesión de {name} — una más mostrará tu progreso.",
+    trend_sentence_up: "Estás mejorando en {name}.",
+    trend_sentence_steady: "Mantienes tu nivel en {name}.",
+    trend_sentence_down: "Un poco más de práctica en {name} ayudará.",
+    streak_last_14_days: "Has practicado {n} de los últimos 14 días"
   },
   pt_br: {
       exercise_error: 'Algo deu errado ao iniciar este exercício. Toque em Voltar e tente novamente.', chipEffortLabel: "Esforço", chipSizeLabel: "Tamanho", chipFluencyLabel: "Fluência", chipFluencyAria: "Fluência", chipEffortNone: "Sem tentativa", chipEffortAttempt: "Tentado", chipEffortCompleted: "Concluído", chipEffortMulti: "Várias tentativas", chipSizeSmall: "Pequeno", chipSizeMedium: "Médio", chipSizeLarge: "Grande", narrCompleted: "Letras tentadas e reconhecíveis.", narrMulti: "Algumas tentativas — continue.", narrAttempt: "Bom começo — tente uma forma mais completa da próxima vez.", narrNone: "Vá com calma e tente.", narrFluencyHigh: "Bela fluência.", narrFluencyLow: "Mais devagar ajuda a fluência.", narrSizeBigGood: "Ótima amplitude.", narrSizeBigLow: "Tente escrever maior.", setShowNumericLabel: "Mostrar pontuações numéricas", setShowNumericDesc: "Mostra o anel de pontuação 0–100% antigo ao lado dos novos chips de esforço. Desativado por padrão.", exBigTitle: "Prática GRANDE", exBigDesc: "Treine uma amplitude de escrita maior. Útil para micrografia de Parkinson e para escrita que vai ficando cada vez menor.", exerciseTypeBigPractice: "Prática GRANDE", setBigModeLabel: "Modo GRANDE", setBigModeDesc: "Mostra uma caixa-alvo maior e pontuação de amplitude para todos os exercícios. Projetado para micrografia de Parkinson ou para quem vê a própria escrita ficar cada vez menor.", shrinkWarn: "Suas letras estão ficando menores. Tente escrever GRANDE.", bigBadge: "GRANDE", exWordBuilderTitle: "Construtor de Palavras", exWordBuilderDesc: "Escolha uma terminação para completar uma palavra e depois trace. Ótimo para recuperação lexical.", exerciseTypeWordBuilder: "Construtor de Palavras", wbPrompt: "Escolha uma terminação para formar uma palavra", wbChoiceAria: "Escolher terminação","personalDetailsTitle":"Dados pessoais","personalDetailsHint":"Todos opcionais. Armazenados apenas neste dispositivo. Usados para preencher seu relatório PDF de progresso.","pd_firstname":"Nome","pd_lastname":"Sobrenome","pd_dob":"Data de nascimento","pd_patientid":"Número NHS (opcional)","pd_patientid_intl":"ID do paciente (opcional)","pd_clinician":"Nome do médico (opcional)","pd_clinician_email":"E-mail do médico (opcional)","generatePdfBtnLabel":"Gerar relatório PDF","generatePdfHint":"Cria um PDF bilíngue (seu idioma e inglês) com seu progresso, gráficos e dados pessoais. Você pode salvá-lo ou compartilhá-lo por e-mail.","pdf_scroll_english":"Role para baixo para inglês","pdf_title":"Relatório de Progresso ReWrite","pdf_patient":"Paciente","pdf_dob":"Data de nascimento","pdf_clinician":"Médico","pdf_date":"Data","pdf_exercise":"Exercício","pdf_avg":"Média","pdf_best":"Melhor","exercises_count":"exercícios","exType_letter":"Letras","exType_word":"Palavras","exType_sentence":"Frases","pdf_generating":"Gerando","pdf_error":"Não foi possível gerar o PDF. Tente novamente.","pdf_no_sessions":"Ainda sem sessões — comece a praticar para gerar um relatório.","pdf_share_title":"Relatório de Progresso ReWrite","disclaimerTitle":"Importante","aboutDisclaimerText":"ReWrite é uma ferramenta de apoio ao bem-estar, não um dispositivo médico. Foi projetado para complementar — não substituir — a terapia ocupacional. Sempre siga a orientação do seu terapeuta ou equipe de cuidados.",
@@ -5936,6 +6198,20 @@ const STRINGS = {
     progressEmptyBody: "Inicie um exercício na aba Exercícios para começar a registrar seu progresso.",
     progressMoreOne: "Mais 1 exercício disponível — experimente na aba Exercícios",
     progressMoreOther: "Mais {count} exercícios disponíveis — experimente na aba Exercícios",
+  
+    view_simple: "Simples",
+    view_detailed: "Detalhado",
+    trend_improving: "Melhorando",
+    trend_steady: "Estável",
+    trend_needs_practice: "Pratique mais",
+    trend_started: "Início",
+    trend_now: "Agora",
+    trend_need_two_sessions: "Conclua duas sessões para ver sua evolução",
+    trend_first_session: "Você concluiu sua primeira sessão de {name} — mais uma mostrará sua evolução.",
+    trend_sentence_up: "Você está melhorando em {name}.",
+    trend_sentence_steady: "Você mantém seu nível em {name}.",
+    trend_sentence_down: "Um pouco mais de prática em {name} vai ajudar.",
+    streak_last_14_days: "Você praticou {n} dos últimos 14 dias"
   },
   fr_ca: {
       exercise_error: 'Une erreur s\'est produite au démarrage de cet exercice. Touchez Retour et réessayez.', chipEffortLabel: "Effort", chipSizeLabel: "Taille", chipFluencyLabel: "Fluidité", chipFluencyAria: "Fluidité", chipEffortNone: "Aucune tentative", chipEffortAttempt: "Essayé", chipEffortCompleted: "Terminé", chipEffortMulti: "Plusieurs essais", chipSizeSmall: "Petit", chipSizeMedium: "Moyen", chipSizeLarge: "Grand", narrCompleted: "Lettres tentées et reconnaissables.", narrMulti: "Quelques essais — continue.", narrAttempt: "Bon début — essaie une forme plus complète la prochaine fois.", narrNone: "Prends ton temps et essaie.", narrFluencyHigh: "Belle fluidité.", narrFluencyLow: "Plus lentement aide à la fluidité.", narrSizeBigGood: "Excellente amplitude.", narrSizeBigLow: "Essaie d'écrire plus grand.", setShowNumericLabel: "Afficher les scores numériques", setShowNumericDesc: "Affiche l'anneau de score 0–100% hérité à côté des nouvelles puces d'effort. Désactivé par défaut.", exBigTitle: "Pratique GRANDE", exBigDesc: "Entraîne-toi à écrire plus grand. Utile pour la micrographie de Parkinson et pour l'écriture qui rétrécit avec le temps.", exerciseTypeBigPractice: "Pratique GRANDE", setBigModeLabel: "Mode GRAND", setBigModeDesc: "Affiche une zone cible plus grande et un score d'amplitude pour tous les exercices. Conçu pour la micrographie de Parkinson ou pour quiconque dont l'écriture rétrécit avec le temps.", shrinkWarn: "Tes lettres rétrécissent. Essaie d'écrire GRAND.", bigBadge: "GRAND", exWordBuilderTitle: "Constructeur de Mots", exWordBuilderDesc: "Choisis une fin pour compléter un mot, puis trace-le. Idéal pour la récupération lexicale.", exerciseTypeWordBuilder: "Constructeur de Mots", wbPrompt: "Choisis une fin pour former un mot", wbChoiceAria: "Choisir une fin","personalDetailsTitle":"Renseignements personnels","personalDetailsHint":"Tous facultatifs. Stockés uniquement sur cet appareil. Utilisés pour remplir votre rapport PDF de progression.","pd_firstname":"Prénom","pd_lastname":"Nom","pd_dob":"Date de naissance","pd_patientid":"Numéro NHS (facultatif)","pd_patientid_intl":"ID patient (facultatif)","pd_clinician":"Nom du clinicien (facultatif)","pd_clinician_email":"Courriel du clinicien (facultatif)","generatePdfBtnLabel":"Générer le rapport PDF","generatePdfHint":"Crée un PDF bilingue (votre langue et anglais) avec votre progression, vos graphiques et vos renseignements personnels. Vous pouvez l'enregistrer ou le partager par courriel.","pdf_scroll_english":"Faites défiler pour l'anglais","pdf_title":"Rapport de Progression ReWrite","pdf_patient":"Patient","pdf_dob":"Date de naissance","pdf_clinician":"Clinicien","pdf_date":"Date","pdf_exercise":"Exercice","pdf_avg":"Moyenne","pdf_best":"Meilleur","exercises_count":"exercices","exType_letter":"Lettres","exType_word":"Mots","exType_sentence":"Phrases","pdf_generating":"Génération","pdf_error":"Impossible de générer le PDF. Veuillez réessayer.","pdf_no_sessions":"Aucune session pour le moment — commencez à vous entraîner pour générer un rapport.","pdf_share_title":"Rapport de Progression ReWrite","disclaimerTitle":"Important","aboutDisclaimerText":"ReWrite est un outil de soutien au bien-être, pas un dispositif médical. Il est conçu pour compléter — et non remplacer — l'ergothérapie. Suivez toujours les conseils de votre thérapeute ou de votre équipe soignante.",
@@ -6055,6 +6331,20 @@ const STRINGS = {
     progressEmptyBody: "Commencez un exercice depuis l'onglet Exercices pour suivre votre progression.",
     progressMoreOne: "1 exercice supplémentaire disponible — essayez-le dans l'onglet Exercices",
     progressMoreOther: "{count} exercices supplémentaires disponibles — essayez-les dans l'onglet Exercices",
+  
+    view_simple: "Simple",
+    view_detailed: "Détaillé",
+    trend_improving: "En progrès",
+    trend_steady: "Stable",
+    trend_needs_practice: "Encore un peu",
+    trend_started: "Début",
+    trend_now: "Aujourd'hui",
+    trend_need_two_sessions: "Terminez deux séances pour voir votre évolution",
+    trend_first_session: "Vous avez terminé votre première séance de {name} — une de plus révélera votre évolution.",
+    trend_sentence_up: "Vous progressez en {name}.",
+    trend_sentence_steady: "Vous maintenez votre niveau en {name}.",
+    trend_sentence_down: "Un peu plus d'entraînement en {name} vous aidera.",
+    streak_last_14_days: "{n} des 14 derniers jours pratiqués"
   },
 
   "ga": { exercise_error: 'Chuaigh rud éigin mícheart agus an cleachtadh seo á thosú. Tapáil Ar Ais agus bain triail eile.', chipEffortLabel: "Iarracht", chipSizeLabel: "Méid", chipFluencyLabel: "Líofacht", chipFluencyAria: "Líofacht", chipEffortNone: "Gan iarracht", chipEffortAttempt: "Tugadh iarracht", chipEffortCompleted: "Críochnaithe", chipEffortMulti: "Iarrachtaí iolracha", chipSizeSmall: "Beag", chipSizeMedium: "Meánach", chipSizeLarge: "Mór", narrCompleted: "Litreacha tugtha agus inaitheanta.", narrMulti: "Cúpla iarracht — coinnigh ort.", narrAttempt: "Tús maith — bain triail as cruth níos iomláine an chéad uair eile.", narrNone: "Tóg do chuid ama agus tabhair iarracht.", narrFluencyHigh: "Sruth álainn.", narrFluencyLow: "Cabhraíonn níos moille le líofacht.", narrSizeBigGood: "Aimplitiúid den scoth.", narrSizeBigLow: "Bain triail as scríobh níos mó.", setShowNumericLabel: "Taispeáin scóir uimhriúla", setShowNumericDesc: "Taispeáin an fáinne scóir oidhreachta 0–100% in éineacht leis na sliseanna iarrachta nua. As de réir réamhshocraithe.", exBigTitle: "Cleachtadh MÓR", exBigDesc: "Oiliúint scríbhneoireachta níos mó. Cabhrach do mhicrigrafáil Parkinson agus do scríbhneoireacht a éiríonn níos lú le himeacht ama.", exerciseTypeBigPractice: "Cleachtadh MÓR", setBigModeLabel: "Modh MÓR", setBigModeDesc: "Taispeáin bosca sprice níos mó agus scóráil aimplitiúide do gach cleachtadh. Deartha do mhicrigrafáil Parkinson nó d'aon duine a éiríonn a chuid scríbhneoireachta níos lú le himeacht ama.", shrinkWarn: "Tá do litreacha ag éirí níos lú. Bain triail as scríobh GO MÓR.", bigBadge: "MÓR", exWordBuilderTitle: "Tógálaí Focal", exWordBuilderDesc: "Roghnaigh deireadh chun focal a chríochnú, ansin lorgaigh é. Iontach do aisghabháil focal.", exerciseTypeWordBuilder: "Tógálaí Focal", wbPrompt: "Roghnaigh deireadh chun focal a dhéanamh", wbChoiceAria: "Roghnaigh deireadh","personalDetailsTitle":"Sonraí pearsanta","personalDetailsHint":"Roghnach ar fad. Stóráilte ar an ngléas seo amháin. Úsáidte chun do thuarascáil dul chun cinn PDF a líonadh.","pd_firstname":"Ainm baiste","pd_lastname":"Sloinne","pd_dob":"Dáta breithe","pd_patientid":"Uimhir NHS (roghnach)","pd_patientid_intl":"ID Othair (roghnach)","pd_clinician":"Ainm an chliniceora (roghnach)","pd_clinician_email":"Ríomhphost an chliniceora (roghnach)","generatePdfBtnLabel":"Cruthaigh tuarascáil PDF","generatePdfHint":"Cruthaíonn sé PDF dátheangach (do theanga féin agus Béarla) le do dhul chun cinn, cairteacha agus sonraí pearsanta. Is féidir é a shábháil nó a roinnt trí ríomhphost.","pdf_scroll_english":"Scrollaigh síos don Bhéarla","pdf_title":"Tuarascáil Dul Chun Cinn ReWrite","pdf_patient":"Othar","pdf_dob":"Dáta breithe","pdf_clinician":"Cliniceoir","pdf_date":"Dáta","pdf_exercise":"Cleachtadh","pdf_avg":"Meán","pdf_best":"Is fearr","exercises_count":"cleachtaí","exType_letter":"Litreacha","exType_word":"Focail","exType_sentence":"Abairtí","pdf_generating":"Á chruthú","pdf_error":"Níorbh fhéidir an PDF a chruthú. Bain triail eile as.","pdf_no_sessions":"Gan seisiúin go fóill — tosaigh ag cleachtadh chun tuarascáil a chruthú.","pdf_share_title":"Tuarascáil Dul Chun Cinn ReWrite","disclaimerTitle":"Tábhachtach","aboutDisclaimerText":"Is uirlis tacaíochta folláine é ReWrite, ní gléas leighis. Tá sé deartha chun teiripe ghairme a chomhlánú — ní chun é a chur in ionad. Lean treoir do theiripeoir nó do fhoireann cúraim i gcónaí.",
@@ -7364,9 +7654,42 @@ function exitExercise() {
 }
 
 // ══════════════ PROGRESS ══════════════
+// v1.0.21: Progress view mode helpers. Persists in localStorage so users don't
+// have to re-toggle after switching languages or reopening the app.
+function _getProgressView(){
+  try { return localStorage.getItem('rewrite_progressView') || 'simple'; }
+  catch(e){ return 'simple'; }
+}
+function _setProgressView(mode){
+  try { localStorage.setItem('rewrite_progressView', mode); } catch(e){}
+}
+
 async function refreshProgress() {
   const sessions = await getAllSessions();
   const lang = STRINGS[currentLang] || STRINGS.en;
+
+  // ── v1.0.21: apply localised toggle labels + wire click handlers idempotently
+  const _toggleSimple = document.getElementById('viewToggleSimple');
+  const _toggleDetailed = document.getElementById('viewToggleDetailed');
+  if (_toggleSimple) _toggleSimple.textContent = lang.view_simple || 'Simple';
+  if (_toggleDetailed) _toggleDetailed.textContent = lang.view_detailed || 'Detailed';
+  if (_toggleSimple && !_toggleSimple._wired){
+    _toggleSimple._wired = true;
+    _toggleSimple.addEventListener('click', function(){ _setProgressView('simple'); refreshProgress(); });
+  }
+  if (_toggleDetailed && !_toggleDetailed._wired){
+    _toggleDetailed._wired = true;
+    _toggleDetailed.addEventListener('click', function(){ _setProgressView('detailed'); refreshProgress(); });
+  }
+  const _viewMode = _getProgressView();
+  if (_toggleSimple) _toggleSimple.classList.toggle('active', _viewMode === 'simple');
+  if (_toggleDetailed) _toggleDetailed.classList.toggle('active', _viewMode === 'detailed');
+
+  // Show/hide containers based on the current view mode.
+  const _simpleWrap = document.getElementById('simpleViewContainer');
+  const _detailedWrap = document.getElementById('detailedViewContainer');
+  if (_simpleWrap) _simpleWrap.style.display = (_viewMode === 'simple') ? '' : 'none';
+  if (_detailedWrap) _detailedWrap.style.display = (_viewMode === 'detailed') ? '' : 'none';
 
   // Stats
   const total = sessions.length;
@@ -7464,7 +7787,16 @@ async function refreshProgress() {
   peDiv.innerHTML = peHtml || `<p style="font-size:12px;color:var(--text3);padding:8px 0">${lang.noExercises || 'No exercises recorded yet.'}</p>`;
 
   // Trend chart
-  renderTrendChart(sessions);
+  // v1.0.21: Detailed view renders as small-multiples grid; keep the legacy
+  // canvas hidden for backward-compat with any external references.
+  const _trendCardEl = document.getElementById('trendChartCard');
+  if (_trendCardEl) _trendCardEl.style.display = 'none';
+  _renderSmallMultiples(sessions, lang);
+
+  // v1.0.21: render the Simple view (streak + trend cards) if selected
+  if (_viewMode === 'simple') {
+    _renderSimpleView(sessions, lang);
+  }
 
   // Session log
   const logDiv = document.getElementById('sessionLog');
@@ -7489,6 +7821,340 @@ async function refreshProgress() {
     logDiv.innerHTML = logHtml;
   }
 }
+
+// ══════════════ v1.0.21 Simple/Detailed Progress helpers ══════════════
+
+// Classify a series of scores into up/steady/down. Uses the last-half
+// vs first-half mean gap (in percentage points) — robust to a single spike.
+function _rwClassifyTrend(scores){
+  if (!scores || scores.length < 2) return { direction: 'insufficient', delta: 0 };
+  const half = Math.max(1, Math.floor(scores.length / 2));
+  const firstMean = scores.slice(0, half).reduce((a,b) => a+b, 0) / half;
+  const lastN = scores.length - half;
+  const lastMean = scores.slice(half).reduce((a,b) => a+b, 0) / lastN;
+  const delta = lastMean - firstMean;
+  if (delta >= 5) return { direction: 'up', delta: delta };
+  if (delta <= -5) return { direction: 'down', delta: delta };
+  return { direction: 'steady', delta: delta };
+}
+
+// Render the filled-gradient sparkline for a single trend card.
+function _rwRenderTrendGraph(canvas, scores){
+  if (!canvas || !scores || scores.length < 2) return;
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.clientWidth || canvas.offsetWidth || 300;
+  const cssH = canvas.clientHeight || canvas.offsetHeight || 88;
+  canvas.width = cssW * dpr;
+  canvas.height = cssH * dpr;
+  canvas.style.width = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const padL = 8, padR = 8, padT = 22, padB = 8;
+  const w = cssW - padL - padR;
+  const h = cssH - padT - padB;
+  const min = Math.min(...scores);
+  const max = Math.max(...scores);
+  const range = Math.max(1, max - min);
+  const N = scores.length;
+  const pts = scores.map(function(v, i){
+    return {
+      x: padL + (N === 1 ? w/2 : (i / (N - 1)) * w),
+      y: padT + (h - ((v - min) / range) * h)
+    };
+  });
+  // Filled area under the line
+  const grad = ctx.createLinearGradient(0, padT, 0, padT + h);
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#b85c38';
+  grad.addColorStop(0, accent + 'cc');
+  grad.addColorStop(1, accent + '11');
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, padT + h);
+  pts.forEach(function(p){ ctx.lineTo(p.x, p.y); });
+  ctx.lineTo(pts[N - 1].x, padT + h);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+  // Line stroke
+  ctx.beginPath();
+  pts.forEach(function(p, i){ if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = accent;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+  // Endpoint dots
+  [pts[0], pts[N - 1]].forEach(function(p){
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = accent;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--card').trim() || '#fff';
+    ctx.stroke();
+  });
+}
+
+// Render the 14-day streak strip (one dot per day, last two weeks, today on the right).
+function _rwRenderStreakStrip(container, sessions, lang){
+  if (!container) return;
+  const days = 14;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const activeDates = new Set();
+  sessions.forEach(function(s){
+    if (!s.date) return;
+    const d = new Date(s.date);
+    d.setHours(0,0,0,0);
+    activeDates.add(d.getTime());
+  });
+  // Count active days for the {n} placeholder
+  let activeCount = 0;
+  for (let i = 0; i < days; i++){
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    if (activeDates.has(d.getTime())) activeCount++;
+  }
+  const titleTpl = lang.streak_last_14_days || 'Practised {n} of the last 14 days';
+  let html = '<div class="streak-strip-title">' + titleTpl.replace('{n}', activeCount) + '</div><div class="streak-strip-dots">';
+  for (let i = days - 1; i >= 0; i--){
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const isActive = activeDates.has(d.getTime());
+    const isToday = i === 0;
+    let cls = 'streak-dot';
+    if (isActive) cls += ' active';
+    if (isToday) cls += ' today';
+    html += '<div class="' + cls + '" title="' + d.toDateString() + '"></div>';
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// Build the Simple view: streak strip + one trend card per exercise type.
+function _rwGetTypeName(type, lang){
+  const nameMap = {
+    letters: lang.exerciseTypeLetters || 'Letters',
+    numbers: lang.exerciseTypeNumbers || 'Numbers',
+    words: lang.exerciseTypeWords || 'Words',
+    sentences: lang.exerciseTypeSentences || 'Sentences',
+    bigpractice: lang.exerciseTypeBigPractice || 'BIG Practice',
+    wordbuilder: lang.exerciseTypeWordBuilder || 'Word Builder'
+  };
+  return nameMap[type] || (type.charAt(0).toUpperCase() + type.slice(1));
+}
+
+function _renderSimpleView(sessions, lang){
+  const host = document.getElementById('simpleViewContainer');
+  if (!host) return;
+  // Group sessions by type, ordered by first-seen chronology.
+  const byType = {};
+  sessions.forEach(function(s){
+    const t = s.type || 'other';
+    if (!byType[t]) byType[t] = [];
+    byType[t].push(s);
+  });
+  // Streak strip first.
+  const streak = document.createElement('div');
+  streak.className = 'streak-strip';
+  _rwRenderStreakStrip(streak, sessions, lang);
+  let html = '';
+  const types = Object.keys(byType);
+  types.forEach(function(type){
+    const seriesSessions = byType[type].slice().sort(function(a,b){ return new Date(a.date) - new Date(b.date); });
+    const scores = seriesSessions.map(function(s){ return s.averageScore || 0; });
+    const startedLabel = lang.trend_started || 'Started';
+    const nowLabel = lang.trend_now || 'Now';
+    const typeName = _rwGetTypeName(type, lang);
+    if (scores.length < 2){
+      // Not enough data — a friendly first-session card.
+      const msg = scores.length === 1
+        ? (lang.trend_need_two_sessions || 'Complete one more session to see your trend for {name}.').replace('{name}', typeName)
+        : (lang.trend_first_session || 'Start your first {name} session to see your trend here.').replace('{name}', typeName);
+      html += '<div class="trend-card"><div class="trend-card-head"><h3 class="trend-card-title">' + typeName + '</h3></div><div class="trend-sentence">' + msg + '</div></div>';
+      return;
+    }
+    const cls = _rwClassifyTrend(scores);
+    let badgeCls = 'steady', badgeTxt = lang.trend_steady || 'Steady';
+    let sentence = (lang.trend_sentence_steady || "You're holding steady at {name}.").replace('{name}', typeName);
+    if (cls.direction === 'up'){
+      badgeCls = 'up';
+      badgeTxt = lang.trend_improving || 'Improving';
+      sentence = (lang.trend_sentence_up || 'Your {name} scores are improving — up {delta} points.').replace('{name}', typeName).replace('{delta}', Math.round(cls.delta));
+    } else if (cls.direction === 'down'){
+      badgeCls = 'down';
+      badgeTxt = lang.trend_needs_practice || 'Practise more';
+      sentence = (lang.trend_sentence_down || 'A little dip in {name} — keep practising.').replace('{name}', typeName);
+    }
+    const canvasId = '_trendGraph_' + type;
+    html += '<div class="trend-card">' +
+      '<div class="trend-card-head">' +
+        '<h3 class="trend-card-title">' + typeName + '</h3>' +
+        '<span class="trend-badge ' + badgeCls + '">' + badgeTxt + '</span>' +
+      '</div>' +
+      '<div class="trend-graph-wrap">' +
+        '<canvas class="trend-graph" id="' + canvasId + '"></canvas>' +
+        '<div class="trend-endpoints">' +
+          '<div class="trend-endpoint-label start">' + startedLabel + '</div>' +
+          '<div class="trend-endpoint-label end">' + nowLabel + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<p class="trend-sentence">' + sentence + '</p>' +
+    '</div>';
+  });
+  host.innerHTML = '';
+  host.appendChild(streak);
+  const cards = document.createElement('div');
+  cards.innerHTML = html;
+  while (cards.firstChild) host.appendChild(cards.firstChild);
+  // Paint sparklines after the DOM is in place so canvas has measurable size.
+  requestAnimationFrame(function(){
+    types.forEach(function(type){
+      const arr = byType[type].slice().sort(function(a,b){ return new Date(a.date) - new Date(b.date); });
+      if (arr.length < 2) return;
+      const canvas = document.getElementById('_trendGraph_' + type);
+      const scores = arr.map(function(s){ return s.averageScore || 0; });
+      _rwRenderTrendGraph(canvas, scores);
+    });
+  });
+}
+
+// Render a small-multiples grid (2×N) as the Detailed-view chart replacement.
+// Each mini-chart auto-scales to its own Y-range so no exercise gets squashed.
+function _renderSmallMultiples(sessions, lang){
+  // Insert (or find) the grid host after the trendChartCard.
+  let host = document.getElementById('smallMultGrid');
+  if (!host){
+    host = document.createElement('div');
+    host.id = 'smallMultGrid';
+    host.className = 'smallmult-grid';
+    const detailedWrap = document.getElementById('detailedViewContainer');
+    const perExCard = document.getElementById('perExerciseCard');
+    if (detailedWrap && perExCard){
+      detailedWrap.insertBefore(host, perExCard);
+    } else {
+      // Fallback: append to detailed wrap.
+      if (detailedWrap) detailedWrap.appendChild(host);
+    }
+  }
+  const byType = {};
+  sessions.forEach(function(s){
+    const t = s.type || 'other';
+    if (!byType[t]) byType[t] = [];
+    byType[t].push(s);
+  });
+  const types = Object.keys(byType);
+  if (types.length === 0){ host.innerHTML = ''; host.style.display = 'none'; return; }
+  host.style.display = '';
+  const __lang = (STRINGS[currentLang] || STRINGS.en);
+  const __dateLocale = currentLang === 'en' ? 'en-GB' : currentLang.replace('_','-');
+  const formatDate = function(iso){
+    try {
+      return new Date(iso).toLocaleDateString(__dateLocale, { day: 'numeric', month: 'short' });
+    } catch(e){
+      return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    }
+  };
+  let html = '';
+  types.forEach(function(type){
+    const arr = byType[type].slice().sort(function(a,b){ return new Date(a.date) - new Date(b.date); });
+    const typeName = _rwGetTypeName(type, lang);
+    const first = arr[0], last = arr[arr.length - 1];
+    html += '<div class="smallmult">' +
+      '<h4 class="smallmult-title">' + typeName + '</h4>' +
+      '<div class="smallmult-canvas-wrap"><canvas id="_sm_' + type + '"></canvas></div>' +
+      '<div class="smallmult-meta"><span>' + formatDate(first.date) + '</span><span>' + formatDate(last.date) + '</span></div>' +
+    '</div>';
+  });
+  host.innerHTML = html;
+  requestAnimationFrame(function(){
+    types.forEach(function(type){
+      const arr = byType[type].slice().sort(function(a,b){ return new Date(a.date) - new Date(b.date); });
+      const scores = arr.map(function(s){ return s.averageScore || 0; });
+      const canvas = document.getElementById('_sm_' + type);
+      if (!canvas) return;
+      if (scores.length < 2){
+        // Show a friendly placeholder
+        const ctx = canvas.getContext('2d');
+        const w = canvas.clientWidth || 140, h = canvas.clientHeight || 80;
+        canvas.width = w * (window.devicePixelRatio || 1);
+        canvas.height = h * (window.devicePixelRatio || 1);
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+        ctx.font = '11px system-ui,sans-serif';
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text3').trim() || '#888';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('—', w/2, h/2);
+        return;
+      }
+      _rwRenderTrendGraph(canvas, scores);
+    });
+  });
+}
+
+// ══════════════ v1.0.21 Panic recovery gesture ══════════════
+// Long-press the version chip in Settings for ~1.5s to unstick a modal or
+// return to a known-good home state. Progress and personal details are safe.
+function _rwPanicRecover(){
+  try {
+    document.querySelectorAll('.modal, .overlay, [class*="modal"], .drawer, .picker').forEach(function(el){
+      el.classList.remove('open','show','is-visible','active');
+    });
+    document.body.style.overflow = '';
+    // Return to Exercises tab (Rewrite's default landing).
+    const exBtn = document.querySelector('[data-tab="panelExercises"]');
+    if (exBtn) exBtn.click();
+    // Show a small toast (reuse existing toast helper if present).
+    if (typeof showToast === 'function'){
+      showToast('App reset. Your progress is safe.');
+    }
+  } catch(err){
+    // Last-resort reload — but only if the DOM-clean path threw.
+    setTimeout(function(){ location.reload(); }, 100);
+  }
+}
+(function _wirePanicRecover(){
+  function attach(){
+    const chip = document.getElementById('app-version-display')
+              || document.querySelector('.version-chip')
+              || document.querySelector('[data-role="version"]');
+    if (!chip || chip._panicWired) return false;
+    chip._panicWired = true;
+    let timer = null, startXY = null;
+    const startPress = function(e){
+      const t = (e.touches && e.touches[0]) || e;
+      startXY = { x: t.clientX, y: t.clientY };
+      timer = setTimeout(_rwPanicRecover, 1500);
+    };
+    const cancelPress = function(e){
+      if (e && e.touches && e.touches[0] && startXY){
+        const t = e.touches[0];
+        if (Math.hypot(t.clientX - startXY.x, t.clientY - startXY.y) > 8){
+          if (timer){ clearTimeout(timer); timer = null; }
+        }
+        return;
+      }
+      if (timer){ clearTimeout(timer); timer = null; }
+    };
+    chip.addEventListener('touchstart', startPress, { passive: true });
+    chip.addEventListener('touchend', cancelPress);
+    chip.addEventListener('touchmove', cancelPress);
+    chip.addEventListener('touchcancel', cancelPress);
+    chip.addEventListener('mousedown', startPress);
+    chip.addEventListener('mouseup', cancelPress);
+    chip.addEventListener('mouseleave', cancelPress);
+    return true;
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attach);
+  } else {
+    if (!attach()){ setTimeout(attach, 500); setTimeout(attach, 2000); }
+  }
+})();
 
 function exportForTherapist() {
   window.print();
