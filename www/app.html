@@ -1101,7 +1101,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   <div class="card" id="settings-card-about">
     <div class="card-title" id="settingsAboutSection">ABOUT</div>
     <p style="font-size:13px;color:var(--text2);margin-bottom:8px">
-      <span id="settingsAppVersion">App version</span>: <strong id="app-version-display" style="cursor:pointer;user-select:none;-webkit-user-select:none">1.0.21</strong>
+      <span id="settingsAppVersion">App version</span>: <strong id="app-version-display" style="cursor:pointer;user-select:none;-webkit-user-select:none">1.0.22</strong>
     </p>
     <p style="font-size:13px;margin-top:6px">
       <a id="contact-support-link" href="#" style="color:var(--primary,#3a7a5a);text-decoration:underline;font-weight:500" id="settingsContactSupport">Contact support</a>
@@ -3328,9 +3328,24 @@ function renderStrokeGuide(guideCanvas, char, guideLevel) {
   var strokeData = getStrokeData(char);
   if (!strokeData || !strokeData.strokes || strokeData.strokes.length === 0) return;
 
-  var scale = Math.min(w, h) / 100;
-  var offsetX = (w - 100 * scale) / 2;
-  var offsetY = (h - 100 * scale) / 2;
+  // v1.0.22: for Latin script, size and place the guide to match the faint
+  // reference glyph that setupCanvas draws — baseline near 0.75·height, body at
+  // y≈10–85 in the 0–100 design space — instead of filling the whole canvas
+  // (which left the dots/arrows larger than, and above, the letter to trace).
+  // Non-Latin scripts (CJK/Arabic/Devanagari) use a centred glyph, so they keep
+  // the original full-box mapping.
+  var _guideLang = (typeof currentLang !== 'undefined') ? currentLang : 'en';
+  var _guideNonLatin = (_guideLang==='ja'||_guideLang==='ko'||_guideLang==='zh'||_guideLang==='ar'||_guideLang==='hi');
+  var scale, offsetX, offsetY;
+  if (_guideNonLatin) {
+    scale = Math.min(w, h) / 100;
+    offsetX = (w - 100 * scale) / 2;
+    offsetY = (h - 100 * scale) / 2;
+  } else {
+    scale = Math.min(w, h) / 200;
+    offsetX = (w - 100 * scale) / 2;
+    offsetY = 0.75 * h - 85 * scale;
+  }
 
   // Opacity based on guide level
   var pathAlpha = guideLevel >= 3 ? 0.2 : guideLevel >= 2 ? 0.3 : 0.35;
@@ -4130,7 +4145,10 @@ function openDB() {
         if (!d.objectStoreNames.contains('sessions')) d.createObjectStore('sessions', { keyPath: 'id', autoIncrement: true });
         if (!d.objectStoreNames.contains('settings')) d.createObjectStore('settings', { keyPath: 'key' });
       };
-      req.onsuccess = e => { db = e.target.result; resolve(db); };
+      // v1.0.22: clear usingFallback in case the 2s timeout below already
+      // flipped it — otherwise a slow-but-successful open left every save
+      // routed to the volatile in-memory store and lost on reload.
+      req.onsuccess = e => { db = e.target.result; usingFallback = false; resolve(db); };
       req.onerror = () => { usingFallback = true; showStorageWarning(); resolve(null); };
       // Some browsers fire neither callback — timeout fallback
       setTimeout(() => { if (!db && !usingFallback) { usingFallback = true; showStorageWarning(); resolve(null); } }, 2000);
@@ -6518,7 +6536,20 @@ const STRINGS = {
     "progressEmptyTitle": "Gan seisiúin go fóill",
     "progressEmptyBody": "Tosaigh cleachtadh ón gcluaisín Cleachtaí chun do dhul chun cinn a leanúint.",
     "progressMoreOne": "Tá 1 chleachtadh eile ar fáil — bain triail as ar an gcluaisín Cleachtaí",
-    "progressMoreOther": "Tá {count} cleachtadh eile ar fáil — bain triail astu ar an gcluaisín Cleachtaí"
+    "progressMoreOther": "Tá {count} cleachtadh eile ar fáil — bain triail astu ar an gcluaisín Cleachtaí",
+    "view_simple": "Simplí",
+    "view_detailed": "Mionsonraithe",
+    "trend_improving": "Ag feabhsú",
+    "trend_steady": "Cobhsaí",
+    "trend_needs_practice": "Cleacht níos mó",
+    "trend_started": "Tosaithe",
+    "trend_now": "Anois",
+    "trend_need_two_sessions": "Críochnaigh dhá sheisiún chun do threocht a fheiceáil",
+    "trend_first_session": "Rinne tú do chéad seisiún {name} — taispeánfaidh ceann eile do threocht.",
+    "trend_sentence_up": "Tá tú ag éirí níos fearr ag {name}.",
+    "trend_sentence_steady": "Tá tú cobhsaí ag {name}.",
+    "trend_sentence_down": "Chabhródh beagán níos mó cleachtaidh le {name}.",
+    "streak_last_14_days": "Chleacht tú {n} de na 14 lá dheireanacha"
 }
 };
 
@@ -6720,6 +6751,10 @@ function startExerciseType(type) {
     }
     currentIndex = 0;
     scores = [];
+    // v1.0.22: reset amplitude tracking every session. Previously it was only
+    // cleared for the 'bigpractice' type, so with the BIG Mode *setting* on,
+    // amplitudes leaked across letters/words sessions → false shrink warnings.
+    sessionAmplitudes = [];
     showExerciseScreen();
   } catch (err) {
     // Log to the diagnostic ring buffer if available
@@ -6804,6 +6839,14 @@ function selectWordBuilderEnding(ending) {
   var saved = currentType;
   currentType = 'words';
   try { loadExercise(); } finally { currentType = saved; }
+  // v1.0.22: loadExercise set the header to "Words" while currentType was
+  // temporarily 'words'. Restore the Word Builder label for the trace phase.
+  try {
+    var _etEl = document.getElementById('exerciseType');
+    if (_etEl && saved === 'wordbuilder') {
+      _etEl.textContent = (STRINGS[currentLang] || STRINGS.en).exerciseTypeWordBuilder || 'Word Builder';
+    }
+  } catch (_e) {}
 }
 
 
@@ -6880,22 +6923,35 @@ function handleCanvasResize() {
   // Word builder unchosen objects are skipped
   if (typeof exercise === 'object' && !exercise.chosen) return;
   if (typeof exercise === 'object') exercise = exercise.stem + (exercise.chosen || '');
-  // Capture current strokes so we can restore after re-setup
+  // Capture current strokes + the old canvas size so we can rescale after
+  // re-setup (v1.0.22 — strokes are stored in CSS pixels; a rotation changes
+  // the canvas width/height and aspect ratio, so replaying old coordinates
+  // verbatim pushed the drawing off-position).
+  const _drawEl = document.getElementById('drawCanvas');
+  const _oldW = (_drawEl && _drawEl._cssW) || 0;
+  const _oldH = (_drawEl && _drawEl._cssH) || 0;
   const savedStrokes = (typeof strokes !== 'undefined' && strokes) ? strokes.slice() : [];
   setupCanvas(exercise);
-  // Re-render saved strokes onto the new canvas
+  const _newW = (_drawEl && _drawEl._cssW) || _oldW;
+  const _newH = (_drawEl && _drawEl._cssH) || _oldH;
+  const _sx = _oldW ? (_newW / _oldW) : 1;
+  const _sy = _oldH ? (_newH / _oldH) : 1;
+  // Re-render saved strokes onto the new canvas, rescaled to the new size
   if (savedStrokes.length && typeof drawCtx !== 'undefined' && drawCtx) {
     drawCtx.lineCap = 'round'; drawCtx.lineJoin = 'round';
     drawCtx.lineWidth = settings.penWidth || 5;
     drawCtx.strokeStyle = getActivePenColor(document.documentElement.getAttribute('data-theme') === 'dark');
-    for (const stroke of savedStrokes) {
+    const _rescaled = savedStrokes.map(function(stroke){
+      return (stroke || []).map(function(p){ return { x: p.x * _sx, y: p.y * _sy }; });
+    });
+    for (const stroke of _rescaled) {
       if (!stroke || stroke.length < 2) continue;
       drawCtx.beginPath();
       drawCtx.moveTo(stroke[0].x, stroke[0].y);
       for (let i = 1; i < stroke.length; i++) drawCtx.lineTo(stroke[i].x, stroke[i].y);
       drawCtx.stroke();
     }
-    strokes = savedStrokes;
+    strokes = _rescaled;
     hasStrokes = true;
     const sb = document.getElementById('submitBtn'); if (sb) sb.disabled = false;
   }
@@ -7332,9 +7388,10 @@ function clearCanvas() {
   hasStrokes = false;
   document.getElementById('submitBtn').disabled = true;
   document.getElementById('canvasHint').style.opacity = '1';
-  // Re-render stroke-order guide (guide canvas is separate from draw canvas,
-  // so it isn't cleared above, but call this for belt-and-suspenders).
-  renderGuideForCurrent();
+  // v1.0.22: do NOT re-render the stroke-order guide here. The guide lives on a
+  // separate canvas that clearing the draw canvas does not touch, so it's
+  // already correct. Re-rendering re-composited the existing marks over
+  // themselves (destination-over), darkening the faint guide on each Clear.
 }
 
 // ══════════════ SCORING ══════════════
@@ -7357,6 +7414,13 @@ function setPenColor(color) {
   document.querySelectorAll('.pen-color-swatch').forEach(function(b) {
     b.classList.toggle('active', b.dataset.color === color);
   });
+  // v1.0.22: apply immediately to the live canvas. Previously strokeStyle was
+  // only set in setupCanvas, so a colour change mid-exercise had no effect
+  // until the next exercise loaded.
+  if (typeof drawCtx !== 'undefined' && drawCtx) {
+    var _dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    drawCtx.strokeStyle = getActivePenColor(_dark);
+  }
 }
 
 function submitAttempt() {
@@ -7396,7 +7460,8 @@ function calculateScore() {
         }
       }
     }
-    return {minX, minY, maxX, maxY, count, w: maxX-minX+1, h: maxY-minY+1};
+    // v1.0.22: clamp w/h so an empty box (count 0) can't return negative dims.
+    return {minX, minY, maxX, maxY, count, w: Math.max(0, maxX-minX+1), h: Math.max(0, maxY-minY+1)};
   }
 
   const guideBB = getBBox(charData, w, h, 30);
@@ -7434,6 +7499,11 @@ function calculateScore() {
       drawBB = {minX, minY, maxX, maxY, count:kept, w:maxX-minX+1, h:maxY-minY+1};
     }
   }
+
+  // v1.0.22: keep the exposed bbox in sync with the outlier-filtered box.
+  // Previously _rwLastBBox.drawBB held the pre-filter box, so a stray dot
+  // inflated the Size chip and the BIG-mode amplitude score.
+  window._rwLastBBox.drawBB = drawBB;
 
   // 2. Render both into normalised 80x80 canvases
   const NS = 80; // normalised size
@@ -7507,7 +7577,11 @@ function calculateScore() {
     for (let i = 1; i < s.length - 1; i++) {
       const a1 = Math.atan2(s[i].y - s[i-1].y, s[i].x - s[i-1].x);
       const a2 = Math.atan2(s[i+1].y - s[i].y, s[i+1].x - s[i].x);
-      totalVar += Math.min(Math.abs(a2 - a1), Math.PI);
+      // v1.0.22: wrap the angle difference into [0, π]. atan2 wraps at ±π, so a
+      // near-straight left-going stroke used to register as a maximum turn.
+      let da = Math.abs(a2 - a1);
+      if (da > Math.PI) da = 2 * Math.PI - da;
+      totalVar += da;
       pts++;
     }
   }
@@ -7560,9 +7634,12 @@ function showScoreFeedback(score) {
   document.getElementById('scoreMessage').textContent = msg;
 
   // Benchmark
+  // v1.0.22: use the SAME thresholds as the ring/label above (75/55) so a
+  // single attempt can't show green "Excellent" next to an amber "Developing"
+  // benchmark. The aggregate Progress-tab bands keep their own 80/50 scale.
   const benchDiv = document.getElementById('benchmarkDisplay');
-  const band = score >= SCORE_BANDS.green ? 'green' : score >= SCORE_BANDS.amber ? 'amber' : 'grey';
-  const benchLabel = score >= SCORE_BANDS.green ? (s.bandStrong || 'Strong') : score >= SCORE_BANDS.amber ? (s.bandDeveloping || 'Developing') : (s.bandEarly || 'Early stage');
+  const band = score >= 75 ? 'green' : score >= 55 ? 'amber' : 'grey';
+  const benchLabel = score >= 75 ? (s.bandStrong || 'Strong') : score >= 55 ? (s.bandDeveloping || 'Developing') : (s.bandEarly || 'Early stage');
   benchDiv.innerHTML = `<div class="benchmark" style="justify-content:center"><div class="benchmark-dot bench-${band}"></div> ${benchLabel}</div>`;
 
   // Next/Finish button
@@ -8408,6 +8485,15 @@ async function generateProgressPDF(){
     function buildSection(lang, isFirstSection){
       var S = STRINGS[lang] || STRINGS.en;
       function tt(k){return S[k] || STRINGS.en[k] || k;}
+      // v1.0.22: sessions are saved with PLURAL type ids (letters/words/…). Map
+      // them to a localised, human name for the PDF. Previously the code used
+      // singular exType_* keys, so labels came out blank or as raw key strings.
+      var PDF_TYPE_I18N = { letters:'exerciseTypeLetters', numbers:'exerciseTypeNumbers', words:'exerciseTypeWords', sentences:'exerciseTypeSentences', bigpractice:'exerciseTypeBigPractice', wordbuilder:'exerciseTypeWordBuilder' };
+      function pdfTypeName(t){
+        var k = PDF_TYPE_I18N[t];
+        if (k) { var n = tt(k); if (n && n !== k) return n; }
+        return t ? (t.charAt(0).toUpperCase() + t.slice(1)) : '—';
+      }
       var dateLocale = lang==='en' ? 'en-GB' : lang.replace('_','-');
       var isRTL = __rwIsRTL(lang);
       var leadX = isRTL ? (pageW - margin) : margin;
@@ -8504,9 +8590,9 @@ async function generateProgressPDF(){
       }
 
       // Per-exercise breakdown
-      var byType = {letter:[], word:[], sentence:[]};
+      var byType = {};
       sessions.forEach(function(sn){
-        var ty = sn.type || (sn.exercises&&sn.exercises[0]&&sn.exercises[0].type) || 'letter';
+        var ty = sn.type || (sn.exercises&&sn.exercises[0]&&sn.exercises[0].type) || 'letters';
         if(!byType[ty]) byType[ty] = [];
         byType[ty] = byType[ty].concat(sn.exercises||[]);
       });
@@ -8514,13 +8600,21 @@ async function generateProgressPDF(){
       newPageIfNeeded(15);
       drawText(tt('perExTitle') || 'Per-Exercise Breakdown', leadX, y, {lang:lang, size:11, weight:'bold', colour:MOSS, align:leadAlign});
       y += 5;
-      ['letter','word','sentence'].forEach(function(typ){
+      // v1.0.22: iterate the plural type ids actually present (was a fixed
+      // singular list that never matched, leaving this section empty).
+      var _peOrder = ['letters','numbers','words','sentences','bigpractice','wordbuilder'];
+      var _peTypes = Object.keys(byType).sort(function(a,b){
+        var ia = _peOrder.indexOf(a), ib = _peOrder.indexOf(b);
+        return (ia<0?99:ia) - (ib<0?99:ib);
+      });
+      _peTypes.forEach(function(typ){
         var arr = byType[typ] || [];
         if(!arr.length) return;
-        var scores = arr.map(function(e){return e.score;});
+        var scores = arr.map(function(e){return e.score;}).filter(function(v){return typeof v === 'number';});
+        if(!scores.length) return;
         var best = Math.max.apply(null, scores);
         var avg = Math.round(scores.reduce(function(a,b){return a+b;},0)/scores.length);
-        var label = tt('exType_'+typ) || (typ.charAt(0).toUpperCase()+typ.slice(1)+'s');
+        var label = pdfTypeName(typ);
         newPageIfNeeded(12);
         doc.setDrawColor(RULE[0],RULE[1],RULE[2]);
         doc.line(margin, y, pageW-margin, y);
@@ -8560,7 +8654,7 @@ async function generateProgressPDF(){
           doc.rect(margin, y, pageW-2*margin, 6, 'F');
         }
         drawText(dStr, dateLeadX, y+4, {lang:lang, size:9, colour:INK, align:dateAlign});
-        drawText(tt('exType_'+sn.type) || (sn.type?(sn.type.charAt(0).toUpperCase()+sn.type.slice(1)+'s'):'—'), exerciseLeadX, y+4, {lang:lang, size:9, colour:INK, align:exerciseAlign});
+        drawText(pdfTypeName(sn.type), exerciseLeadX, y+4, {lang:lang, size:9, colour:INK, align:exerciseAlign});
         drawText((sn.averageScore||0)+'%', scoreLeadX, y+4, {lang:'en', size:9, colour:INK, align:scoreAlign});
         y += 6;
       });
@@ -8640,7 +8734,11 @@ function renderTrendChart(sessions, forLang) {
   document.getElementById('trendChartHelp').textContent = chartLang.trendHelp || 'Average score per session over time';
 
   const dpr = window.devicePixelRatio || 1;
-  const cssW = container.clientWidth;
+  // v1.0.22: fall back to a fixed width when the container is hidden (e.g. the
+  // canvas lives inside #detailedViewContainer, which is display:none while the
+  // default "Simple" progress view is active). Without this the PDF chart
+  // capture measured clientWidth 0 → 0-width canvas → no chart in the report.
+  const cssW = container.clientWidth || 500;
   const cssH = container.clientHeight || 180;
   canvas.width = cssW * dpr;
   canvas.height = cssH * dpr;
@@ -8843,13 +8941,21 @@ async function init() {
     setLanguage(this.value);
   };
 
-  // Register service worker for offline caching
+  // v1.0.22: This app ships fresh assets with every native build and does not
+  // use offline caching. Earlier versions registered a self-destruct worker
+  // (sw.js) on every launch — but that worker forces a client reload on
+  // activate, so re-registering it each load caused a spurious refresh (and a
+  // possible reload loop) on the web build. We now only unregister any legacy
+  // worker and clear its caches once, without registering anything new.
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-    // Listen for SW updates and auto-refresh
-    navigator.serviceWorker.addEventListener('message', e => {
-      if (e.data && e.data.type === 'SW_UPDATED') location.reload();
-    });
+    navigator.serviceWorker.getRegistrations().then(function(regs) {
+      if (regs && regs.length) {
+        regs.forEach(function(r) { try { r.unregister(); } catch (e) {} });
+        if ('caches' in window) {
+          caches.keys().then(function(keys) { keys.forEach(function(k) { caches.delete(k); }); }).catch(function(){});
+        }
+      }
+    }).catch(function() {});
   }
 }
 
@@ -9017,7 +9123,10 @@ function startMpTrace(idx) {
   document.getElementById('mpTracePrompt').textContent = s.tracePrompt || 'Trace this carefully:';
   document.getElementById('mpTraceClearBtn').textContent = s.mpFreeClearBtn || '↻ Clear';
   document.getElementById('mpTraceUndoBtn').textContent = s.mpFreeUndoBtn || '↶ Undo';
-  document.getElementById('mpTraceDoneBtn').textContent = (s.mpDoneBtn || '✓ Done');
+  // v1.0.22: mpDoneBtn was never added to STRINGS, so every non-English locale
+  // showed the English "✓ Done". Localised fallback keeps it in one place.
+  var _mpDone = { en:'✓ Done', es:'✓ Hecho', es_mx:'✓ Hecho', fr:'✓ Terminé', fr_ca:'✓ Terminé', de:'✓ Fertig', it:'✓ Fatto', pt:'✓ Concluído', pt_br:'✓ Concluído', cy:'✓ Wedi gorffen', ja:'✓ 完了', ko:'✓ 완료', zh:'✓ 完成', hi:'✓ पूर्ण', ar:'✓ تم', pl:'✓ Gotowe', ga:'✓ Déanta' };
+  document.getElementById('mpTraceDoneBtn').textContent = (s.mpDoneBtn || _mpDone[currentLang] || _mpDone.en);
   document.getElementById('mpTraceTarget').textContent = items[idx].text;
   // Mode label
   var bold = (items[idx].traces || 0) < MP_BOLD_TRACES;
@@ -9383,10 +9492,15 @@ if (document.readyState === 'loading') {
     // Try to find the active language from the page's existing lang state
     var lang = (function() {
       try {
-        var stored = localStorage.getItem('strokesight_lang') || localStorage.getItem('rewrite_lang') || localStorage.getItem('lang');
-        if (stored && window.__ROTATE_STRINGS__[stored]) return stored;
-        var picker = document.getElementById('lang-select');
+        // v1.0.22: ReWrite keeps the chosen language in the global currentLang
+        // and the #langSelect dropdown (it's stored in IndexedDB, not
+        // localStorage), so read those first. Falling straight through to
+        // navigator.language previously showed the gate in the OS language.
+        if (typeof currentLang !== 'undefined' && window.__ROTATE_STRINGS__[currentLang]) return currentLang;
+        var picker = document.getElementById('langSelect') || document.getElementById('lang-select');
         if (picker && picker.value && window.__ROTATE_STRINGS__[picker.value]) return picker.value;
+        var stored = localStorage.getItem('rewrite_lang') || localStorage.getItem('strokesight_lang') || localStorage.getItem('lang');
+        if (stored && window.__ROTATE_STRINGS__[stored]) return stored;
         var navLang = (navigator.language || 'en').toLowerCase().split('-')[0];
         if (window.__ROTATE_STRINGS__[navLang]) return navLang;
       } catch (e) {}
@@ -9537,8 +9651,12 @@ if (document.readyState === 'loading') {
       if (typeof clearAllSessions === 'function') {
         clearAllSessions().then(function() {
           if (typeof refreshProgress === 'function') refreshProgress();
-          // Wipe rewrite_* keys but keep activation + language + dark mode
-          var keep = ['rewrite_activated', 'rewrite_licence_key', 'rewrite_lang', 'rewrite_ls_instance', 'rewrite_instance_id'];
+          // Wipe rewrite_* keys but keep activation + language + dark mode.
+          // v1.0.22: also preserve personal details (rewrite_pd — name, DOB, NHS
+          // number, clinician email) and custom My Practice content
+          // (rewrite_personal_items_v1). The confirmation only warns about
+          // "sessions, scores and history", so these must survive a reset.
+          var keep = ['rewrite_activated', 'rewrite_licence_key', 'rewrite_lang', 'rewrite_ls_instance', 'rewrite_instance_id', 'rewrite_pd', 'rewrite_personal_items_v1', 'rewrite_settings', 'rewrite_devMode'];
           for (var i = localStorage.length - 1; i >= 0; i--) {
             var k = localStorage.key(i);
             if (k && k.indexOf('rewrite_') === 0 && keep.indexOf(k) === -1) {
