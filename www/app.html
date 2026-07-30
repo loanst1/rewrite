@@ -552,11 +552,20 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 .trend-sentence strong{color:var(--text);font-weight:600}
 
 /* Small-multiples grid for Detailed view */
-.smallmult-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
-.smallmult{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;box-shadow:var(--shadow)}
+/* v1.0.23: single column on phones (2-up only on tablets), and min-width:0 so
+   the 1fr tracks shrink to the container. Without min-width:0 the canvas's
+   intrinsic width forced the columns wider than the screen and the graphs ran
+   off the right edge with no way to scroll to them. */
+.smallmult-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:14px;min-width:0}
+@media (min-width:640px){.smallmult-grid{grid-template-columns:1fr 1fr}}
+.smallmult{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;box-shadow:var(--shadow);min-width:0}
 .smallmult-title{font-size:12px;font-weight:700;color:var(--text);margin:0 0 6px}
 .smallmult-canvas-wrap{position:relative;height:80px;width:100%}
-.smallmult canvas{width:100%;height:100%}
+.smallmult canvas{width:100%;max-width:100%;height:100%}
+/* v1.0.23: Personal Details inputs sit in a 2-column grid; without this their
+   intrinsic width forced the row wider than the phone and the right column ran
+   off-screen. Scoped so other .input uses are unaffected. */
+#personalDetailsCard .input{width:100%;min-width:0}
 .smallmult-meta{font-size:10px;color:var(--text3);margin-top:6px;display:flex;justify-content:space-between}
 @media (max-width:380px){.smallmult-grid{grid-template-columns:1fr}}
 
@@ -1101,7 +1110,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   <div class="card" id="settings-card-about">
     <div class="card-title" id="settingsAboutSection">ABOUT</div>
     <p style="font-size:13px;color:var(--text2);margin-bottom:8px">
-      <span id="settingsAppVersion">App version</span>: <strong id="app-version-display" style="cursor:pointer;user-select:none;-webkit-user-select:none">1.0.22</strong>
+      <span id="settingsAppVersion">App version</span>: <strong id="app-version-display" style="cursor:pointer;user-select:none;-webkit-user-select:none">1.0.23</strong>
     </p>
     <p style="font-size:13px;margin-top:6px">
       <a id="contact-support-link" href="#" style="color:var(--primary,#3a7a5a);text-decoration:underline;font-weight:500" id="settingsContactSupport">Contact support</a>
