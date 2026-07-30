@@ -560,13 +560,20 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
 @media (min-width:640px){.smallmult-grid{grid-template-columns:1fr 1fr}}
 .smallmult{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;box-shadow:var(--shadow);min-width:0}
 .smallmult-title{font-size:12px;font-weight:700;color:var(--text);margin:0 0 6px}
-.smallmult-canvas-wrap{position:relative;height:80px;width:100%}
+.smallmult-canvas-wrap{position:relative;height:104px;width:100%}
 .smallmult canvas{width:100%;max-width:100%;height:100%}
 /* v1.0.23: Personal Details inputs sit in a 2-column grid; without this their
    intrinsic width forced the row wider than the phone and the right column ran
    off-screen. Scoped so other .input uses are unaffected. */
 #personalDetailsCard .input{width:100%;min-width:0}
-.smallmult-meta{font-size:10px;color:var(--text3);margin-top:6px;display:flex;justify-content:space-between}
+.smallmult-meta{font-size:10px;color:var(--text3);margin-top:6px;display:flex;justify-content:space-between;align-items:baseline}
+.smallmult-meta .sm-axis{font-weight:700;color:var(--text3)}
+.smallmult-summary{margin-top:7px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;font-size:12px}
+.smallmult-summary .sm-cur{font-weight:800;color:var(--text)}
+.smallmult-summary .sm-trend{font-weight:700;font-size:11.5px}
+.smallmult-summary .sm-base{font-weight:600;font-size:11px}
+.smallmult-summary .up{color:#2e7d5b}.smallmult-summary .down{color:#c0603a}.smallmult-summary .steady,.smallmult-summary .flat{color:var(--text3)}
+[data-theme="dark"] .smallmult-summary .up{color:#7fceac}[data-theme="dark"] .smallmult-summary .down{color:#e0a07a}
 @media (max-width:380px){.smallmult-grid{grid-template-columns:1fr}}
 
 </style>
@@ -1110,7 +1117,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   <div class="card" id="settings-card-about">
     <div class="card-title" id="settingsAboutSection">ABOUT</div>
     <p style="font-size:13px;color:var(--text2);margin-bottom:8px">
-      <span id="settingsAppVersion">App version</span>: <strong id="app-version-display" style="cursor:pointer;user-select:none;-webkit-user-select:none">1.0.23</strong>
+      <span id="settingsAppVersion">App version</span>: <strong id="app-version-display" style="cursor:pointer;user-select:none;-webkit-user-select:none">1.0.24</strong>
     </p>
     <p style="font-size:13px;margin-top:6px">
       <a id="contact-support-link" href="#" style="color:var(--primary,#3a7a5a);text-decoration:underline;font-weight:500" id="settingsContactSupport">Contact support</a>
@@ -4405,7 +4412,7 @@ const STRINGS = {
     trend_improving: "Improving",
     trend_steady: "Steady",
     trend_needs_practice: "Practise more",
-    trend_started: "Started",
+    trend_started: "Started", since_start: "since start", axis_date: "Date",
     trend_now: "Now",
     trend_need_two_sessions: "Complete two sessions to see your trend",
     trend_first_session: "You've done your first {name} session — one more will show your trend.",
@@ -4532,7 +4539,7 @@ const STRINGS = {
     trend_improving: "Mejorando",
     trend_steady: "Estable",
     trend_needs_practice: "Practica más",
-    trend_started: "Inicio",
+    trend_started: "Inicio", since_start: "desde el inicio", axis_date: "Fecha",
     trend_now: "Ahora",
     trend_need_two_sessions: "Completa dos sesiones para ver tu tendencia",
     trend_first_session: "Has completado tu primera sesión de {name} — una más mostrará tu progreso.",
@@ -4659,7 +4666,7 @@ const STRINGS = {
     trend_improving: "En progrès",
     trend_steady: "Stable",
     trend_needs_practice: "Encore un peu",
-    trend_started: "Début",
+    trend_started: "Début", since_start: "depuis le début", axis_date: "Date",
     trend_now: "Aujourd'hui",
     trend_need_two_sessions: "Terminez deux séances pour voir votre évolution",
     trend_first_session: "Vous avez terminé votre première séance de {name} — une de plus révélera votre évolution.",
@@ -4786,7 +4793,7 @@ const STRINGS = {
     trend_improving: "Verbessert sich",
     trend_steady: "Gleichbleibend",
     trend_needs_practice: "Mehr üben",
-    trend_started: "Anfang",
+    trend_started: "Anfang", since_start: "seit Beginn", axis_date: "Datum",
     trend_now: "Jetzt",
     trend_need_two_sessions: "Zwei Sitzungen abschließen, um deinen Verlauf zu sehen",
     trend_first_session: "Erste {name}-Sitzung abgeschlossen — eine weitere zeigt deinen Verlauf.",
@@ -4913,7 +4920,7 @@ const STRINGS = {
     trend_improving: "In miglioramento",
     trend_steady: "Costante",
     trend_needs_practice: "Continua a praticare",
-    trend_started: "Inizio",
+    trend_started: "Inizio", since_start: "dall'inizio", axis_date: "Data",
     trend_now: "Ora",
     trend_need_two_sessions: "Completa due sessioni per vedere il tuo andamento",
     trend_first_session: "Hai completato la tua prima sessione di {name} — un'altra mostrerà il tuo andamento.",
@@ -5040,7 +5047,7 @@ const STRINGS = {
     trend_improving: "A melhorar",
     trend_steady: "Estável",
     trend_needs_practice: "Pratique mais",
-    trend_started: "Início",
+    trend_started: "Início", since_start: "desde o início", axis_date: "Data",
     trend_now: "Agora",
     trend_need_two_sessions: "Complete duas sessões para ver a sua evolução",
     trend_first_session: "Concluiu a sua primeira sessão de {name} — mais uma mostrará a sua evolução.",
@@ -5167,7 +5174,7 @@ const STRINGS = {
     trend_improving: "Yn gwella",
     trend_steady: "Cyson",
     trend_needs_practice: "Ymarfer mwy",
-    trend_started: "Dechreuad",
+    trend_started: "Dechreuad", since_start: "ers y dechrau", axis_date: "Dyddiad",
     trend_now: "Nawr",
     trend_need_two_sessions: "Cwblhewch ddwy sesiwn i weld eich tuedd",
     trend_first_session: "Rydych chi wedi cwblhau'ch sesiwn {name} gyntaf — bydd un arall yn dangos eich tuedd.",
@@ -5300,7 +5307,7 @@ const STRINGS = {
     trend_improving: "改善中",
     trend_steady: "安定中",
     trend_needs_practice: "もう少し練習",
-    trend_started: "開始",
+    trend_started: "開始", since_start: "開始時から", axis_date: "日付",
     trend_now: "現在",
     trend_need_two_sessions: "傾向を確認するには2つのセッションを完了してください",
     trend_first_session: "初めての{name}セッションが完了しました。もう1回で傾向が表示されます。",
@@ -5433,7 +5440,7 @@ const STRINGS = {
     trend_improving: "향상 중",
     trend_steady: "유지 중",
     trend_needs_practice: "더 연습해요",
-    trend_started: "시작",
+    trend_started: "시작", since_start: "시작 이후", axis_date: "날짜",
     trend_now: "지금",
     trend_need_two_sessions: "추세를 보려면 두 세션을 완료하세요",
     trend_first_session: "{name} 첫 세션을 마쳤습니다. 한 번 더 하면 추세가 표시됩니다.",
@@ -5566,7 +5573,7 @@ const STRINGS = {
     trend_improving: "सुधार हो रहा है",
     trend_steady: "स्थिर",
     trend_needs_practice: "और अभ्यास",
-    trend_started: "शुरुआत",
+    trend_started: "शुरुआत", since_start: "शुरुआत से", axis_date: "दिनांक",
     trend_now: "अभी",
     trend_need_two_sessions: "अपना ट्रेंड देखने के लिए दो सत्र पूरे करें",
     trend_first_session: "आपने अपना पहला {name} सत्र पूरा किया — एक और सत्र से आपका ट्रेंड दिखेगा।",
@@ -5699,7 +5706,7 @@ const STRINGS = {
     trend_improving: "يتحسّن",
     trend_steady: "ثابت",
     trend_needs_practice: "المزيد من التمرين",
-    trend_started: "البداية",
+    trend_started: "البداية", since_start: "منذ البداية", axis_date: "التاريخ",
     trend_now: "الآن",
     trend_need_two_sessions: "أكمل جلستين لعرض تقدّمك",
     trend_first_session: "أكملت جلستك الأولى من {name} — واحدة أخرى ستُظهر تقدّمك.",
@@ -5832,7 +5839,7 @@ const STRINGS = {
     trend_improving: "在进步",
     trend_steady: "保持稳定",
     trend_needs_practice: "多加练习",
-    trend_started: "开始",
+    trend_started: "开始", since_start: "起点以来", axis_date: "日期",
     trend_now: "现在",
     trend_need_two_sessions: "完成两次训练即可查看趋势",
     trend_first_session: "已完成第一次 {name} 训练——再做一次即可查看趋势。",
@@ -5965,7 +5972,7 @@ const STRINGS = {
     trend_improving: "Postępy",
     trend_steady: "Stabilnie",
     trend_needs_practice: "Ćwicz więcej",
-    trend_started: "Start",
+    trend_started: "Start", since_start: "od początku", axis_date: "Data",
     trend_now: "Teraz",
     trend_need_two_sessions: "Ukończ dwie sesje, aby zobaczyć trend",
     trend_first_session: "Pierwsza sesja {name} ukończona — kolejna pokaże Twój trend.",
@@ -6098,7 +6105,7 @@ const STRINGS = {
     trend_improving: "Mejorando",
     trend_steady: "Estable",
     trend_needs_practice: "Practica más",
-    trend_started: "Inicio",
+    trend_started: "Inicio", since_start: "desde el inicio", axis_date: "Fecha",
     trend_now: "Ahora",
     trend_need_two_sessions: "Completa dos sesiones para ver tu tendencia",
     trend_first_session: "Completaste tu primera sesión de {name} — una más mostrará tu progreso.",
@@ -6231,7 +6238,7 @@ const STRINGS = {
     trend_improving: "Melhorando",
     trend_steady: "Estável",
     trend_needs_practice: "Pratique mais",
-    trend_started: "Início",
+    trend_started: "Início", since_start: "desde o início", axis_date: "Data",
     trend_now: "Agora",
     trend_need_two_sessions: "Conclua duas sessões para ver sua evolução",
     trend_first_session: "Você concluiu sua primeira sessão de {name} — mais uma mostrará sua evolução.",
@@ -6364,7 +6371,7 @@ const STRINGS = {
     trend_improving: "En progrès",
     trend_steady: "Stable",
     trend_needs_practice: "Encore un peu",
-    trend_started: "Début",
+    trend_started: "Début", since_start: "depuis le début", axis_date: "Date",
     trend_now: "Aujourd'hui",
     trend_need_two_sessions: "Terminez deux séances pour voir votre évolution",
     trend_first_session: "Vous avez terminé votre première séance de {name} — une de plus révélera votre évolution.",
@@ -6551,7 +6558,7 @@ const STRINGS = {
     "trend_improving": "Ag feabhsú",
     "trend_steady": "Cobhsaí",
     "trend_needs_practice": "Cleacht níos mó",
-    "trend_started": "Tosaithe",
+    "trend_started": "Tosaithe", "since_start": "ón tús", "axis_date": "Dáta",
     "trend_now": "Anois",
     "trend_need_two_sessions": "Críochnaigh dhá sheisiún chun do threocht a fheiceáil",
     "trend_first_session": "Rinne tú do chéad seisiún {name} — taispeánfaidh ceann eile do threocht.",
@@ -7924,62 +7931,117 @@ function _rwClassifyTrend(scores){
   return { direction: 'steady', delta: delta };
 }
 
-// Render the filled-gradient sparkline for a single trend card.
-function _rwRenderTrendGraph(canvas, scores){
+// Render the score graph for a single card.
+//   Simple view  → axis-free filled "growth shape" sparkline (opts omitted).
+//   Detailed view → labelled Y-axis (Score %) + dashed baseline at the first
+//   (oldest) session, so every later point reads as improvement (opts.axes).
+// v1.0.24: added the labelled/baseline Detailed mode.
+function _rwRenderTrendGraph(canvas, scores, opts){
   if (!canvas || !scores || scores.length < 2) return;
+  opts = opts || {};
+  const lang = opts.lang || (STRINGS[currentLang] || STRINGS.en);
+  const withAxes = !!opts.axes;
   const dpr = window.devicePixelRatio || 1;
   const cssW = canvas.clientWidth || canvas.offsetWidth || 300;
-  const cssH = canvas.clientHeight || canvas.offsetHeight || 88;
+  const cssH = canvas.clientHeight || canvas.offsetHeight || (withAxes ? 104 : 88);
   canvas.width = cssW * dpr;
   canvas.height = cssH * dpr;
   canvas.style.width = cssW + 'px';
   canvas.style.height = cssH + 'px';
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
-  const padL = 8, padR = 8, padT = 22, padB = 8;
-  const w = cssW - padL - padR;
-  const h = cssH - padT - padB;
-  const min = Math.min(...scores);
-  const max = Math.max(...scores);
-  const range = Math.max(1, max - min);
+  const cs = getComputedStyle(document.documentElement);
+  const accent = cs.getPropertyValue('--accent').trim() || '#b85c38';
+  const cardClr = cs.getPropertyValue('--card').trim() || '#fff';
   const N = scores.length;
-  const pts = scores.map(function(v, i){
-    return {
-      x: padL + (N === 1 ? w/2 : (i / (N - 1)) * w),
-      y: padT + (h - ((v - min) / range) * h)
-    };
-  });
-  // Filled area under the line
-  const grad = ctx.createLinearGradient(0, padT, 0, padT + h);
-  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#b85c38';
-  grad.addColorStop(0, accent + 'cc');
-  grad.addColorStop(1, accent + '11');
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, padT + h);
-  pts.forEach(function(p){ ctx.lineTo(p.x, p.y); });
-  ctx.lineTo(pts[N - 1].x, padT + h);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
-  // Line stroke
-  ctx.beginPath();
-  pts.forEach(function(p, i){ if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
-  ctx.lineWidth = 2.5;
-  ctx.strokeStyle = accent;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  ctx.stroke();
-  // Endpoint dots
-  [pts[0], pts[N - 1]].forEach(function(p){
+
+  if (!withAxes){
+    // ── Simple view: axis-free filled sparkline (unchanged growth shape) ──
+    const padL = 8, padR = 8, padT = 22, padB = 8;
+    const w = cssW - padL - padR, h = cssH - padT - padB;
+    const min = Math.min(...scores), max = Math.max(...scores);
+    const range = Math.max(1, max - min);
+    const pts = scores.map(function(v, i){
+      return { x: padL + (N === 1 ? w/2 : (i / (N - 1)) * w), y: padT + (h - ((v - min) / range) * h) };
+    });
+    const grad = ctx.createLinearGradient(0, padT, 0, padT + h);
+    grad.addColorStop(0, accent + 'cc');
+    grad.addColorStop(1, accent + '11');
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-    ctx.fillStyle = accent;
+    ctx.moveTo(pts[0].x, padT + h);
+    pts.forEach(function(p){ ctx.lineTo(p.x, p.y); });
+    ctx.lineTo(pts[N - 1].x, padT + h);
+    ctx.closePath();
+    ctx.fillStyle = grad;
     ctx.fill();
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--card').trim() || '#fff';
+    pts.forEach(function(p, i){ if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = accent;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     ctx.stroke();
+    [pts[0], pts[N - 1]].forEach(function(p){
+      ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fillStyle = accent; ctx.fill();
+      ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.lineWidth = 2; ctx.strokeStyle = cardClr; ctx.stroke();
+    });
+    return;
+  }
+
+  // ── Detailed view: labelled line chart with a dashed baseline ──
+  const axisClr = cs.getPropertyValue('--text3').trim() || '#8a8a86';
+  const gridClr = 'rgba(128,128,128,0.16)';
+  const padL = 30, padR = 10, padT = 12, padB = 14;
+  const w = cssW - padL - padR, h = cssH - padT - padB;
+  const dMin = Math.min(...scores), dMax = Math.max(...scores);
+  const R = Math.max(dMax - dMin, 5);
+  const top = Math.min(100, dMax + R * 0.15), bot = Math.max(0, dMin - R * 0.15);
+  const range = Math.max(1, top - bot);
+  const yFor = function(v){ return padT + (h - ((v - bot) / range) * h); };
+  const pts = scores.map(function(v, i){
+    return { x: padL + (N === 1 ? w/2 : (i / (N - 1)) * w), y: yFor(v) };
+  });
+  // Y-axis gridlines + % labels (min / mid / max).
+  ctx.font = '9px system-ui,sans-serif';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  for (let ti = 0; ti < 3; ti++){
+    const val = bot + (top - bot) * (ti / 2);
+    const y = yFor(val);
+    ctx.strokeStyle = gridClr; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + w, y); ctx.stroke();
+    ctx.fillStyle = axisClr;
+    ctx.fillText(Math.round(val) + '%', padL - 4, y);
+  }
+  // Rotated Y-axis title.
+  ctx.save();
+  ctx.translate(9, padT + h / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = 'bold 9px system-ui,sans-serif';
+  ctx.fillStyle = accent;
+  ctx.fillText(lang.statAvgLabel || 'Avg Score', 0, 0);
+  ctx.restore();
+  // Dashed baseline at the first (oldest) score.
+  const baseY = yFor(scores[0]);
+  ctx.save();
+  ctx.strokeStyle = axisClr; ctx.lineWidth = 1; ctx.setLineDash([4, 3]); ctx.globalAlpha = 0.7;
+  ctx.beginPath(); ctx.moveTo(padL, baseY); ctx.lineTo(padL + w, baseY); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle = axisClr;
+  ctx.font = '8.5px system-ui,sans-serif';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+  ctx.fillText(lang.trend_started || 'Started', padL + 2, baseY - 2);
+  // Score line + endpoint dots.
+  ctx.beginPath();
+  pts.forEach(function(p, i){ if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+  ctx.lineWidth = 2.2;
+  ctx.strokeStyle = accent;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.stroke();
+  [pts[0], pts[N - 1]].forEach(function(p){
+    ctx.beginPath(); ctx.arc(p.x, p.y, 3.4, 0, Math.PI * 2); ctx.fillStyle = accent; ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x, p.y, 3.4, 0, Math.PI * 2); ctx.lineWidth = 1.6; ctx.strokeStyle = cardClr; ctx.stroke();
   });
 }
 
@@ -8148,10 +8210,31 @@ function _renderSmallMultiples(sessions, lang){
     const arr = byType[type].slice().sort(function(a,b){ return new Date(a.date) - new Date(b.date); });
     const typeName = _rwGetTypeName(type, lang);
     const first = arr[0], last = arr[arr.length - 1];
+    const scoresArr = arr.map(function(s){ return s.averageScore || 0; });
+    // Trend + "since start" summary (only meaningful with ≥2 sessions).
+    let summary = '';
+    if (scoresArr.length >= 2){
+      const tr = _rwClassifyTrend(scoresArr);
+      const cur = scoresArr[scoresArr.length - 1];
+      const d = cur - scoresArr[0]; // change vs the first (baseline) session
+      const badgeCls = tr.direction === 'up' ? 'up' : tr.direction === 'down' ? 'down' : 'steady';
+      const badgeTxt = tr.direction === 'up' ? (lang.trend_improving || 'Improving')
+        : tr.direction === 'down' ? (lang.trend_needs_practice || 'Practise more')
+        : (lang.trend_steady || 'Steady');
+      const arrow = tr.direction === 'up' ? '↑' : tr.direction === 'down' ? '↓' : '→';
+      const baseCls = d > 0.5 ? 'up' : d < -0.5 ? 'down' : 'flat';
+      const sinceTxt = (d >= 0 ? '+' : '−') + Math.abs(Math.round(d)) + '% ' + (lang.since_start || 'since start');
+      summary = '<div class="smallmult-summary">' +
+        '<span class="sm-cur">' + Math.round(cur) + '%</span>' +
+        '<span class="sm-trend ' + badgeCls + '">' + arrow + ' ' + badgeTxt + '</span>' +
+        '<span class="sm-base ' + baseCls + '">' + sinceTxt + '</span>' +
+      '</div>';
+    }
     html += '<div class="smallmult">' +
       '<h4 class="smallmult-title">' + typeName + '</h4>' +
       '<div class="smallmult-canvas-wrap"><canvas id="_sm_' + type + '"></canvas></div>' +
-      '<div class="smallmult-meta"><span>' + formatDate(first.date) + '</span><span>' + formatDate(last.date) + '</span></div>' +
+      '<div class="smallmult-meta"><span>' + formatDate(first.date) + '</span><span class="sm-axis">' + (lang.axis_date || 'Date') + '</span><span>' + formatDate(last.date) + '</span></div>' +
+      summary +
     '</div>';
   });
   host.innerHTML = html;
@@ -8177,7 +8260,7 @@ function _renderSmallMultiples(sessions, lang){
         ctx.fillText('—', w/2, h/2);
         return;
       }
-      _rwRenderTrendGraph(canvas, scores);
+      _rwRenderTrendGraph(canvas, scores, { lang: lang, axes: true });
     });
   });
 }
