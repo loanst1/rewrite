@@ -1117,7 +1117,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   <div class="card" id="settings-card-about">
     <div class="card-title" id="settingsAboutSection">ABOUT</div>
     <p style="font-size:13px;color:var(--text2);margin-bottom:8px">
-      <span id="settingsAppVersion">App version</span>: <strong id="app-version-display" style="cursor:pointer;user-select:none;-webkit-user-select:none">1.0.24</strong>
+      <span id="settingsAppVersion">App version</span>: <strong id="app-version-display" style="cursor:pointer;user-select:none;-webkit-user-select:none">1.0.25</strong>
     </p>
     <p style="font-size:13px;margin-top:6px">
       <a id="contact-support-link" href="#" style="color:var(--primary,#3a7a5a);text-decoration:underline;font-weight:500" id="settingsContactSupport">Contact support</a>
@@ -8022,8 +8022,11 @@ function _rwRenderTrendGraph(canvas, scores, opts){
   ctx.fillStyle = accent;
   ctx.fillText(lang.statAvgLabel || 'Avg Score', 0, 0);
   ctx.restore();
-  // Dashed baseline at the first (oldest) score.
-  const baseY = yFor(scores[0]);
+  // Dashed baseline at the mean of the first few (up to 3) sessions, so a single
+  // fluke opening score doesn't skew the comparison.
+  const kFew = Math.min(3, N);
+  const baseMean = scores.slice(0, kFew).reduce(function(a, b){ return a + b; }, 0) / kFew;
+  const baseY = yFor(baseMean);
   ctx.save();
   ctx.strokeStyle = axisClr; ctx.lineWidth = 1; ctx.setLineDash([4, 3]); ctx.globalAlpha = 0.7;
   ctx.beginPath(); ctx.moveTo(padL, baseY); ctx.lineTo(padL + w, baseY); ctx.stroke();
@@ -8216,7 +8219,10 @@ function _renderSmallMultiples(sessions, lang){
     if (scoresArr.length >= 2){
       const tr = _rwClassifyTrend(scoresArr);
       const cur = scoresArr[scoresArr.length - 1];
-      const d = cur - scoresArr[0]; // change vs the first (baseline) session
+      // Baseline = mean of the first few (up to 3) sessions (matches the graph).
+      const kFew = Math.min(3, scoresArr.length);
+      const baseMean = scoresArr.slice(0, kFew).reduce(function(a, b){ return a + b; }, 0) / kFew;
+      const d = cur - baseMean; // change vs the first-few baseline
       const badgeCls = tr.direction === 'up' ? 'up' : tr.direction === 'down' ? 'down' : 'steady';
       const badgeTxt = tr.direction === 'up' ? (lang.trend_improving || 'Improving')
         : tr.direction === 'down' ? (lang.trend_needs_practice || 'Practise more')
