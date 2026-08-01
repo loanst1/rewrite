@@ -1,6 +1,6 @@
 {
   "name": "rewrite",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "description": "Handwriting rehabilitation for stroke recovery",
   "main": "index.html",
   "scripts": {
