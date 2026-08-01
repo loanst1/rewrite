@@ -1118,7 +1118,7 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
   <div class="card" id="settings-card-about">
     <div class="card-title" id="settingsAboutSection">ABOUT</div>
     <p style="font-size:13px;color:var(--text2);margin-bottom:8px">
-      <span id="settingsAppVersion">App version</span>: <strong id="app-version-display" style="cursor:pointer;user-select:none;-webkit-user-select:none">1.0.26</strong>
+      <span id="settingsAppVersion">App version</span>: <strong id="app-version-display" style="cursor:pointer;user-select:none;-webkit-user-select:none">1.0.27</strong>
     </p>
     <p style="font-size:13px;margin-top:6px">
       <a id="contact-support-link" href="#" style="color:var(--primary,#3a7a5a);text-decoration:underline;font-weight:500" id="settingsContactSupport">Contact support</a>
@@ -4301,7 +4301,7 @@ const STRINGS = {
     exNumbersTitle: 'Numbers', exNumbersDesc: 'Practice writing digits 0–9. Important for forms, dates and addresses.',
     exWordsTitle: 'Common Words', exWordsDesc: 'Trace short everyday words. Connect letters smoothly.',
     exSentencesTitle: 'Sentences', exSentencesDesc: 'Write full sentences. Builds endurance and flow.',
-    tipText: 'Tip: Short daily sessions (10–15 minutes) are more effective than long infrequent ones.',
+    tipText: 'Tip: little and often works best. Ten to fifteen minutes a day is plenty.',
     exMyPracticeTitle: "My Practice", exMyPracticeDesc: "Practice your own name, address, or anything that matters to you.", mpTitle: "My Practice", mpTabList: "My List", mpTabFree: "Free Practice", mpAddLabel: "Add something to practice", mpAddPlaceholder: "Your name, address, phone number…", mpAddSaveBtn: "Save", mpAddClearBtn: "Clear", mpEmptyMsg: "Your saved items will appear here. Add your name, address, or anything you want to practice writing.", mpSuggestionsLabel: "Suggestions to get started:", mpSuggestions: ["Your name", "Your address", "Your phone number", "A short message", "Today's date"], mpTraceBtn: "Trace", mpDeleteBtn: "Delete", mpDeleteConfirm: "Delete this item?", mpAddEmpty: "Please type something to save.", mpAddTooLong: "Too long. Maximum length is ", mpTracesLabel: "Traces", mpNeverUsed: "Not yet practiced", mpTraceHeader: "Trace your item", mpTraceGuided: "Guided", mpTraceFreestyle: "Trace only", mpFreeIntro: "A blank canvas to write anything you like. Nothing is scored or saved.", mpFreeClearBtn: "↻ Clear", mpFreeUndoBtn: "↶ Undo", mpFreeSaveBtn: "↓ Save", mpFreeLinesSingle: "Single line", mpFreeLinesDouble: "Double line", mpFreeLinesBlank: "Blank",
     diffWordsHard: "Advanced", diffWordsFunc: "Functional", diffSentHard: "Endurance", diffSentFunc: "Real-world",
     tracePrompt: 'Trace this carefully:', clearBtn: '↻ Clear', submitBtn: '✓ Submit',
@@ -4313,15 +4313,15 @@ const STRINGS = {
     settingsTitle: 'Settings',
     tabExercises: 'Exercises', tabProgress: 'Progress', tabAbout: 'About', tabSettings: 'Settings',
     // Score bands
-    excellent: 'Excellent!', excellentMsg: 'Beautiful tracing — keep it up.',
-    good: 'Good effort', goodMsg: 'Good form — try to stay closer to the guide.',
-    improving: 'Keep practising', improvingMsg: 'You\'re making progress — every attempt counts.',
+    excellent: 'Excellent!', excellentMsg: 'Really neat work. Keep it going.',
+    good: 'Good effort', goodMsg: 'Good shape. Try to stay a bit closer to the guide.',
+    improving: 'Keep practising', improvingMsg: 'You\'re getting there. Every attempt counts.',
     early: 'Well done for trying', earlyMsg: 'Rehab takes time and patience — you\'re doing great just by trying.',
     // Summary
-    sumEncHigh: 'Outstanding work today. Your handwriting is really coming along.',
-    sumEncMid: 'Solid session. Consistent practice will keep the improvement going.',
-    sumEncLow: 'Every session matters. You\'re building important neural pathways.',
-    sumEncEarly: 'Just showing up and trying is the most important step in recovery.',
+    sumEncHigh: 'Brilliant today. Your writing is really coming on.',
+    sumEncMid: 'Good session. Keep it regular and it\'ll keep improving.',
+    sumEncLow: 'Every session counts. You\'re building those pathways back.',
+    sumEncEarly: 'Showing up and trying is the hard part. You did that today.',
   
     whatIsTitle: 'What is ReWrite?',
     whatIsText: 'ReWrite helps you rebuild handwriting skills through guided tracing exercises. Designed for people recovering from stroke, brain injury, or other conditions that affect hand control and writing ability. It provides practice exercises with progress tracking and colour-coded score bands. No ads, no subscriptions — no additional costs after purchase.',
@@ -4333,15 +4333,15 @@ const STRINGS = {
     howIt5: 'Your progress is saved automatically on this device',
     benchmarksTitle: 'Understanding benchmarks',
     benchmarksText: 'Scores are compared against typical performance bands. These are guides only — visual, motor, cognitive and fatigue factors all affect scores. What matters most is your personal improvement over time.',
-    benchGreen: 'Strong — close match to the guide',
-    benchAmber: 'Developing — improving, keep practising',
-    benchGrey: 'Early stage — every attempt builds new pathways',
+    benchGreen: 'Strong. Close to the guide.',
+    benchAmber: 'Coming along. Keep practising.',
+    benchGrey: 'Early days. Every go builds the pathways back.',
     tipsTitle: 'Tips for best results',
-    tip1: 'Practice 10–15 minutes daily — short frequent sessions beat long infrequent ones',
-    tip2: 'Start with individual letters before progressing to words and sentences',
-    tip3: 'Focus on accuracy, not speed — you are retraining motor pathways',
-    tip4: 'Use the Export button on the Progress tab to share results with your therapist',
-    tip5: 'Sit comfortably with your device on a stable surface at a good angle',
+    tip1: 'Little and often. Ten to fifteen minutes a day beats one long session.',
+    tip2: 'Start with single letters, then build up to words and sentences.',
+    tip3: 'Go for accuracy, not speed. You\'re retraining the movement.',
+    tip4: 'Tap Export on the Progress tab to send your results to your therapist.',
+    tip5: 'Get comfy, with your device on a steady surface at a good angle.',
     privacyTitle: 'Privacy',
     privacyText: 'All data is stored locally on your device only. Nothing is sent to any server. No account is needed. Your progress stays private.',
     aboutFooter1: 'ReWrite — Handwriting Rehabilitation',
@@ -4372,9 +4372,9 @@ const STRINGS = {
     perExTitle: 'Per-Exercise Breakdown',
     sessionLogTitle: 'Session History',
     trendHelp: 'Average score per session over time',
-    trendEmpty: 'Complete at least two sessions to see your progress trend.',
-    noExercises: 'No exercises recorded yet.',
-    noSessions: 'No sessions yet — start your first one from the Exercises tab.',
+    trendEmpty: 'Do two sessions and your trend shows up here.',
+    noExercises: 'Nothing recorded yet.',
+    noSessions: 'Nothing here yet. Finish an exercise and it\'ll show up.',
     printHeaderTitle: 'Handwriting Rehabilitation',
     printHeaderSub: 'Progress Report',
     aboutDisclaimer: '<strong>Important:</strong> ReWrite is a wellness support tool, not a medical device. It is designed to supplement — not replace — occupational therapy. Always follow the guidance of your therapist or care team.',
