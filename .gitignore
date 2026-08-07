@@ -12,3 +12,4 @@ keystore.properties
 *.log
 package-lock.json.bak
 *.bak
+test-results/

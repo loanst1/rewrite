@@ -4195,7 +4195,7 @@ function openDB() {
             Object.entries(memStore.settings).forEach(([k, v]) => {
               try { saveSetting(k, v); } catch (e2) {}
             });
-            loadSettings();
+            loadSettings().catch(() => {});
           } catch (e2) { /* keep running on the in-memory data */ }
         }
         resolve(db);
@@ -4254,10 +4254,17 @@ function getAllSessions() {
 function clearAllSessions() {
   if (usingFallback) { memStore.sessions = []; return Promise.resolve(); }
   return new Promise((resolve) => {
-    const tx = db.transaction('sessions', 'readwrite');
-    tx.objectStore('sessions').clear();
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => resolve();
+    // db.transaction can throw synchronously (Safari closed connection etc.)
+    // — clear the memory fallback and resolve so the reset flow never freezes.
+    try {
+      const tx = db.transaction('sessions', 'readwrite');
+      tx.objectStore('sessions').clear();
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => resolve();
+    } catch (e) {
+      memStore.sessions = [];
+      resolve();
+    }
   });
 }
 
@@ -4281,14 +4288,22 @@ function loadSettings() {
     return Promise.resolve();
   }
   return new Promise((resolve) => {
-    const tx = db.transaction('settings', 'readonly');
-    const req = tx.objectStore('settings').getAll();
-    req.onsuccess = () => {
-      (req.result || []).forEach(s => { settings[s.key] = s.value; });
+    // db.transaction can throw synchronously (Safari closed connection etc.)
+    // — fall back to the in-memory settings mirror and resolve.
+    try {
+      const tx = db.transaction('settings', 'readonly');
+      const req = tx.objectStore('settings').getAll();
+      req.onsuccess = () => {
+        (req.result || []).forEach(s => { settings[s.key] = s.value; });
+        applySettings();
+        resolve();
+      };
+      req.onerror = () => { applySettings(); resolve(); };
+    } catch (e) {
+      Object.entries(memStore.settings).forEach(([k, v]) => { settings[k] = v; });
       applySettings();
       resolve();
-    };
-    req.onerror = () => { applySettings(); resolve(); };
+    }
   });
 }
 
@@ -7498,6 +7513,11 @@ window.pauseExercise = function(){
       isDrawing = false;
       if (typeof currentStroke !== 'undefined') currentStroke = [];
     }
+    // Also forget the tracked finger so a stale identifier can't match a new
+    // touch after resume. (The My Practice trace/free canvases keep their touch
+    // state in per-canvas closures that reset on each setup, so only the main
+    // draw canvas needs this.)
+    if (typeof _activeTouchId !== 'undefined') _activeTouchId = null;
   } catch(e){}
 };
 window.resumeExercise = function(){ /* no-op for ReWrite */ };
@@ -9490,6 +9510,9 @@ function mpTraceSetupCanvas(text, boldGuide) {
     if (e && e.changedTouches && touchId !== null && !_findTouchById(e.changedTouches, touchId)) return;
     drawing = false; touchId = null;
     if (current && current.length > 1) mpTraceStrokes.push(current);
+    // Cap trace stroke history (user can keep drawing on one item
+    // indefinitely) so it can never grow unbounded — mirrors mpFreeStrokes
+    if (mpTraceStrokes.length > 2000) mpTraceStrokes.shift();
     current = null;
   };
 }
