@@ -1042,9 +1042,15 @@ select.setting-select{padding:8px 12px;border-radius:var(--radius-sm);border:1px
     <p id="privacyText">All data is stored locally on your device only. Nothing is sent to any server. No account is needed. Your progress stays private.</p>
   </div>
 
+  <div class="about-section">
+    <h3>Acknowledgements</h3>
+    <p style="font-size:13px">This app includes open-source software and typefaces, used with thanks: jsPDF (MIT License, &copy; 2010&ndash;2021 James Hall and contributors), Noto Sans (SIL Open Font License 1.1, &copy; Google), and Atkinson Hyperlegible (SIL Open Font License 1.1, &copy; Braille Institute of America). Licence texts: opensource.org/license/mit &middot; openfontlicense.org</p>
+  </div>
+
   <div style="text-align:center;margin-top:20px;padding:16px;border-top:1px solid var(--border)">
     <p style="font-size:11px;color:var(--text3)" id="aboutFooter1">ReWrite — Handwriting Rehabilitation</p>
     <p style="font-size:11px;color:var(--text3)" id="aboutFooter2">A wellness support tool — no subscription required</p>
+    <p style="font-size:11px;color:var(--text3);margin-top:6px">&copy; 2026 Ansteyapps Limited. All rights reserved. ReWrite, including its software, exercises, text and design, is the property of Ansteyapps Limited.</p>
   </div>
 </div>
 
@@ -4165,7 +4171,35 @@ function openDB() {
       // v1.0.22: clear usingFallback in case the 2s timeout below already
       // flipped it — otherwise a slow-but-successful open left every save
       // routed to the volatile in-memory store and lost on reload.
-      req.onsuccess = e => { db = e.target.result; usingFallback = false; resolve(db); };
+      req.onsuccess = e => {
+        const cameLate = usingFallback; // 2s timeout already fired
+        db = e.target.result;
+        usingFallback = false;
+        if (cameLate) {
+          // Migrate anything captured by the memory fallback during the open
+          // window into IndexedDB, then re-load the user's real settings so
+          // fallback defaults don't stick for the rest of the session.
+          try {
+            if (memStore.sessions.length) {
+              const mtx = db.transaction('sessions', 'readwrite');
+              const mst = mtx.objectStore('sessions');
+              memStore.sessions.forEach(s => {
+                const copy = { ...s };
+                delete copy.id; // let autoIncrement assign a real key
+                try { mst.add(copy); } catch (e2) {}
+              });
+              mtx.oncomplete = () => { memStore.sessions = []; };
+            }
+            // Flush settings picked while db was unset (saveSetting mirrors
+            // them into memStore.settings), then re-read + re-apply.
+            Object.entries(memStore.settings).forEach(([k, v]) => {
+              try { saveSetting(k, v); } catch (e2) {}
+            });
+            loadSettings();
+          } catch (e2) { /* keep running on the in-memory data */ }
+        }
+        resolve(db);
+      };
       req.onerror = () => { usingFallback = true; showStorageWarning(); resolve(null); };
       // Some browsers fire neither callback — timeout fallback
       setTimeout(() => { if (!db && !usingFallback) { usingFallback = true; showStorageWarning(); resolve(null); } }, 2000);
@@ -4188,20 +4222,32 @@ function showStorageWarning() {
 function saveSession(sessionData) {
   if (usingFallback) { memStore.sessions.push({ ...sessionData, id: Date.now() }); return Promise.resolve(); }
   return new Promise((resolve) => {
-    const tx = db.transaction('sessions', 'readwrite');
-    tx.objectStore('sessions').add(sessionData);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => resolve();
+    // db.transaction can throw synchronously (db closed/unset, store missing…)
+    // — record to the memory fallback and resolve, so the session isn't lost
+    // and the finish-session flow never freezes.
+    try {
+      const tx = db.transaction('sessions', 'readwrite');
+      tx.objectStore('sessions').add(sessionData);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => resolve();
+    } catch (e) {
+      memStore.sessions.push({ ...sessionData, id: Date.now() });
+      resolve();
+    }
   });
 }
 
 function getAllSessions() {
   if (usingFallback) return Promise.resolve([...memStore.sessions]);
   return new Promise((resolve) => {
-    const tx = db.transaction('sessions', 'readonly');
-    const req = tx.objectStore('sessions').getAll();
-    req.onsuccess = () => resolve(req.result || []);
-    req.onerror = () => resolve([]);
+    try {
+      const tx = db.transaction('sessions', 'readonly');
+      const req = tx.objectStore('sessions').getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => resolve([]);
+    } catch (e) {
+      resolve([...memStore.sessions]);
+    }
   });
 }
 
@@ -4217,7 +4263,11 @@ function clearAllSessions() {
 
 function saveSetting(key, value) {
   settings[key] = (typeof value === 'object' || typeof value === 'boolean') ? value : (isNaN(Number(value)) ? value : Number(value));
-  if (usingFallback) { memStore.settings[key] = settings[key]; return; }
+  // Always mirror into the memory store: if db isn't open yet (2s open window)
+  // the IDB write below silently fails, and the late-onsuccess migration in
+  // openDB flushes this mirror so the setting isn't lost.
+  memStore.settings[key] = settings[key];
+  if (usingFallback || !db) return;
   try {
     const tx = db.transaction('settings', 'readwrite');
     tx.objectStore('settings').put({ key, value: settings[key] });
@@ -6701,7 +6751,18 @@ function applyLanguage() {
         var preserved = sessionExercises.slice(0, currentIndex);
         var fresh = shuffle([].concat(pool)).slice(0, Math.max(0, Math.min(len, pool.length) - preserved.length));
         sessionExercises = preserved.concat(fresh);
-        if (typeof loadExercise === 'function') loadExercise();
+        // Don't reload the canvas while the score screen is showing — that
+        // would repaint the guide under the score. The next natural
+        // loadExercise (Next button) picks up the new language.
+        var _sf = document.getElementById('scoreFeedback');
+        var _scoreVisible = _sf && _sf.style.display !== 'none';
+        if (currentIndex >= sessionExercises.length) {
+          // Regenerated pool is shorter than progress — end gracefully via the
+          // normal end path instead of loading undefined.
+          if (!_scoreVisible && typeof endSession === 'function') endSession();
+        } else if (!_scoreVisible && typeof loadExercise === 'function') {
+          loadExercise();
+        }
       }
     } catch (e) { /* fail soft */ }
   }
@@ -7117,6 +7178,19 @@ function loadExercise() {
   const total = sessionExercises.length;
   // 1.0.22 BIG mode badge update
   try { updateBigBadge(); } catch(_e){}
+
+  // Unconditionally reset Word Builder DOM state (mirrors what
+  // selectWordBuilderEnding restores). An abandoned selection screen used to
+  // leave wbSelect visible, targetChar/tracePrompt hidden and canvasHint
+  // hidden forever on later screens.
+  var _wbSel = document.getElementById('wbSelect');
+  if (_wbSel) _wbSel.style.display = 'none';
+  var _wbTarget = document.getElementById('targetChar');
+  if (_wbTarget) _wbTarget.style.visibility = '';
+  var _wbTracePrompt = document.getElementById('tracePrompt');
+  if (_wbTracePrompt) _wbTracePrompt.style.display = '';
+  var _wbCanvasHint = document.getElementById('canvasHint');
+  if (_wbCanvasHint) _wbCanvasHint.style.display = '';
   // 1.0.21 Word Builder: if current item is an unchosen object, show selection screen
   if (currentType === 'wordbuilder' && exercise && typeof exercise === 'object' && !exercise.chosen) {
     document.getElementById('exerciseCounter').textContent = (currentIndex + 1) + ' / ' + total;
@@ -7219,6 +7293,10 @@ function renderGuideForCurrent() {
 }
 
 function setupCanvas(text) {
+  // Cancel any pending zero-width retry from a PREVIOUS invocation, so a stale
+  // callback can never repaint the guide/scoring canvases with old text.
+  if (setupCanvas._raf) { cancelAnimationFrame(setupCanvas._raf); setupCanvas._raf = null; }
+
   const container = document.getElementById('canvasContainer');
   const guideC = document.getElementById('guideCanvas');
   const drawC = document.getElementById('drawCanvas');
@@ -7228,10 +7306,14 @@ function setupCanvas(text) {
   const rect = container.getBoundingClientRect();
   // Defer setup if container hasn't laid out yet — retry on next frame
   if (!rect.width) {
-    if (!setupCanvas._retried) {
-      setupCanvas._retried = true;
-      requestAnimationFrame(() => { setupCanvas._retried = false; setupCanvas(text); });
-    }
+    setupCanvas._raf = requestAnimationFrame(() => {
+      setupCanvas._raf = null;
+      // Bail out (no reschedule) unless the exercise screen is actually
+      // visible — retrying while hidden looped forever at 0 width.
+      const screen = document.getElementById('exerciseActive');
+      if (!screen || screen.offsetParent === null || !screen.classList.contains('active')) return;
+      setupCanvas(text);
+    });
     return;
   }
   const cssW = rect.width;
@@ -7335,22 +7417,42 @@ function setupCanvas(text) {
   drawC.onmousedown = drawC.ontouchstart = startDraw;
   drawC.onmousemove = drawC.ontouchmove = draw;
   drawC.onmouseup = drawC.onmouseleave = drawC.ontouchend = endDraw;
+  drawC.ontouchcancel = endDraw;
 
   // Render stroke-order guide on top of ruled lines + reference letter
   renderGuideForCurrent();
+}
+
+// Multi-touch: track the finger that started the stroke so a second finger
+// (or palm) can't restart or corrupt it.
+let _activeTouchId = null;
+function _findTouchById(list, id) {
+  if (!list) return null;
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].identifier === id) return list[i];
+  }
+  return null;
 }
 
 function getPos(e, canvas) {
   const rect = canvas.getBoundingClientRect();
   // Return CSS pixel coordinates (context is already scaled by dpr)
   if (e.touches) {
-    return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+    const t = (_activeTouchId !== null && _findTouchById(e.touches, _activeTouchId)) || e.touches[0];
+    return { x: t.clientX - rect.left, y: t.clientY - rect.top };
   }
   return { x: e.clientX - rect.left, y: e.clientY - rect.top };
 }
 
 function startDraw(e) {
   e.preventDefault();
+  if (e.touches) {
+    // A second finger while drawing: ignore instead of restarting the stroke
+    if (isDrawing) return;
+    _activeTouchId = e.changedTouches[0].identifier;
+  } else {
+    _activeTouchId = null;
+  }
   const canvas = document.getElementById('drawCanvas');
   const pos = getPos(e, canvas);
   isDrawing = true;
@@ -7365,6 +7467,8 @@ function startDraw(e) {
 function draw(e) {
   if (!isDrawing) return;
   e.preventDefault();
+  // Ignore moves that don't include the finger that started the stroke
+  if (e.touches && _activeTouchId !== null && !_findTouchById(e.touches, _activeTouchId)) return;
   const canvas = document.getElementById('drawCanvas');
   const pos = getPos(e, canvas);
   currentStroke.push(pos);
@@ -7372,9 +7476,14 @@ function draw(e) {
   drawCtx.stroke();
 }
 
-function endDraw() {
+function endDraw(e) {
   if (!isDrawing) return;
+  // Only end the stroke when the ACTIVE finger lifted (a second finger
+  // lifting must not cut the stroke short)
+  if (e && e.changedTouches && _activeTouchId !== null &&
+      !_findTouchById(e.changedTouches, _activeTouchId)) return;
   isDrawing = false;
+  _activeTouchId = null;
   if (currentStroke.length > 1) strokes.push([...currentStroke]);
   currentStroke = [];
 }
@@ -7444,7 +7553,11 @@ function submitAttempt() {
   if (!hasStrokes) return;
   let score = calculateScore(); if (window._rwLastBBox) { try { score = bigModeScoreAdjust(score, window._rwLastBBox.drawBB, window._rwLastBBox.guideBB); } catch(_e){} }
   const timeTaken = Math.round((Date.now() - startTime) / 1000);
-  scores.push({ score, time: timeTaken, exercise: sessionExercises[currentIndex], type: currentType });
+  // Store a readable label — a Word Builder item can still be an object here,
+  // which used to render as "[object Object]" in the summary/history.
+  let exLabel = sessionExercises[currentIndex];
+  if (exLabel && typeof exLabel === 'object') exLabel = (exLabel.stem || '') + (exLabel.chosen || '');
+  scores.push({ score, time: timeTaken, exercise: exLabel, type: currentType });
 
   // Show feedback
   showScoreFeedback(score);
@@ -7663,9 +7776,16 @@ function showScoreFeedback(score) {
   const isLast = currentIndex + 1 >= sessionExercises.length;
   const nextBtnEl = document.getElementById('nextBtn');
   nextBtnEl.textContent = isLast ? (s.finishBtn || 'Finish Session ✓') : (s.nextBtn || 'Next Exercise →');
+  // Re-enable after the re-entry guard in nextExercise disabled it
+  nextBtnEl.disabled = false;
 }
 
 function nextExercise() {
+  // Re-entry guard: a double-tap on "Finish Session" used to save the session
+  // twice. Disable immediately; showScoreFeedback re-enables for the next step.
+  const _nextBtn = document.getElementById('nextBtn');
+  if (_nextBtn) _nextBtn.disabled = true;
+
   // Reset ring
   document.getElementById('scoreRing').style.strokeDashoffset = '314.16';
 
@@ -7678,21 +7798,30 @@ function nextExercise() {
 }
 
 async function endSession() {
-  const total = scores.length;
-  const avg = total > 0 ? Math.round(scores.reduce((a, b) => a + b.score, 0) / total) : 0;
-  const best = total > 0 ? Math.max(...scores.map(s => s.score)) : 0;
+  // Second guard against double-invocation while the (async) save is in flight
+  if (endSession._inFlight) return;
+  endSession._inFlight = true;
+  try {
+    const total = scores.length;
+    const avg = total > 0 ? Math.round(scores.reduce((a, b) => a + b.score, 0) / total) : 0;
+    const best = total > 0 ? Math.max(...scores.map(s => s.score)) : 0;
 
-  // Save to IndexedDB
-  await saveSession({
-    date: new Date().toISOString(),
-    type: currentType,
-    exercises: scores,
-    averageScore: avg,
-    bestScore: best,
-    count: total
-  });
+    // Save to IndexedDB — a storage failure must never stop the summary screen
+    try {
+      await saveSession({
+        date: new Date().toISOString(),
+        type: currentType,
+        exercises: scores,
+        averageScore: avg,
+        bestScore: best,
+        count: total
+      });
+    } catch (e) { /* session kept in memory fallback; summary must still show */ }
 
-  showSessionSummary(avg, best, total);
+    showSessionSummary(avg, best, total);
+  } finally {
+    endSession._inFlight = false;
+  }
 }
 
 function showSessionSummary(avg, best, total) {
@@ -7718,9 +7847,13 @@ function showSessionSummary(avg, best, total) {
   let html = `<p style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">${s.exBreakdownTitle || 'Exercise Breakdown'}</p>`;
   scores.forEach((entry, i) => {
     const color = entry.score >= 80 ? 'var(--success)' : entry.score >= 50 ? 'var(--warning)' : 'var(--text3)';
+    // Tolerate old-shape records where a Word Builder item object was stored
+    const exName = (entry.exercise && typeof entry.exercise === 'object')
+      ? ((entry.exercise.stem || '') + (entry.exercise.chosen || ''))
+      : entry.exercise;
     html += `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
       <span style="width:22px;height:22px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text3);flex-shrink:0">${i+1}</span>
-      <span style="flex:1;font-size:13px;font-weight:500">${entry.exercise}</span>
+      <span style="flex:1;font-size:13px;font-weight:500">${exName}</span>
       <span style="font-weight:700;font-size:14px;color:${color}">${entry.score}%</span>
     </div>`;
   });
@@ -7735,7 +7868,13 @@ function showSessionSummary(avg, best, total) {
 }
 
 function exitExercise() {
-  document.getElementById('exerciseActive').style.display = 'none'; if (typeof window.__updateRotationGate__ === 'function') window.__updateRotationGate__();
+  const _exScreen = document.getElementById('exerciseActive');
+  _exScreen.style.display = 'none';
+  // Remove the stale 'active' class (showExerciseScreen adds it, nothing else
+  // removed it) so visibility checks — e.g. setupCanvas's retry — see the
+  // screen as closed.
+  _exScreen.classList.remove('active');
+  if (typeof window.__updateRotationGate__ === 'function') window.__updateRotationGate__();
   document.getElementById('sessionSummary').style.display = 'none';
   // Reset ring offsets
   document.getElementById('scoreRing').style.strokeDashoffset = '314.16';
@@ -7759,7 +7898,9 @@ function _setProgressView(mode){
 }
 
 async function refreshProgress() {
-  const sessions = await getAllSessions();
+  let sessions;
+  try { sessions = await getAllSessions(); } catch (e) { sessions = [...memStore.sessions]; }
+  if (!Array.isArray(sessions)) sessions = [];
   const lang = STRINGS[currentLang] || STRINGS.en;
 
   // ── v1.0.21: apply localised toggle labels + wire click handlers idempotently
@@ -7900,7 +8041,12 @@ async function refreshProgress() {
     let logHtml = '';
     [...sessions].reverse().slice(0, 20).forEach(sess => {
       const d = new Date(sess.date);
-      const dateStr = d.toLocaleDateString(currentLang === 'en' ? 'en-GB' : currentLang.replace('_','-'), { weekday: 'short', day: 'numeric', month: 'short' });
+      let dateStr;
+      try {
+        dateStr = d.toLocaleDateString(currentLang === 'en' ? 'en-GB' : currentLang.replace('_','-'), { weekday: 'short', day: 'numeric', month: 'short' });
+      } catch(e) {
+        dateStr = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+      }
       const color = sess.averageScore >= 80 ? 'var(--success)' : sess.averageScore >= 50 ? 'var(--warning)' : 'var(--text3)';
       const sessTypeName = typeNames[sess.type||'letters'] || (sess.type||'letters').charAt(0).toUpperCase()+(sess.type||'letters').slice(1);
       const exLabel = lang.sessionLogExercises || 'exercises';
@@ -8379,6 +8525,10 @@ document.addEventListener('DOMContentLoaded',function(){
 
 var __rwNonLatin = ['ja','ko','zh','ar','hi'];
 var __rwIsRTL = function(l){return ['ar','he','fa','ur'].indexOf(l)>=0;};
+// Content-based check for user-entered strings (e.g. patient name): true when
+// the text contains characters outside the Latin ranges the embedded Noto Sans
+// covers, so it must go through the canvas-image path regardless of UI locale.
+function __rwNeedsImage(txt){return /[^ -ɏḀ-ỿ]/.test(txt||'')}
 
 function __rwPreloadLogo(){
   return new Promise(function(resolve){
@@ -8548,7 +8698,9 @@ async function generateProgressPDF(){
       var align = opts.align || 'left';
       var maxWidth = opts.maxWidth || (pageW - 2*margin);
 
-      if(__rwNonLatin.indexOf(lang) >= 0){
+      // Route by CONTENT as well as UI locale: user-entered text (names etc.)
+      // may be non-Latin even when the report language is Latin-scripted.
+      if(__rwNonLatin.indexOf(lang) >= 0 || (opts.userText && __rwNeedsImage(text))){
         var hex = '#' + colour.map(function(c){return ('0'+c.toString(16)).slice(-2);}).join('');
         var img = __rwTextToImage(text, {
           fontSize: size, color: hex, weight: weight,
@@ -8627,7 +8779,7 @@ async function generateProgressPDF(){
         doc.setDrawColor(RULE[0],RULE[1],RULE[2]);
         doc.roundedRect(margin, y, pageW-2*margin, 22, 2, 2, 'FD');
         drawText(tt('pdf_patient').toUpperCase(), blockInnerLead, y+5, {lang:lang, size:7, colour:MUTED, align:leadAlign});
-        if(fullName) drawText(fullName, blockInnerLead, y+12, {lang:'en', size:13, weight:'bold', colour:INK, align:leadAlign});
+        if(fullName) drawText(fullName, blockInnerLead, y+12, {lang:'en', size:13, weight:'bold', colour:INK, align:leadAlign, userText:true});
         var meta = [];
         if(pd.dob) meta.push(tt('pdf_dob')+': '+new Date(pd.dob).toLocaleDateString(dateLocale,{day:'numeric',month:'long',year:'numeric'}));
         if(pd.patientid){
@@ -8635,14 +8787,14 @@ async function generateProgressPDF(){
           var label = isUK ? tt('pd_patientid').replace(/\s*\(.*\)$/,'') : tt('pd_patientid_intl').replace(/\s*\(.*\)$/,'');
           meta.push(label+': '+pd.patientid);
         }
-        if(meta.length) drawText(meta.join('   ·   '), blockInnerLead, y+18, {lang:lang, size:9, colour:[68,68,68], align:leadAlign});
+        if(meta.length) drawText(meta.join('   ·   '), blockInnerLead, y+18, {lang:lang, size:9, colour:[68,68,68], align:leadAlign, userText:true});
         y += 26;
       }
 
       // Clinician
       if(pd.clinician || pd.clinicianEmail){
         var clinText = [pd.clinician, pd.clinicianEmail].filter(Boolean).join(' · ');
-        drawText(tt('pdf_clinician')+': '+clinText, leadX, y, {lang:lang, size:9, colour:INK, align:leadAlign});
+        drawText(tt('pdf_clinician')+': '+clinText, leadX, y, {lang:lang, size:9, colour:INK, align:leadAlign, userText:true});
         y += 6;
       }
 
@@ -9308,24 +9460,35 @@ function mpTraceSetupCanvas(text, boldGuide) {
   mpTraceDrawCtx.strokeStyle = isDark ? '#6abf8a' : '#2a6a4a';
   drawC._cssW = cssW; drawC._cssH = cssH;
   // Pointer events
-  var drawing = false, current = null;
+  var drawing = false, current = null, touchId = null;
   function pos(e) {
     var r = drawC.getBoundingClientRect();
-    if (e.touches) return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+    if (e.touches) {
+      var t = (touchId !== null && _findTouchById(e.touches, touchId)) || e.touches[0];
+      return { x: t.clientX - r.left, y: t.clientY - r.top };
+    }
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   }
   drawC.onmousedown = drawC.ontouchstart = function(e) {
-    e.preventDefault(); drawing = true;
+    e.preventDefault();
+    if (e.touches) {
+      if (drawing) return; // second finger — ignore, don't restart the stroke
+      touchId = e.changedTouches[0].identifier;
+    } else { touchId = null; }
+    drawing = true;
     var p = pos(e); current = [p];
     mpTraceDrawCtx.beginPath(); mpTraceDrawCtx.moveTo(p.x, p.y);
   };
   drawC.onmousemove = drawC.ontouchmove = function(e) {
     if (!drawing) return; e.preventDefault();
+    if (e.touches && touchId !== null && !_findTouchById(e.touches, touchId)) return;
     var p = pos(e); current.push(p);
     mpTraceDrawCtx.lineTo(p.x, p.y); mpTraceDrawCtx.stroke();
   };
-  drawC.onmouseup = drawC.onmouseleave = drawC.ontouchend = function(e) {
-    if (!drawing) return; drawing = false;
+  drawC.onmouseup = drawC.onmouseleave = drawC.ontouchend = drawC.ontouchcancel = function(e) {
+    if (!drawing) return;
+    if (e && e.changedTouches && touchId !== null && !_findTouchById(e.changedTouches, touchId)) return;
+    drawing = false; touchId = null;
     if (current && current.length > 1) mpTraceStrokes.push(current);
     current = null;
   };
@@ -9381,15 +9544,23 @@ function mpFreeSetupCanvas() {
   mpFreeCtx.scale(dpr, dpr);
   c._cssW = cssW; c._cssH = cssH;
   mpFreeRedraw();
-  var drawing = false, current = null;
+  var drawing = false, current = null, touchId = null;
   function pos(e) {
     var r = c.getBoundingClientRect();
-    if (e.touches) return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+    if (e.touches) {
+      var t = (touchId !== null && _findTouchById(e.touches, touchId)) || e.touches[0];
+      return { x: t.clientX - r.left, y: t.clientY - r.top };
+    }
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   }
   var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   c.onmousedown = c.ontouchstart = function(e) {
-    e.preventDefault(); drawing = true;
+    e.preventDefault();
+    if (e.touches) {
+      if (drawing) return; // second finger — ignore, don't restart the stroke
+      touchId = e.changedTouches[0].identifier;
+    } else { touchId = null; }
+    drawing = true;
     var p = pos(e); current = [p];
     mpFreeCtx.beginPath(); mpFreeCtx.lineWidth = (settings && settings.penWidth) || 5;
     mpFreeCtx.lineCap = 'round'; mpFreeCtx.lineJoin = 'round';
@@ -9398,12 +9569,17 @@ function mpFreeSetupCanvas() {
   };
   c.onmousemove = c.ontouchmove = function(e) {
     if (!drawing) return; e.preventDefault();
+    if (e.touches && touchId !== null && !_findTouchById(e.touches, touchId)) return;
     var p = pos(e); current.push(p);
     mpFreeCtx.lineTo(p.x, p.y); mpFreeCtx.stroke();
   };
-  c.onmouseup = c.onmouseleave = c.ontouchend = function(e) {
-    if (!drawing) return; drawing = false;
+  c.onmouseup = c.onmouseleave = c.ontouchend = c.ontouchcancel = function(e) {
+    if (!drawing) return;
+    if (e && e.changedTouches && touchId !== null && !_findTouchById(e.changedTouches, touchId)) return;
+    drawing = false; touchId = null;
     if (current && current.length > 1) mpFreeStrokes.push(current);
+    // Cap free-practice stroke history so it can never grow unbounded
+    if (mpFreeStrokes.length > 2000) mpFreeStrokes.shift();
     current = null;
   };
 }
@@ -9480,6 +9656,23 @@ window.addEventListener('error', function(e) {
   });
   if (_rwErrorLog.length > 20) _rwErrorLog = _rwErrorLog.slice(-20);
   try { localStorage.setItem('rewrite_errorLog', JSON.stringify(_rwErrorLog)); } catch (e2) {}
+});
+// Promise rejections were previously invisible to the diagnostic log
+window.addEventListener('unhandledrejection', function(e) {
+  try {
+    var reason = e && e.reason;
+    var msg;
+    if (reason && reason.message) msg = reason.message;
+    else { try { msg = String(reason); } catch (e3) { msg = 'unknown'; } }
+    _rwErrorLog.push({
+      time: new Date().toISOString(),
+      msg: 'Unhandled rejection: ' + msg,
+      src: (reason && reason.stack ? String(reason.stack).split('\n')[1] || '' : '').trim().slice(0, 120),
+      line: 0
+    });
+    if (_rwErrorLog.length > 20) _rwErrorLog = _rwErrorLog.slice(-20);
+    try { localStorage.setItem('rewrite_errorLog', JSON.stringify(_rwErrorLog)); } catch (e2) {}
+  } catch (e4) { /* logging must never throw */ }
 });
 // One-time migration: clear stale error logs from pre-1.0.11 builds
 try {
