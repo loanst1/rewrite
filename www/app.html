@@ -4262,6 +4262,14 @@ function clearAllSessions() {
       tx.oncomplete = () => resolve();
       tx.onerror = () => resolve();
     } catch (e) {
+      // The connection is broken (Safari closed it behind us, etc.) — a bare
+      // resolve() here would report success while the sessions survive on
+      // disk. Drop the dead handle so every later session op takes the !db
+      // memory paths, and best-effort delete the database itself so
+      // "delete my data" is honest.
+      try { db.close(); } catch (e2) {}
+      db = null;
+      try { indexedDB.deleteDatabase('ReWriteDB'); } catch (e2) {}
       memStore.sessions = [];
       resolve();
     }
@@ -9492,7 +9500,17 @@ function mpTraceSetupCanvas(text, boldGuide) {
   drawC.onmousedown = drawC.ontouchstart = function(e) {
     e.preventDefault();
     if (e.touches) {
-      if (drawing) return; // second finger — ignore, don't restart the stroke
+      if (drawing) {
+        // Stale-state recovery: if the finger we were tracking is no longer
+        // in e.touches, its touchend/touchcancel never reached us (OS gesture,
+        // app switch…) — the old stroke can never end and every new touch
+        // would be ignored. Reset and treat this touch as a fresh start.
+        if (touchId !== null && !_findTouchById(e.touches, touchId)) {
+          drawing = false; touchId = null; current = null;
+        } else {
+          return; // second finger — ignore, don't restart the stroke
+        }
+      }
       touchId = e.changedTouches[0].identifier;
     } else { touchId = null; }
     drawing = true;
@@ -9580,7 +9598,17 @@ function mpFreeSetupCanvas() {
   c.onmousedown = c.ontouchstart = function(e) {
     e.preventDefault();
     if (e.touches) {
-      if (drawing) return; // second finger — ignore, don't restart the stroke
+      if (drawing) {
+        // Stale-state recovery: if the finger we were tracking is no longer
+        // in e.touches, its touchend/touchcancel never reached us (OS gesture,
+        // app switch…) — the old stroke can never end and every new touch
+        // would be ignored. Reset and treat this touch as a fresh start.
+        if (touchId !== null && !_findTouchById(e.touches, touchId)) {
+          drawing = false; touchId = null; current = null;
+        } else {
+          return; // second finger — ignore, don't restart the stroke
+        }
+      }
       touchId = e.changedTouches[0].identifier;
     } else { touchId = null; }
     drawing = true;

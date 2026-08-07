@@ -323,6 +323,65 @@ test('multi-touch — a second finger cannot restart, corrupt, or continue the s
   expect(errs).toEqual([]);
 });
 
+test('My Practice free canvas — a swallowed touchend cannot soft-lock drawing', async ({ page }) => {
+  const errs = trackErrors(page);
+  await seedActivatedApp(page);
+
+  // Open My Practice → Free Practice tab (the canvas is sized ~50ms later)
+  await page.locator(`.exercise-card[onclick="openMyPractice()"]`).click();
+  await expect(page.locator('#myPracticeScreen')).toBeVisible();
+  await page.locator('#mpTabFree').click();
+  await page.waitForFunction(() => {
+    const c = document.getElementById('mpFreeCanvas');
+    return !!(c && c._cssW);
+  });
+
+  // Finger A starts a stroke and draws — but its touchend/touchcancel never
+  // arrives (OS edge gesture, app switch, notification shade). The handler is
+  // left holding drawing=true for a finger that is no longer on the screen.
+  await page.evaluate(() => {
+    const c = document.getElementById('mpFreeCanvas');
+    const r = c.getBoundingClientRect();
+    const T = (id, fx, fy) => new Touch({
+      identifier: id, target: c,
+      clientX: r.left + r.width * fx, clientY: r.top + r.height * fy,
+    });
+    const fire = (type, touches, changed) => c.dispatchEvent(new TouchEvent(type, {
+      touches, changedTouches: changed, targetTouches: touches,
+      bubbles: true, cancelable: true,
+    }));
+    const a1 = T(1, 0.2, 0.3), a2 = T(1, 0.45, 0.55);
+    fire('touchstart', [a1], [a1]);
+    fire('touchmove', [a2], [a2]);
+    // deliberately NO touchend / touchcancel — the stale state stays behind
+  });
+  const inkAfterA = await inkCount(page, '#mpFreeCanvas');
+  expect(inkAfterA).toBeGreaterThan(0);
+
+  // A fresh finger lands later: new identifier, and the tracked finger is
+  // absent from e.touches. The canvas must accept it as a brand-new stroke
+  // instead of ignoring every touch forever.
+  await page.evaluate(() => {
+    const c = document.getElementById('mpFreeCanvas');
+    const r = c.getBoundingClientRect();
+    const T = (id, fx, fy) => new Touch({
+      identifier: id, target: c,
+      clientX: r.left + r.width * fx, clientY: r.top + r.height * fy,
+    });
+    const fire = (type, touches, changed) => c.dispatchEvent(new TouchEvent(type, {
+      touches, changedTouches: changed, targetTouches: touches,
+      bubbles: true, cancelable: true,
+    }));
+    const b1 = T(9, 0.25, 0.75), b2 = T(9, 0.6, 0.85);
+    fire('touchstart', [b1], [b1]); // note: finger 1 is NOT in touches
+    fire('touchmove', [b2], [b2]);
+    fire('touchend', [], [b2]);
+  });
+  expect(await inkCount(page, '#mpFreeCanvas')).toBeGreaterThan(inkAfterA);
+
+  expect(errs).toEqual([]);
+});
+
 test('rapid double-click on Next advances exactly one exercise', async ({ page }) => {
   const errs = trackErrors(page);
   await seedActivatedApp(page);
